@@ -1,6 +1,8 @@
 package com.Tour.exception;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+
 import java.util.Set;
 public class ApplicationConstrainViolationException extends ConstraintViolationException {
 

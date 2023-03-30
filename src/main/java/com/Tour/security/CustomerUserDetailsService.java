@@ -1,8 +1,7 @@
 package com.Tour.security;
 
-import com.Tour.repository.UserRepository;
+import com.Tour.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -11,10 +10,12 @@ import org.springframework.stereotype.Service;
 public class CustomerUserDetailsService  implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+
+
     @Override
     public CustomerUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.getTourist(username);
+        var user = userService.getUser(username);
         if(user ==null) throw  new UsernameNotFoundException("User is not found");
         else {
             return new CustomerUserDetails(user);

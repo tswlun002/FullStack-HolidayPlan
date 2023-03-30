@@ -13,63 +13,64 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @RestController
-@CrossOrigin("*")
-@RequestMapping("/home//holiday-plan")
+@CrossOrigin( origins = "*",originPatterns = "http://localhost:3000/**")
+@RequestMapping("/holiday-plan/api/")
 public class HolidayPlanController {
     @Autowired
     HolidayPlanService holidayPlanService;
-    @PostMapping(value = "/holiday-plan/add-holiday-plan")
+    @PostMapping(value = "holiday/save/", consumes = {"application/json"})
     public ResponseEntity<Boolean> saveHolidayPlan(@RequestBody HolidayPlan holidayPlan){
         boolean saved = holidayPlanService.saveHolidayPlan(holidayPlan);
         if(saved) return  new ResponseEntity<>(true,HttpStatus.OK);
         return  new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }
-    @GetMapping("/all-holiday-plans")
-    public ResponseEntity<List<HolidayPlan>> getHolidayPlans() throws NotFoundException {
-        List<HolidayPlan> holidayPlans=  holidayPlanService.getHolidayPlans();
+    @GetMapping(value = "holiday/holidays/")
+    public ResponseEntity<Set<HolidayPlan>> getHolidayPlans() throws NotFoundException {
+        var holidayPlans=  holidayPlanService.getHolidayPlans();
         if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan found");
         HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.add("desc","HolidayPlans");
 
         return  new ResponseEntity<>(holidayPlans,headers,HttpStatus.OK);
     }
-    @GetMapping("/holiday-plans/{location}/{city}")
+    @GetMapping("holiday/{location}/{city}")
 
-    public ResponseEntity<List<HolidayPlan>> getHolidayPlan(
+    public ResponseEntity<Set<HolidayPlan>> getHolidayPlan(
                                       @PathVariable String location, @PathVariable String city) throws NotFoundException {
 
-        List<HolidayPlan> holidayPlans=  holidayPlanService.getHolidayPlan(location,city);
+        var holidayPlans=  holidayPlanService.getHolidayPlan(location,city);
         if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan found at "
         +location +", "+city);
         return  new ResponseEntity<>(holidayPlans,HttpStatus.FOUND);
     }
-    @GetMapping("/holiday-plans/{location}/{city}/{start_date}")
-    public ResponseEntity<List<HolidayPlan>> getHolidayPlan(@PathVariable String location,
+    @GetMapping("holiday/{location}/{city}/{start_date}")
+    public ResponseEntity<Set<HolidayPlan>> getHolidayPlan(@PathVariable String location,
                                       @PathVariable String city, @PathVariable Date start_date) throws NotFoundException {
-        List<HolidayPlan> holidayPlans=  holidayPlanService.getHolidayPlan(location,city);
+        var holidayPlans=  holidayPlanService.getHolidayPlan(location,city);
         if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan found at "
                 +location +", "+city +" from "+start_date);
         return  new ResponseEntity<>(holidayPlans,HttpStatus.FOUND);
     }
-    @GetMapping("/holiday-plans/{location}/{city}/{start_date}/{end_date}")
-    public ResponseEntity<List<HolidayPlan>> getHolidayPlan(@PathVariable String location,
+    @GetMapping("holiday/{location}/{city}/{start_date}/{end_date}")
+    public ResponseEntity<Set<HolidayPlan>> getHolidayPlan(@PathVariable String location,
                                       @PathVariable  String city,@PathVariable Date start_date,
                                       @RequestBody Date end_date) throws NotFoundException {
-        List<HolidayPlan> holidayPlans=  holidayPlanService.getHolidayPlan(location,city);
+        var holidayPlans=  holidayPlanService.getHolidayPlan(location,city);
         if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan found at "
                 +location +", "+city +" between "+start_date +" & " +end_date);
         return  new ResponseEntity<>(holidayPlans,HttpStatus.FOUND);
     }
-    @DeleteMapping("/delete-holiday-plan/{id}")
+    @DeleteMapping("holiday/delete/holiday-plan/{id}")
     public  ResponseEntity<Boolean> deleteHolidayPlan(@PathVariable("id") long id){
         boolean deleteHolidayPlan= holidayPlanService.deleteHolidayPlan(id);
        if(deleteHolidayPlan) return  new ResponseEntity<>(true,HttpStatus.OK);
        return  new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @PatchMapping("/update-holiday-plan/{id}/{level}")
+    @PatchMapping("holiday/update/holiday-plan/{id}/{level}")
     public  ResponseEntity<Boolean>  updateHolidayPlan(@PathVariable("id") long id,@PathVariable("level") int level){
         boolean updatedHolidayPlan= holidayPlanService.updateHolidayPlan( id,level);
         if(updatedHolidayPlan) return  new ResponseEntity<>(true,HttpStatus.OK);

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 public class HolidayPlanEventListeners {
     private  final  HolidayPlanService holidayPlanService;
    @EventListener
-   public  void onDeleteTourist(HolidayPlanEvent holidayPlanEvent){
-       holidayPlanService.deleteAllHolidayPlan(holidayPlanEvent.getUser());
+   public  void onDeleteUser(HolidayPlanEvent holidayPlanEvent){
+       holidayPlanService.deleteAllHolidayPlan(holidayPlanEvent.user());
    }
 
 }

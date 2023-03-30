@@ -1,54 +1,54 @@
 package com.Tour.model;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
-@Builder
-@Table(name = "User")
+@Entity(name = "User")
 @Getter
 @Setter
 @ToString
-public class User {
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
+@Builder
+public class User   {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
     @NonNull
-    @Column(name = "user_name", nullable = false,unique = true)
-    @NotBlank(message = "userName is required")
-    @NotEmpty(message = "userName is required")
-    @Size(min = 4, max = 50, message = "userName must contain 3 to 50 characters.")
-    private  String userName;
+    @Column(name = "user_type")
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
     @NonNull
-    @NotBlank(message = "firstName is required")
-    @NotEmpty(message = "firstName is required")
-    @Size(min = 3, max = 50, message = "firstName must contain 3 to 50 characters.")
+    @Column(name = "user_name", nullable = false,unique = true)
+    private  String username;
+    @NonNull
     @Column(name = "first_name",nullable = false)
-    private String firstName;
-    @NotBlank(message = "lastName is required")
-    @NotEmpty(message = "lastName is required")
-    @Size(min = 3, max = 50, message = "lastName must contain 3 to 50 characters.")
+    private String firstname;
     @Column(name = "last_name" ,nullable=false)
-    private String lastName;
-    @NotBlank(message = "password is required")
-    @NotEmpty(message = "password is required")
-    @Size(min = 5, max = 50, message = "password must contain 5 to 50 characters.")
+    private String lastname;
+     @NonNull
+     @Column(nullable = false,unique = true)
     private  String password;
-    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
-    private Set<Roles> roles;
+    @NonNull
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @JoinTable(
+            name = "User_Role",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")}
+    )
+    private Set<Role> roles = new HashSet<>();
     private int age;
     public void setId(Long id) {
         this.id = id;
@@ -66,5 +66,8 @@ public class User {
         return getClass().hashCode();
     }
 
-
+   @PostConstruct
+    void toUpper(){
+        userType =UserType.valueOf(userType.name().toUpperCase());
+   }
 }

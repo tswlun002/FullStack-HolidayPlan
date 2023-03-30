@@ -1,71 +1,77 @@
 import './App.css';
-import Card from './card';
-import Header from './Header';
-import "./Form.css"
-import { useState , useReducer} from "react"
-import Form from './Form';
-import { useEffect } from 'react';
-import {Route, Routes} from 'react-router-dom';
-import Login from './Login';
-import Register from './Register';
-import {RegisterUser, LogInUser} from './User';
-import { FetchHolidayPlan,AddHolidayPlan,DeleteHolidayPlan,UpdateHolidayPlan } from './HolidayPlan';
-
+import Home from './component/Home';
+import Header from './component/Header';
+import {  useReducer} from "react"
+import HolidayPlanForm from './component/HolidayPlanForm';
+import  React,{ useEffect} from 'react';
+import {Route, Routes,useNavigate} from 'react-router-dom';
+import Login from './component/Login';
+import Register from './component/Register';
+import {CreateAuthContext} from './context/CreateAuthContext';
+import Profile from './component/Profile';
+const initialState = {
+  isAuthenticated: false,
+  access_token: null,
+  refresh_token: null,
+  
+};
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "LOGIN":
+      const{access_token, refresh_token} = action.payload;
+      console.log(access_token)
+      console.log(refresh_token)
+      return {
+        ...state,
+        isAuthenticated: true,
+        access_token: action.payload.access_token,
+        refresh_token: action.payload.refresh_token
+      };
+    case "LOGOUT":
+      
+      return {
+        ...state,
+        isAuthenticated: false,
+        access_token: null,
+        refresh_token: null,
+      };
+    default:
+      return state;
+  }
+}
 const App=()=>{
-
-
-const [Data, setData] = useState([]);
-
-//Login registered values
-const[userRegister, dispatchRegister] = useReducer((state, action)=>{
-  return {...state,...action,
-   }
-},{firstname:"",lastname:"",username:"",password:"",confirmPassword:"", registered:false})
+  const navigate = useNavigate();
 
 //Login registered user
-const[userLogin, dispatchLogin] = useReducer((state, action)=>{
-  return {...state,...action,
-        }
-        },{username:"",password:"", logedIn:false})
-
-   
+const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
 //call fetch data on hooks
-  useEffect(() =>{
-    if(!userRegister.registered ) alert(`${userRegister.username} is not registered`)
-    else if (userLogin.logedIn) FetchHolidayPlan(setData)
-  },[]
+ useEffect(() =>{
+     console.log(userLoginState.isAuthenticated)
+    if(userLoginState.isAuthenticated) navigate("/home");
+    else navigate("/");
+  },[userLoginState.isAuthenticated]
   );
 
 
-  //Make cards 
-  const Cards  = Data.map((data)=> <Card setData={setData} fetchData={FetchHolidayPlan} data={data}
-                                     deleteData={DeleteHolidayPlan} updateData={UpdateHolidayPlan}/>);
-  
-  const AppBody = ()=>{
-    return (
-      <div className="body">
-      <div className="form">
-          <Form  data={Data} addData={AddHolidayPlan}  />
-        </div>
-      <div className="cards">
-          {Cards}
-        </div>
-    </div>
-    )
-  }
- /**////////////////////////////////////////////////////////////////////APP//////////////////////////////////////////////// */
+
+
+
  return (
-  <div className="App">
-    <div>
-        <Header/>
+  <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>
+    <div className="App">
+      <Header/>
+      <Routes>
+        <Route path="/" element={<Login/>}/>
+        <Route path="/register" element={<Register />}/>
+        <Route path="/addHolidayPlan" element={<HolidayPlanForm/>}/>
+        <Route path="/home" element={<Home/>}/>  
+        <Route path="/profile" element={<Profile/>}/>  
+
+      </Routes>
     </div>
-    <Routes>
-      <Route path="/" element={<Login state={userLogin} dispatchLogin={dispatchLogin} loginUser={LogInUser}/>}/>
-      <Route path="/register" element={<Register state={userRegister} dispatchRegister={dispatchRegister} registerUser={RegisterUser}/>}/>
-      <Route path="/home" element={<AppBody/>}/>  
-    </Routes>
-  </div>
+  </CreateAuthContext.Provider>
  )
 }
+
 
 export default App;
