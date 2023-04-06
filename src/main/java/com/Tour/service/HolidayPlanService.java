@@ -20,7 +20,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
 
     @Override
     public boolean saveHolidayPlan(HolidayPlan holidayPlan) {
-
+        System.out.println(holidayPlan);
         if(holidayPlan==null) throw  new NullPointerException("Can not save null HolidayPlan");
         try {
             holidayPlan.setUser(onUser.getLoginedUser());

@@ -1,49 +1,74 @@
 import "./HolidayPlanForm.css"
-import {Paper,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel}  from '@mui/material';
-import CssTextField from './CssTextField';
-import ColorButton from './ColorButton';
+import {Paper,Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel}  from '@mui/material';
+import CssTextField from '../component/CssTextField';
+import ColorButton from '../component/ColorButton';
 import { useReducer, useContext} from "react"
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import {AddHolidayPlan} from '../utils/HolidayPlan';
+import UseAxiosPrivate from '../utils/UseAxiosPrivate'
+
 
 
 const HolidayPlanForm =()=>{
       const { dispatchLogin } = useContext(CreateAuthContext);
+      const  useAxiosPrivate=UseAxiosPrivate();
   //Get HolidayPlan data from Form
   const[HolidayPlanData, DispatchHolidayPlanData] = useReducer((state, action)=>{
     return {...state,...action,}
   },
-    {  location:"",city: "",startDate: "",endDate:"",event:"",description:"",pictureLink:"",priorityLevel:""}
+    {  location:"",city: "",startDate: "",endDate:"",event:"",description:"",pictureLink:"",
+       priorityLevel:"",isDataCorrect:true,errorMessage:""}
     )
 
   //Extract data from form data and store data to Data state
   const StoreData = ()=>{
-      AddHolidayPlan(HolidayPlanData,dispatchLogin.access_token)
+      AddHolidayPlan(useAxiosPrivate,HolidayPlanData, DispatchHolidayPlanData)
   }
 
   
+   const isEmpty= (elementInputData)=>elementInputData.trim()==="";
+
 
 
    const OnSubmit= (e)=>{
         e.preventDefault();
-       StoreData()
-       setTimeout(()=>{
-          DispatchHolidayPlanData(
-            {
-              location: "",
-              city: "",
-              startDate: "",
-              endDate: "",
-              description: "",
-              event: "",
-              pictureLink: "",
-              priorityLevel: "",
+        const isDataValid  = ()=>{
+           return !( isEmpty(HolidayPlanData.location) && isEmpty(HolidayPlanData.city) &&
+            isEmpty(HolidayPlanData.startDate) && isEmpty(HolidayPlanData.endDate)&&
+            isEmpty(HolidayPlanData.description) &&isEmpty(HolidayPlanData.pictureLink)&&
+            isEmpty(HolidayPlanData.priorityLevel))
+        }
 
-            }
-          )
-          
-       },2000);
-  
+        if(isDataValid()){
+
+           const store = async ()=>{
+                await StoreData()
+           }
+
+            store()
+           if(HolidayPlanData.isDataCorrect)
+           setTimeout(()=>{
+              DispatchHolidayPlanData(
+                {
+                  location: "",
+                  city: "",
+                  startDate: "",
+                  endDate: "",
+                  description: "",
+                  event: "",
+                  pictureLink: "",
+                  priorityLevel: "",
+
+                }
+              )
+
+           },2000);
+        }else{
+
+             console.log(HolidayPlanData)
+             DispatchHolidayPlanData({isDataCorrect:false, errorMessage:"All data is required"})
+        }
+
    }
 
   return (
@@ -51,6 +76,12 @@ const HolidayPlanForm =()=>{
        <Paper className="form-container">
         <h1 className="heading">Add Holiday</h1>
         <form className="holiday-plan-form">
+             {
+                !HolidayPlanData.isDataCorrect &&
+                <Typography align="center"sx={{color:"red"}}>
+                {HolidayPlanData.errorMessage}
+                </Typography>
+             }
             <CssTextField
             required
                 id="demo-helper-text-aligned"
@@ -59,7 +90,7 @@ const HolidayPlanForm =()=>{
                 name="location"
                 type="text"  placeholder="Enter location name" className="location-input"
                 value={HolidayPlanData.location}
-                onChange={(e)=>DispatchHolidayPlanData({location:e.currentTarget.value})}
+                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true, location:e.currentTarget.value})}
                 
               />
 
@@ -70,7 +101,7 @@ const HolidayPlanForm =()=>{
                 variant="outlined"
                 name="city"
                 type="text"placeholder="Enter city " className="city" min={3} 
-                onChange={(e)=>DispatchHolidayPlanData({city:e.currentTarget.value}) }
+                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,city:e.currentTarget.value}) }
                 value={HolidayPlanData.city}
                 />
 
@@ -84,7 +115,7 @@ const HolidayPlanForm =()=>{
                 name="startDate"
                 focused
                 type="date"   className="start-date"min={10} 
-                onChange={event=>DispatchHolidayPlanData({startDate:event.currentTarget.value}) }
+                onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,startDate:event.currentTarget.value}) }
                 value={HolidayPlanData.startDate}
                 
                 />
@@ -99,7 +130,7 @@ const HolidayPlanForm =()=>{
               name="endDate"
               focused
               type="date"  className="end-date"min={10}
-              onChange={event=>DispatchHolidayPlanData({endDate:event.currentTarget.value}) }
+              onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,endDate:event.currentTarget.value}) }
               value={HolidayPlanData.endDate}
               />
 
@@ -112,7 +143,7 @@ const HolidayPlanForm =()=>{
                 variant="outlined"
               
                 type="text" name="event" placeholder="Enter event" className="event"min={5} 
-                onChange={(e)=>DispatchHolidayPlanData({event:e.currentTarget.value}) }
+                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,event:e.currentTarget.value}) }
                 value={HolidayPlanData.event}
               />
             
@@ -124,7 +155,7 @@ const HolidayPlanForm =()=>{
                 variant="outlined"
             
                 type="text" name="description" placeholder="Enter description" className="description"min={3} 
-                onChange={(e)=>DispatchHolidayPlanData({description:e.currentTarget.value}) }
+                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,description:e.currentTarget.value}) }
                 value={HolidayPlanData.description} 
               />
 
@@ -137,7 +168,7 @@ const HolidayPlanForm =()=>{
                 variant="outlined"
           
                 type="text" name="pictureLink" placeholder="Enter pictureLink mall" className="pictureLink"min={4}
-                onChange={(e)=>DispatchHolidayPlanData({pictureLink:e.currentTarget.value}) }
+                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,pictureLink:e.currentTarget.value}) }
                 value={HolidayPlanData.pictureLink}
               />
             

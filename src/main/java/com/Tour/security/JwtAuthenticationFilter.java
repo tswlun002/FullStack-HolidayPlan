@@ -60,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 CustomerUserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 var isTokenValid = this.tokenService.findByToken(jwt).map(token1 ->
                         !token1.isExpired() && !token1.isRevoked()).orElse(false);
-                System.out.println("**************************************************"+isTokenValid);
+
 
                 //if the token on the header and database is still valid, update security holder context
                 if(jwtService.isTokenValid(jwt,userDetails.getUser()) && isTokenValid){
@@ -68,16 +68,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    System.out.println("**************************************************"+SecurityContextHolder.getContext()
-                            .getAuthentication().getPrincipal());
+
 
                 }
 
             }
         }catch (Exception e)
         {
-
-            System.out.println("###############################################################");
 
             System.out.println(e.getMessage());
             Map<String,String> tokens = new HashMap<>();

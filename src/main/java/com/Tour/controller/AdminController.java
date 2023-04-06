@@ -6,8 +6,6 @@ import com.Tour.exception.NotFoundException;
 import com.Tour.model.User;
 import com.Tour.model.UserRole;
 import com.Tour.model.UserType;
-import com.Tour.security.CustomerUserDetailsService;
-import com.Tour.service.UserDTO;
 import com.Tour.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,9 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin( origins = "*")

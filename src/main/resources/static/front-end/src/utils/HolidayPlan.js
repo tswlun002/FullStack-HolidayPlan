@@ -10,6 +10,7 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
                console.log("Ok");
                console.log(response.data)
                setData({
+                    type:"replace",
                    payload:response.data
                 });
 
@@ -29,45 +30,58 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
                        console.log("Not ok");
                        errorMessage  = err.response.statusText;
                  }
+                 setData({type: "error", errorMessage: errorMessage})
 
             }
-            else console.log(err)
+            
+            else setData({type: "error", errorMessage: err.response.data.statusText});
+
 
          }
        )
 }
 
 //Add new holiday plan
-export const AddHolidayPlan = (HolidayPlanData,setData,access_token)=> {
-    
-    //setData({data:HolidayPlanData})
+export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
 
     const API = '/holiday-plan/api/holiday/save/';
-    const request = {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${access_token}`},
-      body:JSON.stringify(HolidayPlanData)
-    }
-    fetch(API, request)
-    .then((res) => {
-      console.log(res);
-      if(res.ok){
-        console.log("Ok");
-        return res.json();
+     useAxiosPrivate.post(API, HolidayPlanData)
+           .then(response =>
+               {
+                 if(response.ok || response.status===200){
+                   console.log("Ok");
+                   console.log(response.data)
+                   setData({
+                       isDataCorrect:false,
+                       errorMessage:"Successfully added holiday"
+                    });
 
-      }else if(!res.ok){
-        console.log("Not ok");
-         throw res;
-      }
+                 }
+               }
+           ).catch(err =>
+             {
+                console.log(err);
+                console.log("Not ok");
+                if(!err?.response.ok){
+                     let errorMessage =null;
+                     if(err.response.status===404){
+                       console.log("Not ok ,********");
+                       errorMessage  =err.response.data.message;
+                     }
+                     else{
+                           console.log("Not ok");
+                           errorMessage  = err.response.statusText;
+                     }
+                     setData({isDataCorrect:false, errorMessage: errorMessage})
 
-    })
-    .then((authenticationData)=>{
-         console.log(authenticationData);
-         setData({type:"add", data:authenticationData})
-     })
-    .catch((err) => {err.message?alert(err.message):err.statusText?
-         alert(err.statusText):alert.error("unknown error")}
-   );
+
+                }
+
+                else setData({isDataCorrect:false,  errorMessage: err.response.data.statusText});
+
+
+             }
+           )
 }
 
  //delete  data

@@ -1,8 +1,8 @@
 import {  Link } from "react-router-dom";
 import './Login.css'
 import {Paper,Typography}  from '@mui/material';
-import CssTextField from './CssTextField';
-import ColorButton from './ColorButton';
+import CssTextField from '../component/CssTextField';
+import ColorButton from '../component/ColorButton';
 import { LogInUser} from '../utils/User';
 import React,{ useReducer} from 'react';
 import {CreateAuthContext} from '../context/CreateAuthContext';
@@ -59,7 +59,7 @@ const Login =()=>{
                     <form className="login-inputs" autoComplete='off'>
                         {
                             error.isLoginError &&
-                            <Typography aling="center"sx={{color:"red"}}>
+                            <Typography align="center"sx={{color:"red"}}>
                             {error.errorMessage}
                             </Typography>
                         }

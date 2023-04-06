@@ -3,63 +3,94 @@ import axios from "./Axios"
  * 
  * @param {*} user is the user to be registered
  */
-export const RegisterUser = (registeredState,dispatchRegister) => {
+export const RegisterUser = ({firstname,lastname,email,password, registered,userType},dispatchRegister) => {
 
-   dispatchRegister({registered:true})
-    
-   const API = 'http://localhost:8080/holiday-plan/api/authenticate/user/save/';
-    const request = {
-      method:'POST',
-      headers:{ 'Content-Type': 'application/json;charset=UTF-8'},
-      body:JSON.stringify({firstname:registeredState.firstname,lastname:registeredState.lastname,username:registeredState.email,
-      password:registeredState.password,usertype:registeredState.userType.toUpperCase(),age:registeredState.age})
-    }
-    fetch(API, request)
-    .then((res)=>{dispatchRegister({responseStatus:res.status});console.log(registeredState.responseStatus); console.log(res.status)})
-    .then((res)=>res.json())
-    .then((data)=>{
-             console.log(data)
-             if(registeredState.responseStatus===200){dispatchRegister({registered:true})
-                                        alert(`${registeredState.firstname} ${registeredState.lastname} is succefully registered`)
-
+   //dispatchRegister({registered:true})
+   const username = email; 
+   const API = '/holiday-plan/api/authenticate/user/save/';
+   axios.post(API,{firstname,lastname,username,password, userType})
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+ 
+           dispatchRegister({
+               registered : true,
+            });
+   
+         }
+       }
+   ).catch(err => 
+     {
+        console.log(err);
+       console.log("Not ok");
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+               console.log("Not ok ,********");
+               errorMessage  ="Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  ="Denied access";
              }
              else{
-                console.log(data.message)
-                console.log(registeredState.responseStatus)
+                   console.log(err.response.statusText);
+                   errorMessage  = err.response?.statusText;
              }
-    })
-   .catch((err) => {console.log(err.message)});
-
-  if(registeredState.registered){
-
-
-  }
+             dispatchRegister({errorMessage:errorMessage,
+                             isLoginError:true})
+        }else dispatchRegister({errorMessage:"Server Error",
+        isLoginError:true})
+ 
+     }
+   )
 }
 
 export const RegisterAdmin = ({firstname,lastname,email,password, registered,userType}, dispatchRegister) => {
   const username=email;
-  userType=userType.toUpperCase();
   console.log(JSON.stringify({firstname,lastname,username,password, userType}));
   ///dispatchRegister({registered:true})
 
-   const API = 'http://localhost:8080/holiday-plan/api/user/admin/save';
-    const request = {
-      method:'POST',
-      headers:{ 'Content-Type': 'application/json;charset=UTF-8'},
-      body:JSON.stringify({firstname,lastname,username,password,userType})
-    }
-    fetch(API, request)
-    .then((res) =>{
-      if(res.status===200){
-       dispatchRegister({registered:true})
-       alert(`${firstname} ${lastname} is succefully registered`)
-    }})
-  .catch((err) => {alert(err.message)});
-
-  if(registered){
-
-
-  }
+   const API = '/holiday-plan/api/user/admin/save';
+   axios.post(API,{firstname,lastname,username,password, userType})
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+ 
+           dispatchRegister({
+               registered : true,
+            });
+   
+         }
+       }
+   ).catch(err => 
+     {
+        console.log(err);
+       console.log("Not ok");
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+               console.log("Not ok ,********");
+               errorMessage  ="Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  ="Denied access";
+             }
+             else{
+                   console.log("Not ok");
+                   errorMessage  = err.response?.statusText;
+             }
+             dispatchRegister({errorMessage:errorMessage,
+                             isLoginError:true})
+        }
+        else dispatchRegister({errorMessage:"Server Error",
+          isLoginError:true})
+ 
+     }
+   )
 }
 
 /**
@@ -73,7 +104,11 @@ export const LogInUser = ({email, password},dispatchLogin,setError
    let isMounted = true;
    const controller = new AbortController();
   const API= `/holiday-plan/api/authenticate/user/login/?password=${password}&username=${email}`;
-  
+  dispatchLogin({
+    type:"LOGIN",      
+    payload:{}
+   });
+
   axios.post(API)
   .then(response =>
       {
