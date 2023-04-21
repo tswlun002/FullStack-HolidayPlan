@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState,useContext} from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -13,8 +13,9 @@ import { red } from '@mui/material/colors';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import  {FaTrash,FaMapMarkerAlt} from 'react-icons/fa'
 import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel } from '@mui/material';
-import {DeleteHolidayPlan,UpdateHolidayPlan } from '../utils/HolidayPlan';
-
+import {DeleteHolidayPlan,UpdateHolidayPlan} from '../utils/HolidayPlan';
+import {CreateAuthContext} from '../context/CreateAuthContext';
+import  UseAxiosPrivate from '../utils/UseAxiosPrivate';
 
 
 const ExpandMore = styled((props) => {
@@ -28,29 +29,55 @@ const ExpandMore = styled((props) => {
       }),
 }));
 
-export default function HolidayCard({data,setData}) {
+export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayCard}) {
+  const{userLoginState} = useContext(CreateAuthContext);
   const priorityLevelRate = [1, 2, 3];
   const priorityLevelColor = ["green", "yellow", "orange","bisque"];
 
   const [expanded, setExpanded] = useState(false);
-
 
   const priority_obj = (data.priorityLevel===1) ?priorityLevelRate[0] :(data.priorityLevel===2)
                                     ?priorityLevelRate[1] :(data.priorityLevel===3) ?priorityLevelRate[2]:null
   
   const [experience, setExperience] =useState(priority_obj);
 
+  const useAxiosPrivate = UseAxiosPrivate();
+
+  const [response, setResponse] = useState({iRequestError:false, isResponseSuccess:false,
+                                             errorMessage:"",responseMessage:""
+                                           })
+
+
+
+
   const handleExperience = (event)=>{
-        setExperience(parseInt(event.target.value))
-        UpdateHolidayPlan(data.id, parseInt(event.target.value),setData);
-    }
+        setExperience(parseInt(event.target.value));
+        UpdateHolidayPlan( useAxiosPrivate,data.id, parseInt(event.target.value),setResponse);
+        if(response.isResponseSuccess){
+          console.log(`**************************** updated ${index} ************** ${response.responseMessage}`);
+           updateHolidayCard(index);
 
-    const cardBackgroundColor =  ()=> experience===priorityLevelRate[2]?{backgroundColor:priorityLevelColor[2]}:
-    experience===priorityLevelRate[1]?{backgroundColor:priorityLevelColor[1]}:
-    experience===priorityLevelRate[0]?{backgroundColor:priorityLevelColor[0]}:
-    {backgroundColor:priorityLevelColor[3]}
+        }else alert("Failed to update");
+  }
 
-    const PriorityComponent = ()=>{
+  const handleDelete = (event)=>{
+        DeleteHolidayPlan(useAxiosPrivate,data.id,setResponse);
+        if(response.isResponseSuccess){
+           console.log(`**************************** updated ${index} ************** ${response.responseMessage}`);
+           console.log(data);
+           deleteHolidayCard(index);
+
+       }else alert("Failed to delete");
+
+  }
+
+
+
+  const cardBackgroundColor =  ()=> experience===priorityLevelRate[2]?{backgroundColor:priorityLevelColor[2]}:
+  experience===priorityLevelRate[1]?{backgroundColor:priorityLevelColor[1]}:
+  experience===priorityLevelRate[0]?{backgroundColor:priorityLevelColor[0]}:{backgroundColor:priorityLevelColor[3]}
+
+  const PriorityComponent = ()=>{
         return(
         <FormControl>
             <FormLabel id="demo-controlled-radio-buttons-group">priorityLevel</FormLabel>
@@ -67,7 +94,7 @@ export default function HolidayCard({data,setData}) {
                 </div>
             </RadioGroup>
         </FormControl>)
-    }
+  }
 
 
 
@@ -75,6 +102,9 @@ export default function HolidayCard({data,setData}) {
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
+
+
+
 
   return (
     <Card sx={
@@ -125,9 +155,12 @@ export default function HolidayCard({data,setData}) {
           </Typography>
 
         </CardContent>
-        <CardActions>   <IconButton sx={{marginRight:"auto", marginLeft:"auto"}} variant="outlined"  onClick={(e)=>DeleteHolidayPlan(data.id,setData)}
-                                                 className="btn delete-btn" size="small" style={{color:"red"}}>{<FaTrash/>}
-                                     </IconButton>
+        <CardActions>
+            <IconButton sx={{marginRight:"auto",
+                marginLeft:"auto"}} variant="outlined"
+                onClick={(e)=>handleDelete(e)}
+                className="btn delete-btn" size="small" style={{color:"red"}}>{<FaTrash/>}
+            </IconButton>
         </CardActions>
 
       </Collapse>

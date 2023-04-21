@@ -7,31 +7,31 @@ import com.Tour.model.User;
 import com.Tour.model.UserRole;
 import com.Tour.model.UserType;
 import com.Tour.security.CustomerUserDetailsService;
+import com.Tour.service.UserBYAdminDTO;
 import com.Tour.service.UserDTO;
 import com.Tour.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin( origins = "*",originPatterns = "http://localhost:3000/**")
 @RequestMapping("/holiday-plan/api/")
 public class UserController {
 
     @Autowired
     private UserService userService;
     @Autowired private CustomerUserDetailsService customerUserDetailsService;
-    @PostMapping(value="authenticate/user/login/",consumes = {"application/json"})
-    public  void login(){
-        System.out.println("*********************************************************************************");
-    }
+
 
     @PostMapping(value="authenticate/user/save/",consumes = {"application/json"})
     public ResponseEntity<Boolean> save(@RequestBody  @Validated RegisterUserRequest request){
@@ -65,8 +65,19 @@ public class UserController {
         if(users.size()==0)throw new NotFoundException("User(s) is not found");
         return  new ResponseEntity<>(users,HttpStatus.OK);
     }
-    @GetMapping(path="user/age/{age}")
-    public ResponseEntity<List<User>> get(@PathVariable("age") int age) throws NotFoundException {
+    @GetMapping(path="admin/user/users/")
+    public ResponseEntity<Set<UserBYAdminDTO>> getAllUsersByAdmin(){
+        var users = userService.getUsers()
+                .stream().map(user->
+                        UserBYAdminDTO.builder().userType(user.getUserType()).age(user.getAge())
+                                .username(user.getUsername()).lastname(user.getLastname())
+                                .firstname(user.getFirstname()).roles(user.getRoles()).build())
+                .collect(Collectors.toSet());
+        if(users.size()==0)throw new NotFoundException("User(s) is not found");
+        return  new ResponseEntity<>(users,HttpStatus.OK);
+    }
+    @GetMapping(path="user/age/")
+    public ResponseEntity<List<User>> get(@RequestParam LocalDate age) throws NotFoundException {
         List<User> users =  userService.getUsers(age);
         if(users ==null || users.size()==0) throw new NotFoundException("No Tourists found");
 
@@ -96,6 +107,18 @@ public class UserController {
         return  userService.addNewRoleToUser(role,userName)?
                 new ResponseEntity<>(true, HttpStatus.OK):
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @PatchMapping(value = "user/update/user/")
+    public ResponseEntity<Boolean> updateUserDetails(@RequestBody  EditUserRequest editUserRequest) {
+        System.out.println(editUserRequest);
+        if(! userService.confirmPassword(editUserRequest.currentPassword())){
+             throw  new InvalidCredentials("Invalid credentials");
+        }
+
+        return userService.updateUserDetails(editUserRequest).map(
+                user1 -> new ResponseEntity<>(true, HttpStatus.OK)
+        ).orElseGet(()-> new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE));
     }
     @DeleteMapping(value = "user/delete/role/")
     public ResponseEntity<Boolean>   deleteRoleFromUser(@RequestParam String userName, @RequestParam String userRole){

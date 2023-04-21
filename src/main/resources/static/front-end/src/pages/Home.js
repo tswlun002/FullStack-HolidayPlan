@@ -44,7 +44,10 @@ const Home = ()=>{
         switch(action.type){
          case "replace": return {...state, array:[...action.payload],isDataAvailable:true};
          case "add":return {...state, array:[...state.array,action.payload],isDataAvailable:true};
-         case "error": return {...state, errorMessage:action.errorMessage,isDataAvailable:false}
+         case "error": return {...state, errorMessage:action.errorMessage,isDataAvailable:false};
+         case "dataChange": return {...state, isDataUpdated:true};
+         case "deleteHoliday": return {...state, array:[...action.payload],isDataAvailable:action.payload.isDataAvailable};
+         
          default: return {...state} ;
       } 
     },
@@ -52,9 +55,22 @@ const Home = ()=>{
     {
       array:[],
       errorMessage:"Data is not available",
-      isDataAvailable:false
+      isDataAvailable:false,
+      isDataUpdated:false,
     }
   )
+
+  const deleteHolidayCard = (index)=>{
+        const isDataAvailable = Data.array?.length>0?true:false;
+        const data  = [...Data.array?.slice(0, index), ...Data.array?.slice(index+1)];
+        setData({type:"deleteHoliday", payload:data, isDataAvailable:isDataAvailable});
+
+  }
+
+  const updateHolidayCard = (index)=>{
+      setData({type:"dataChange"});
+  }
+
 
 
   //call fetch data on hooks
@@ -64,9 +80,10 @@ const Home = ()=>{
 
 
   //Make cards
-  const Cards  = Data.array.map((data)=>{
+  const Cards  = Data.array.map((data,index)=>{
       if(data !==null){
-        return <Card setData={setData} data={data} />
+        return <Card  updateHolidayCard={updateHolidayCard} index={index}
+                key={data.id} deleteHolidayCard={deleteHolidayCard} data={data} />
     }
 
   } );

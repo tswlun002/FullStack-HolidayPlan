@@ -28,6 +28,7 @@ public class SecurityConfiguration {
     private  final  String[] SECURED_URLS_EDIT_USER = {"/holiday-plan/api/user/**"};
     private  final  String[] SECURED_URLS_EDIT_USER_HOLIDAY = {"/holiday-plan/api/holiday/**"};
     private  final  String[]  AUTHENTICATE_PATH={"/holiday-plan/api/authenticate/**","/holiday-plan/api/logout/"};
+    private  final  String[] SECURE_QUERY_END_POINT ={"/holiday-plan/api/user-query/**"};
     @Autowired
     private CustomerAuthenticationProvider authenticationProvider;
     @Autowired
@@ -54,7 +55,7 @@ public class SecurityConfiguration {
 
         customerAuthFilter.setFilterProcessesUrl("/holiday-plan/api/authenticate/user/login/");
 
-       http.csrf().disable()
+             http.csrf().disable()
                .authorizeHttpRequests(auth -> auth
                        .requestMatchers(AUTHENTICATE_PATH).permitAll()
                        //.requestMatchers("/holiday-plan/api/admin/user/save/").permitAll()
@@ -70,6 +71,8 @@ public class SecurityConfiguration {
                        .requestMatchers(HttpMethod.PATCH,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name())
                        .requestMatchers(HttpMethod.POST,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name())
                        .requestMatchers(HttpMethod.GET,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name(),HOLIDAYPLAN_READ.name())
+
+                       .requestMatchers(SECURE_QUERY_END_POINT).hasAnyAuthority(QUERY_READ.name(),QUERY_WRITE.name())
                        .anyRequest().authenticated()
                )
                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

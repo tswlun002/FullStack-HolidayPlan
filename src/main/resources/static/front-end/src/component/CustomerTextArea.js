@@ -5,8 +5,6 @@ import { styled } from '@mui/material/styles';
 const CustomerTextArea = styled(TextField)({
     width:"100%",
     marginTop:"8px",
-     multiline:"true",
-
     '& label.Mui-focused': {
       color: 'black',
 

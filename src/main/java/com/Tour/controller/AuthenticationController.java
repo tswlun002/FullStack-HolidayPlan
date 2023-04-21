@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -28,6 +29,9 @@ public class AuthenticationController {
     @GetMapping(value = "refresh/")
     public void refreshToken(HttpServletRequest request,
                                              HttpServletResponse response ) throws IOException {
+
+      System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+      System.out.println(request.toString());
       var tokens= authenticationService.refreshToken( request.getHeader("Authorization"));
       if(tokens.tokens().size()>1) {
           response.setStatus(HttpStatus.OK.value());

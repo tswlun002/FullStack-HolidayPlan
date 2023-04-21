@@ -3,12 +3,18 @@ import axios from "./Axios"
  * 
  * @param {*} user is the user to be registered
  */
-export const RegisterUser = ({firstname,lastname,email,password, registered,userType},dispatchRegister) => {
+ const getErrorMessage = (response)=>{
+      return response.response.data?.error_message?
+      response.response.data.error_message:response.response.data?.message?
+      response.response.data.message :response.response.statusText;
+
+ }
+export const RegisterUser = ({firstname,lastname,email,password,age, registered,userType},dispatchRegister) => {
 
    //dispatchRegister({registered:true})
-   const username = email; 
+  const username=email.replace('/','-');
    const API = '/holiday-plan/api/authenticate/user/save/';
-   axios.post(API,{firstname,lastname,username,password, userType})
+   axios.post(API,{firstname,lastname,username,password,age, usertype:userType})
    .then(response =>
        {
          if(response.ok || response.status===200){
@@ -36,7 +42,7 @@ export const RegisterUser = ({firstname,lastname,email,password, registered,user
              }
              else{
                    console.log(err.response.statusText);
-                   errorMessage  = err.response?.statusText;
+                   errorMessage  = getErrorMessage(err);
              }
              dispatchRegister({errorMessage:errorMessage,
                              isLoginError:true})
@@ -47,13 +53,114 @@ export const RegisterUser = ({firstname,lastname,email,password, registered,user
    )
 }
 
-export const RegisterAdmin = ({firstname,lastname,email,password, registered,userType}, dispatchRegister) => {
-  const username=email;
-  console.log(JSON.stringify({firstname,lastname,username,password, userType}));
+export const FetchUsers = (useAxiosPrivate,dispatchUsers) => {
+
+   const API = '/holiday-plan/api/admin/user/users/';
+   useAxiosPrivate.get(API)
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+
+           dispatchUsers({
+               data:response.data,
+               isDataAvailable : true,
+               isRequestError:false
+            });
+
+         }
+       }
+   ).catch(err =>
+     {
+        console.log(err);
+       console.log("Not ok");
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+               console.log("Not ok ,********");
+               errorMessage  ="Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  ="Denied access";
+             }
+             else{
+                   console.log(err.response.statusText);
+                   errorMessage  = getErrorMessage(err);
+             }
+             dispatchUsers({errorMessage:errorMessage,
+                                isDataAvailable : false,
+                                isRequestError:true})
+        }else dispatchUsers({errorMessage:"Server Error",
+                                isDataAvailable : false,
+                                isRequestError:true})
+
+     }
+   )
+}
+
+
+
+export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword,currentPassword, edited},dispatchRegister) => {
+
+   //dispatchRegister({registered:true})
+  const username=email.replace('/','-');
+   const API = '/holiday-plan/api/user/update/user/';
+   useAxiosPrivate.patch(API,{firstname,lastname,username,newPassword,currentPassword})
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+
+           dispatchRegister({
+               edited : response.data.message,
+               isEditError:false,
+                errorMessage: "",
+                isRequestSucceeded:true,
+                requestResponseMessage:"Profile updated successful"
+            });
+
+         }
+       }
+   ).catch(err =>
+     {
+        console.log(err);
+       console.log("Not ok");
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+               console.log("Not ok ,********");
+               errorMessage  ="Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  ="Denied access";
+             }
+             else{
+                   console.log(err.response.statusText);
+                   errorMessage  = getErrorMessage(err);
+             }
+             dispatchRegister({errorMessage:errorMessage,
+                             isEditError:true, edited:false,
+                             isRequestSucceeded:false,
+                             requestResponseMessage:""})
+        }else dispatchRegister({errorMessage:"Server Error",
+                                isEditError:true, edited:false,
+                                 isRequestSucceeded:false,
+                                 requestResponseMessage:""
+        })
+
+     }
+   )
+}
+
+export const RegisterAdmin = ({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister) => {
+  const username=email.replace('/','-');
+  console.log(JSON.stringify({firstname,lastname,username,password,age, userType}));
   ///dispatchRegister({registered:true})
 
-   const API = '/holiday-plan/api/user/admin/save';
-   axios.post(API,{firstname,lastname,username,password, userType})
+   const API = '/holiday-plan/api/admin/user/save/';
+   useAxiosPrivate.post(API,{firstname,lastname,username,password, usertype:userType})
    .then(response =>
        {
          if(response.ok || response.status===200){
@@ -62,6 +169,7 @@ export const RegisterAdmin = ({firstname,lastname,email,password, registered,use
  
            dispatchRegister({
                registered : true,
+               requestResponseMessage:"Employee is added successfully."
             });
    
          }
@@ -81,7 +189,7 @@ export const RegisterAdmin = ({firstname,lastname,email,password, registered,use
              }
              else{
                    console.log("Not ok");
-                   errorMessage  = err.response?.statusText;
+                   errorMessage  = getErrorMessage(err);
              }
              dispatchRegister({errorMessage:errorMessage,
                              isLoginError:true})
@@ -104,10 +212,6 @@ export const LogInUser = ({email, password},dispatchLogin,setError
    let isMounted = true;
    const controller = new AbortController();
   const API= `/holiday-plan/api/authenticate/user/login/?password=${password}&username=${email}`;
-  dispatchLogin({
-    type:"LOGIN",      
-    payload:{}
-   });
 
   axios.post(API)
   .then(response =>
@@ -138,7 +242,9 @@ export const LogInUser = ({email, password},dispatchLogin,setError
             }
             else{
                   console.log("Not ok");
-                  errorMessage  = err.response.data?.error_message;
+                  errorMessage  = getErrorMessage(err);
+                 console.log(err.response.statusText)
+
             }
             setError({errorMessage:errorMessage,
                             isLoginError:true})
@@ -147,6 +253,9 @@ export const LogInUser = ({email, password},dispatchLogin,setError
     }
   )
 }
+
+
+
 
 
 
@@ -180,10 +289,9 @@ export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPr
               }
               else{
                     console.log("Not ok");
-                    errorMessage  = err.response.data?.error_message;
+                    errorMessage  = getErrorMessage(err);
               }
-             /* setError({errorMessage:errorMessage,
-                              isLoginError:true})*/
+
              alert(errorMessage)
          }
 
@@ -192,33 +300,46 @@ export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPr
   }
 
 
-export const LogoutUser = (refresh_token,dispatchUserInformation) => {
-  console.log(refresh_token)
+export const LogoutUser = (useAxiosPrivate,dispatchLogin, navigate) => {
   const API= '/holiday-plan/api/logout/';
-  const request = {
-    method:'GET',
-    headers:{ 'Content-Type': 'application/json;charset=UTF-8','Authorization':`Bearer ${refresh_token}`},
-  }
-    fetch(API,request)
-    .then((res) => {
-      console.log(res);
-      if(res.ok){
-        console.log("Ok");
-        return res.json();
+    useAxiosPrivate.get(API)
+        .then(response =>
+            {
+              if(response.ok || response.status===200){
+                console.log("Ok");
+                console.log(response.data)
+                // setIsLoggedOut(true);
+                dispatchLogin({
+                                 type:"LOGOUT",
+                                });
+                               navigate("/")
 
-      }else if(!res.ok){
-        console.log("Not ok");
-         throw res;
-      }
+              }
+            }
+        ).catch(err =>
+          {
 
-    })
-    .then((authenticationData)=>{
-      console.log(authenticationData);
-       dispatchUserInformation({
-        payload:{username:"", firstname:"", lastname:""}
-       });
 
-    })
-    .catch((err) => {err.message?alert(err.message):err.statusText?
-    alert(err.statusText):alert.error("unknown error")});
+            console.log(err);
+            console.log("Not ok");
+             if(!err?.response.ok){
+                  let errorMessage =null;
+                  if(err.response.status===404){
+                    console.log("Not ok ,********");
+                    errorMessage  ="Invalid credentials";
+                  }
+                  else if(err.response.status===401){
+                       errorMessage  ="Denied access";
+                  }
+                  else{
+                        console.log("Not ok");
+                        errorMessage  = getErrorMessage(err)
+                  }
+                 /* setError({errorMessage:errorMessage,
+                                  isLoginError:true})*/
+                 alert(errorMessage)
+             }
+
+          }
+        )
    }

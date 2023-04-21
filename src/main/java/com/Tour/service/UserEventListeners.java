@@ -16,8 +16,11 @@ import static com.Tour.model.UserPermission.*;
 @Service
 public class UserEventListeners {
     private  final  UserService service;
+    @EventListener
 
-
+    public  void queryIsUpdated(UserEvent userEvent){
+        service.queryIsUpdated(userEvent.user());
+    }
 
 
 }

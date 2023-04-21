@@ -23,8 +23,8 @@ public class AuthenticationService {
     private TokenService tokenService;
 
     public AuthenticationResponse refreshToken(String authHeader){
-
-        if(authHeader==null || !authHeader.startsWith(TokenAlgorithm.Bearer.name()+" ")) throw new InvalidCredentials("Credentials are not valid");
+        System.out.println(authHeader);
+        if(authHeader==null || !authHeader.startsWith("Bearer ")) throw new InvalidCredentials("Credentials are not valid");
         AuthenticationResponse response= new AuthenticationResponse(new HashMap<>());
         try {
            String refresh_token = authHeader.substring(TokenAlgorithm.Bearer.name().length()).trim();

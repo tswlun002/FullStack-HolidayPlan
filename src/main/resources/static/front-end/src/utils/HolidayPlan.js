@@ -11,7 +11,9 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
                console.log(response.data)
                setData({
                     type:"replace",
-                   payload:response.data
+                   payload:response.data,
+                   isResponseSuccess:true,
+                   isDataAvailable:true
                 });
 
              }
@@ -33,7 +35,7 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
                  setData({type: "error", errorMessage: errorMessage})
 
             }
-            
+
             else setData({type: "error", errorMessage: err.response.data.statusText});
 
 
@@ -46,78 +48,130 @@ export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
 
     const API = '/holiday-plan/api/holiday/save/';
      useAxiosPrivate.post(API, HolidayPlanData)
-           .then(response =>
-               {
-                 if(response.ok || response.status===200){
-                   console.log("Ok");
-                   console.log(response.data)
-                   setData({
-                       isDataCorrect:false,
-                       errorMessage:"Successfully added holiday"
-                    });
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+           setData({
+               isDataCorrect:false,
+               errorMessage:"Successfully added holiday"
+            });
 
-                 }
-               }
-           ).catch(err =>
-             {
-                console.log(err);
-                console.log("Not ok");
-                if(!err?.response.ok){
-                     let errorMessage =null;
-                     if(err.response.status===404){
-                       console.log("Not ok ,********");
-                       errorMessage  =err.response.data.message;
-                     }
-                     else{
-                           console.log("Not ok");
-                           errorMessage  = err.response.statusText;
-                     }
-                     setData({isDataCorrect:false, errorMessage: errorMessage})
-
-
-                }
-
-                else setData({isDataCorrect:false,  errorMessage: err.response.data.statusText});
-
-
+         }
+       }
+   ).catch(err =>
+     {
+        console.log(err);
+        console.log("Not ok");
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+               console.log("Not ok ,********");
+               errorMessage  =err.response.data.message;
              }
-           )
+             else{
+                   console.log("Not ok");
+                   errorMessage  = err.response.statusText;
+             }
+             setData({isDataCorrect:false, errorMessage: errorMessage})
+
+
+        }
+
+        else setData({isDataCorrect:false,  errorMessage: err.response.data.statusText});
+
+
+     }
+   )
 }
 
  //delete  data
- export const DeleteHolidayPlan = (HolidayPlanId,setData)=> {
+ export const DeleteHolidayPlan = (useAxiosPrivate,holidayPlanId,setResponse)=> {
       
-      const API = 'http://localhost:8080/home/holiday-plan/delete-holiday-plan/'+HolidayPlanId;
-      const request = {
-        method:'DELETE',
-        headers:{'Content-Type':'application/json'},
+      const API = `/holiday-plan/api/holiday/delete/holiday-plan/${holidayPlanId}`;
+    useAxiosPrivate.delete(API)
+    .then(response =>
+            {
+              if(response.ok || response.status===200){
+                console.log("Ok");
+                console.log(response.data)
+                setResponse({
+                    isResponseSuccess:true,
+                    responseMessage:"Successfully updated holiday"
+                 });
+
+              }
+        }
+    ).catch(err =>
+      {
+         console.log(err);
+         console.log("Not ok");
+         if(!err?.response.ok){
+              let errorMessage =null;
+              if(err.response.status===404){
+                console.log("Not ok ,********");
+                errorMessage  =err.response.data.message;
+              }
+              else{
+                    console.log("Not ok");
+                    errorMessage  = err.response.statusText;
+              }
+              setResponse({iRequestError:true, errorMessage: errorMessage})
+
+
+         }
+
+         else setResponse({iRequestError:true,  errorMessage: err.response.data.statusText});
+
+
       }
-      fetch(API, request)
-      .then((res) =>{
-        if(res.status===200){
-          FetchHolidayPlan(setData)
-      }})
-    .catch((err) => {alert(err.message)});
+    )
 
 
 } 
 
 //update  data
-export const UpdateHolidayPlan = (HolidayPlanId, priority,setData)=> {
+export const UpdateHolidayPlan = (useAxiosPrivate,holidayPlanId, priority,setResponse)=> {
   
-    const API = `http://localhost:8080/home/update-holiday-plan/${HolidayPlanId}/${priority}`;
-    const request = {
-      method:'PATCH',
-      headers:{'Content-Type':'application/json'},
-    }
-    fetch(API, request)
-    .then((res) =>{
-        if(res.status===200){
-            FetchHolidayPlan(setData)
-        }
-        if(!res.ok){
-            alert(JSON.stringify({message:res.message}))
-        }
+    const API = `/holiday-plan/api/holiday/update/holiday-plan/?holidayPlanId=${holidayPlanId}&level=${priority}`;
+     useAxiosPrivate.patch(API)
+     .then(response =>
+             {
+               if(response.ok || response.status===200){
+                 console.log("Ok");
+                 console.log(response.data)
+                 setResponse({
+                     isResponseSuccess:true,
+                     responseMessage:"Successfully updated holiday"
+                  });
 
-   })
-  .catch((err) => {alert(err.message)});}      
+               }
+         }
+     ).catch(err =>
+       {
+          console.log(err);
+          console.log("Not ok");
+          if(!err?.response.ok){
+               let errorMessage =null;
+               if(err.response.status===404){
+                 console.log("Not ok ,********");
+                 errorMessage  =err.response.data.message;
+               }
+               else{
+                     console.log("Not ok");
+                     errorMessage  = err.response.statusText;
+               }
+               setResponse({iRequestError:true, errorMessage: errorMessage})
+
+
+          }
+
+          else setResponse({iRequestError:true,  errorMessage: err.response.data.statusText});
+
+
+       }
+     )
+
+
+}

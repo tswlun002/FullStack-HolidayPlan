@@ -1,17 +1,25 @@
 import "./HolidayPlanForm.css"
-import {Paper,Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel}  from '@mui/material';
+import {Paper,Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel,Box,Card,CardContent,CardActions}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
-import { useReducer, useContext} from "react"
+import { useReducer, useContext, useState} from "react"
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import {AddHolidayPlan} from '../utils/HolidayPlan';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
+import CustomerTypography from '../component/CustomerTypography'
+
 
 
 
 const HolidayPlanForm =()=>{
       const { dispatchLogin } = useContext(CreateAuthContext);
       const  useAxiosPrivate=UseAxiosPrivate();
+
+       const [dateType1, setDateType1]= useState("text");
+      const [dateType, setDateType]= useState("text");
+
+
+
   //Get HolidayPlan data from Form
   const[HolidayPlanData, DispatchHolidayPlanData] = useReducer((state, action)=>{
     return {...state,...action,}
@@ -72,116 +80,123 @@ const HolidayPlanForm =()=>{
    }
 
   return (
-      <div className="container">
-       <Paper className="form-container">
-        <h1 className="heading">Add Holiday</h1>
-        <form className="holiday-plan-form">
-             {
-                !HolidayPlanData.isDataCorrect &&
-                <Typography align="center"sx={{color:"red"}}>
-                {HolidayPlanData.errorMessage}
-                </Typography>
-             }
-            <CssTextField
-            required
-                id="demo-helper-text-aligned"
-                label="Location"
-                variant="outlined"
-                name="location"
-                type="text"  placeholder="Enter location name" className="location-input"
-                value={HolidayPlanData.location}
-                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true, location:e.currentTarget.value})}
-                
-              />
+      <Box display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
+            >
+            <Card sx={{ maxWidth: 400,display:"block"}}>
+                <CardContent>
+                    <CustomerTypography sx={{alignText:"centre"}} className="heading">Add Holiday</CustomerTypography>
+                    <form className="holiday-plan-form">
+                         {
+                            !HolidayPlanData.isDataCorrect &&
+                            <Typography align="center"sx={{color:"red"}}>
+                            {HolidayPlanData.errorMessage}
+                            </Typography>
+                         }
+                        <CssTextField
+                        required
+                            id="demo-helper-text-aligned"
+                            label="Location"
+                            variant="outlined"
+                            name="location"
+                            type="text"  placeholder="Enter location name" className="location-input"
+                            value={HolidayPlanData.location}
+                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true, location:e.currentTarget.value})}
 
-            <CssTextField
-                required
-                id="demo-helper-text-aligned"
-                label="City"
-                variant="outlined"
-                name="city"
-                type="text"placeholder="Enter city " className="city" min={3} 
-                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,city:e.currentTarget.value}) }
-                value={HolidayPlanData.city}
-                />
+                          />
 
-            <CssTextField
-                  required
-              
-          
-                id="demo-helper-text-aligned"
-                label="Start Date"
-                variant="outlined"
-                name="startDate"
-                focused
-                type="date"   className="start-date"min={10} 
-                onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,startDate:event.currentTarget.value}) }
-                value={HolidayPlanData.startDate}
-                
-                />
+                        <CssTextField
+                            required
+                            id="demo-helper-text-aligned"
+                            label="City"
+                            variant="outlined"
+                            name="city"
+                            type="text"placeholder="Enter city " className="city" min={3}
+                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,city:e.currentTarget.value}) }
+                            value={HolidayPlanData.city}
+                            />
 
-            <CssTextField
-
-              required
-            
-              id="demo-helper-text-aligned"
-              label="End Date"
-              variant="outlined"
-              name="endDate"
-              focused
-              type="date"  className="end-date"min={10}
-              onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,endDate:event.currentTarget.value}) }
-              value={HolidayPlanData.endDate}
-              />
-
-            <CssTextField
-            
-                required
-            
-                id="demo-helper-text-aligned"
-                label="Event"
-                variant="outlined"
-              
-                type="text" name="event" placeholder="Enter event" className="event"min={5} 
-                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,event:e.currentTarget.value}) }
-                value={HolidayPlanData.event}
-              />
-            
-            <CssTextField
-            
-                required
-                id="demo-helper-text-aligned"
-                label="description"
-                variant="outlined"
-            
-                type="text" name="description" placeholder="Enter description" className="description"min={3} 
-                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,description:e.currentTarget.value}) }
-                value={HolidayPlanData.description} 
-              />
+                        <CssTextField
+                              required
 
 
-            <CssTextField
-                required
-                
-                id="demo-helper-text-aligned"
-                label="Link Picture"
-                variant="outlined"
-          
-                type="text" name="pictureLink" placeholder="Enter pictureLink mall" className="pictureLink"min={4}
-                onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,pictureLink:e.currentTarget.value}) }
-                value={HolidayPlanData.pictureLink}
-              />
-            
-            <PriorityLevelComponent HolidayPlanData={HolidayPlanData}DispatchHolidayPlanData={DispatchHolidayPlanData}/>
-            <ColorButton style={{marginTop:"15px"}} type="submit" onClick={(e)=>OnSubmit(e)}
-            className="btn btn-primary" >Save</ColorButton>
-                      
-        </form>
-                
-          
-         
-       </Paper>
-    </div>   
+                            id="demo-helper-text-aligned"
+                            label="Start Date"
+                            variant="outlined"
+                            name="startDate"
+                             onClick={()=>setDateType1("date")}
+                             onBlur={()=>{setDateType1("text"); console.log("abort")}}
+                            type={dateType1}   className="start-date"min={10}
+                            onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,startDate:event.currentTarget.value}) }
+                            value={HolidayPlanData.startDate}
+
+                            />
+
+                        <CssTextField
+
+                          required
+
+                          id="demo-helper-text-aligned"
+                          label="End Date"
+                          variant="outlined"
+                          name="endDate"
+
+                           onClick={()=>setDateType("date")}
+                           onBlur={()=>{setDateType("text"); console.log("abort")}}
+                           type={dateType}  className="end-date"min={10}
+                          onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,endDate:event.currentTarget.value}) }
+                          value={HolidayPlanData.endDate}
+                          />
+
+                        <CssTextField
+
+                            required
+
+                            id="demo-helper-text-aligned"
+                            label="Event"
+                            variant="outlined"
+
+                            type="text" name="event" placeholder="Enter event" className="event"min={5}
+                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,event:e.currentTarget.value}) }
+                            value={HolidayPlanData.event}
+                          />
+
+                        <CssTextField
+
+                            required
+                            id="demo-helper-text-aligned"
+                            label="description"
+                            variant="outlined"
+
+                            type="text" name="description" placeholder="Enter description" className="description"min={3}
+                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,description:e.currentTarget.value}) }
+                            value={HolidayPlanData.description}
+                          />
+
+
+                        <CssTextField
+                            required
+
+                            id="demo-helper-text-aligned"
+                            label="Link Picture"
+                            variant="outlined"
+
+                            type="text" name="pictureLink" placeholder="Enter pictureLink mall" className="pictureLink"min={4}
+                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,pictureLink:e.currentTarget.value}) }
+                            value={HolidayPlanData.pictureLink}
+                          />
+
+                        <PriorityLevelComponent HolidayPlanData={HolidayPlanData}DispatchHolidayPlanData={DispatchHolidayPlanData}/>
+                        <ColorButton style={{marginTop:"15px"}} type="submit" onClick={(e)=>OnSubmit(e)}
+                        className="btn btn-primary" >Save</ColorButton>
+
+                    </form>
+
+                 </CardContent>
+          </Card>
+       </Box>
     
   )
     

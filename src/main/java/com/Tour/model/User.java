@@ -1,14 +1,11 @@
 package com.Tour.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.Hibernate;
-
-
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -49,7 +46,8 @@ public class User   {
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> roles = new HashSet<>();
-    private int age;
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private Date age;
     public void setId(Long id) {
         this.id = id;
     }

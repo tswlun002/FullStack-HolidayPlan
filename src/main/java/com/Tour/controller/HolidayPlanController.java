@@ -28,9 +28,9 @@ public class HolidayPlanController {
         return  new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }
     @GetMapping(value = "holiday/holidays/")
-    public ResponseEntity<Set<HolidayPlan>> getHolidayPlans() throws NotFoundException {
+    public ResponseEntity<Set<HolidayPlan>> getHolidayPlans()  {
         var holidayPlans=  holidayPlanService.getHolidayPlans();
-        if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan found");
+        if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan");
         HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.add("desc","HolidayPlans");
 
@@ -70,9 +70,9 @@ public class HolidayPlanController {
        return  new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @PatchMapping("holiday/update/holiday-plan/{id}/{level}")
-    public  ResponseEntity<Boolean>  updateHolidayPlan(@PathVariable("id") long id,@PathVariable("level") int level){
-        boolean updatedHolidayPlan= holidayPlanService.updateHolidayPlan( id,level);
+    @PatchMapping("holiday/update/holiday-plan/")
+    public  ResponseEntity<Boolean>  updateHolidayPlan(@RequestParam long holidayPlanId,@RequestParam int level){
+        boolean updatedHolidayPlan= holidayPlanService.updateHolidayPlan( holidayPlanId,level);
         if(updatedHolidayPlan) return  new ResponseEntity<>(true,HttpStatus.OK);
         return  new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }

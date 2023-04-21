@@ -4,20 +4,19 @@ import MainLayout from './layouts/MainLayout.js';
 import {  useReducer} from "react"
 import HolidayPlanForm from './pages/HolidayPlanForm';
 import  React,{ useEffect} from 'react';
-import {Route, Routes,useNavigate,useRoutes} from 'react-router-dom';
+import {Route, Routes,useNavigate,useRoutes,useLocation} from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import RegisterAdminForm from './pages/RegisterAdmin';
 import {CreateAuthContext} from './context/CreateAuthContext';
 import Profile from './pages/Profile';
 import jwtDecode from 'jwt-decode';
-import MissingPage from './pages/MissingPage'
-import UserQuery from './pages/UserQuery'
-import QueryTicket from './pages/QueryTicket'
-
-import AdminLayout from './layouts/AdminLayout'
-import UserLayout from './layouts/UserLayout'
-
+import MissingPage from './pages/MissingPage';
+import UserQuery from './pages/UserQuery';
+import QueryTicket from './pages/QueryTicket';
+import AdminLayout from './layouts/AdminLayout';
+import UserLayout from './layouts/UserLayout';
+import ListUser from './pages/ListUsers';
 const initialState = {
   isAuthenticated: false,
   access_token: null,
@@ -36,6 +35,7 @@ const reducer = (state, action) => {
           user =jwtDecode(action.payload?.access_token).user;
           console.log(user);
        }catch(e){
+         console.log(action.payload);
          console.error(e);
        }
       return {
@@ -65,28 +65,29 @@ const reducer = (state, action) => {
   }
 }
 const App=()=>{
-  const navigate = useNavigate();
-
-//Login registered user
-const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
-
-//call fetch data on hooks
- useEffect(() =>{
-
-     console.log(userLoginState.isAuthenticated)
-     if(userLoginState?.userType==="USER")navigate("/home-user");
-     else if(userLoginState?.userType==="ADMIN")navigate("/home-admin");
-     else navigate("/");
-
-  },[userLoginState]
-  );
+    const navigate = useNavigate();
+    //Login registered user
+    const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
+    const location = useLocation();
+    let from = location.state?.from?.path ||"/"
 
 
+    useEffect(()=>{
+         const Path = userLoginState.userType==="USER"?
+                                  "/home-user":userLoginState.userType==="ADMIN"?"/home-admin":"/"
+        /*if(userLoginState.userType=="ADMIN") navigate(Path)
+        else if(userLoginState.userType=="USER")navigate(Path)
+        else navigate("/")*/
+        from = Path;
+        //if(userLoginState.isAuthenticated){
+                   console.log(from)
+                  navigate(from,{replace:true});
+        //}
 
+    } ,[userLoginState]);
 
-
- return (
-  <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>
+    return (
+    <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>
       <Routes>
         <Route path="/" element={<MainLayout/>}>  
           <Route index   element={<Login/>}/>
@@ -97,12 +98,14 @@ const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
              <Route path="addHolidayPlan" element={<HolidayPlanForm/>}/>
              <Route path="profile" element={<Profile/>}/>
              <Route path="query" element={<QueryTicket/>}/>
+             <Route path="user-queries" element={<UserQuery/>}/>
           </Route>
 
           <Route path="home-admin" element={<AdminLayout/>}>
             <Route index element={<UserQuery/>}/>
             <Route path="register-admin" element={<RegisterAdminForm/>}/>
             <Route path="profile" element={<Profile/>}/>
+            <Route path="users" element={<ListUser/>}/>
           </Route>
 
           <Route path="*" element={<MissingPage/>}/>
@@ -110,8 +113,8 @@ const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
         </Route>
 
       </Routes>
-  </CreateAuthContext.Provider>
- )
+   </CreateAuthContext.Provider>
+   )
 }
 
 
