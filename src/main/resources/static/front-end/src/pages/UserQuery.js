@@ -1,5 +1,5 @@
 import { Box,Typography} from "@mui/material"
-import { useReducer,useEffect ,useContext} from "react";
+import { useReducer,useEffect ,useContext, useState} from "react";
 import { FetchQueries } from "../utils/Query";
 import QueryCard from '../component/QueryCard'
 import  UseAxiosPrivate from '../utils/UseAxiosPrivate'
@@ -27,8 +27,13 @@ const UserQuery =  ()=>{
 
     })
 
+
+
     useEffect(()=>{
-        FetchQueries(useAxiosPrivate, userLoginState.userType, dispatchQueryData)
+        let isMounted=true;
+        const controller=new AbortController();
+        isMounted && FetchQueries(useAxiosPrivate, userLoginState.userType, dispatchQueryData, controller);
+        return  ()=>{isMounted=false; controller.abort();}
     },[])
    const deleteQueryCard =(index)=>{
         const isDataAvailable = queryData.array?.length>0?true:false;

@@ -4,25 +4,39 @@ import axios from './Axios'
 const UseRefreshToken = ()=>{
     const{ dispatchLogin} = useContext(CreateAuthContext);
 
+
     const refresh = async() =>{
-        const response = await axios.get(
+
+        const response = await  axios.get(
             '/holiday-plan/api/authenticate/refresh/',
             {
                 withCredentials:true,
+
+
+
             }
         );
-        dispatchLogin(
+
+        console.log(response)
+
+         dispatchLogin(
             {
-                type:"LOGIN",
-                payload:response
+
+                type:"UPDATE_TOKEN",
+                payload:response.data?.tokens
+
             }
         )
 
 
-        return response.access_token;
+        return response.data?.tokens?.access_token;
 
     }
+
     return refresh;
+
+
+
 }
 
 export default UseRefreshToken;

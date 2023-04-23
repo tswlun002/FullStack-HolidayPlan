@@ -44,7 +44,7 @@ public class JwtService {
         if(extraClaims!=null && extraClaims.isEmpty()){
             getExtraClaims(extraClaims, user);
         }
-        return  buildJwtToken(extraClaims,user, 30);
+        return  buildJwtToken(extraClaims,user, 2);
     }
     public String generateRefreshToken(User user) {
         if(user==null)throw new NullException("User is invalid");

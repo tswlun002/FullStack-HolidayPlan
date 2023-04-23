@@ -53,29 +53,32 @@ export const RegisterUser = ({firstname,lastname,email,password,age, registered,
    )
 }
 
-export const FetchUsers = (useAxiosPrivate,dispatchUsers) => {
+export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
+
 
    const API = '/holiday-plan/api/admin/user/users/';
-   useAxiosPrivate.get(API)
+   useAxiosPrivate.get(API, {signal:controller.signal})
    .then(response =>
        {
          if(response.ok || response.status===200){
            console.log("Ok");
            console.log(response.data)
 
-           dispatchUsers({
+         dispatchUsers({
                data:response.data,
                isDataAvailable : true,
                isRequestError:false
             });
 
          }
+
+
        }
    ).catch(err =>
      {
         console.log(err);
        console.log("Not ok");
-        if(!err?.response.ok){
+        if(!err?.response.ok && err.name!=="AbortErr"){
              let errorMessage =null;
              if(err.response.status===404){
                console.log("Not ok ,********");
@@ -97,6 +100,7 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers) => {
 
      }
    )
+
 }
 
 
@@ -104,9 +108,11 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers) => {
 export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword,currentPassword, edited},dispatchRegister) => {
 
    //dispatchRegister({registered:true})
+   let isMounted = true;
+   const controller = new AbortController();
   const username=email.replace('/','-');
    const API = '/holiday-plan/api/user/update/user/';
-   useAxiosPrivate.patch(API,{firstname,lastname,username,newPassword,currentPassword})
+   useAxiosPrivate.patch(API,{firstname,lastname,username,newPassword,currentPassword,signal:controller.signal})
    .then(response =>
        {
          if(response.ok || response.status===200){
@@ -122,6 +128,8 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword
             });
 
          }
+         return ()=>{isMounted=false; controller.abort()}
+
        }
    ).catch(err =>
      {
@@ -206,14 +214,11 @@ export const RegisterAdmin = ({firstname,lastname,email,password, age,registered
  * @param {*} user  to login 
  * @param {*} setLogin  is the function to set the login status of the user
  */
-export const LogInUser = ({email, password},dispatchLogin,setError
-  ) => {
+export const LogInUser = ({email, password},dispatchLogin,setError,controller) => {
   console.log(email, password);
-   let isMounted = true;
-   const controller = new AbortController();
   const API= `/holiday-plan/api/authenticate/user/login/?password=${password}&username=${email}`;
 
-  axios.post(API)
+  axios.post(API, {signal:controller.signal})
   .then(response =>
       {
         if(response.ok || response.status===200){
@@ -243,7 +248,7 @@ export const LogInUser = ({email, password},dispatchLogin,setError
             else{
                   console.log("Not ok");
                   errorMessage  = getErrorMessage(err);
-                 console.log(err.response.statusText)
+
 
             }
             setError({errorMessage:errorMessage,
@@ -252,11 +257,9 @@ export const LogInUser = ({email, password},dispatchLogin,setError
 
     }
   )
+
+
 }
-
-
-
-
 
 
 export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPrivate) => {
@@ -266,8 +269,7 @@ export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPr
     .then(response =>
         {
           if(response.ok || response.status===200){
-            console.log("Ok");
-            console.log(response.data)
+
             dispatchUserInformation({
                 payload:response.data
              });
@@ -276,19 +278,18 @@ export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPr
         }
     ).catch(err =>
       {
-         console.log(err);
-        console.log("Not ok");
+
          if(!err?.response.ok){
               let errorMessage =null;
               if(err.response.status===404){
-                console.log("Not ok ,********");
+
                 errorMessage  ="Invalid credentials";
               }
               else if(err.response.status===401){
                    errorMessage  ="Denied access";
               }
               else{
-                    console.log("Not ok");
+
                     errorMessage  = getErrorMessage(err);
               }
 
@@ -301,38 +302,35 @@ export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPr
 
 
 export const LogoutUser = (useAxiosPrivate,dispatchLogin, navigate) => {
+
   const API= '/holiday-plan/api/logout/';
     useAxiosPrivate.get(API)
         .then(response =>
             {
               if(response.ok || response.status===200){
-                console.log("Ok");
-                console.log(response.data)
-                // setIsLoggedOut(true);
                 dispatchLogin({
-                                 type:"LOGOUT",
-                                });
-                               navigate("/")
+                    type:"LOGOUT",
+                });
+                navigate("/")
 
               }
+
             }
         ).catch(err =>
           {
 
 
-            console.log(err);
-            console.log("Not ok");
              if(!err?.response.ok){
                   let errorMessage =null;
                   if(err.response.status===404){
-                    console.log("Not ok ,********");
+
                     errorMessage  ="Invalid credentials";
                   }
                   else if(err.response.status===401){
                        errorMessage  ="Denied access";
                   }
                   else{
-                        console.log("Not ok");
+
                         errorMessage  = getErrorMessage(err)
                   }
                  /* setError({errorMessage:errorMessage,

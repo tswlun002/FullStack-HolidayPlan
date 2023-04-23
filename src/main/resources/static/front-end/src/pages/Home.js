@@ -73,9 +73,13 @@ const Home = ()=>{
 
 
 
+
   //call fetch data on hooks
   useEffect(() =>{
-      FetchHolidayPlan(useAxiosPrivate, setData)
+    let isMounted = true;
+    const controller = new AbortController();
+    isMounted && FetchHolidayPlan(useAxiosPrivate, setData,controller);
+    return ()=>{isMounted=false; controller.abort();}
   },[]);
 
 

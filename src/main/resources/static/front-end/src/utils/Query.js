@@ -49,19 +49,19 @@ export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=
 
 
 
-export const FetchQueries = (useAxiosPrivate, userType, dispatchQuery)=>{
+export const FetchQueries = (useAxiosPrivate, userType, dispatchQuery, controller)=>{
    const OK_RESPONSES =[200,302, 201]
   const API = userType==="ADMIN"? "/holiday-plan/api/user-query/query/status/?queryStatus=ACTIVE":
                           '/holiday-plan/api/user-query/query/user/logged-in/'
- 
-  useAxiosPrivate.get(API)                      
+
+  useAxiosPrivate.get(API, {signal:controller.signal})
   .then(response =>
       {
         if(response.ok || OK_RESPONSES.includes(response.status)){
           console.log("Ok");
           console.log(response.data)
 
-          dispatchQuery({
+         dispatchQuery({
              type:"replace",
             payload:response.data,
             isDataAvailable:true,
@@ -75,7 +75,7 @@ export const FetchQueries = (useAxiosPrivate, userType, dispatchQuery)=>{
     {
        console.log(err);
       console.log("Not ok");
-       if(!err?.response.ok){
+       if(!err?.response.ok && err.name!=="AbortErr"){
             let errorMessage =null;
             if(err.response.status===404){
               console.log("Not ok ,********");
@@ -98,6 +98,7 @@ export const FetchQueries = (useAxiosPrivate, userType, dispatchQuery)=>{
 
     }
   )
+
 }
 
 

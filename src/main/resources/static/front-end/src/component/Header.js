@@ -56,6 +56,8 @@ function Header() {
 
         else if(item==="Logout"){
           LogoutUser(useAxiosPrivate, dispatchLogin, navigate)
+          window.localStorage.removeItem('access_token');
+          dispatchLogin({type:"LOGOUT"})
 
         }
 
@@ -70,7 +72,7 @@ function Header() {
   const pages = [ `${userLoginState.firstname} ${userLoginState.lastname} Holiday Plans`];
   const initialSettingsState = [ 'Account', 'Home'];
   const [settings, setSettings] = React.useState(initialSettingsState);
-  console.log(`Is user an admin ${userLoginState?.userType==='ADMIN'}`)
+
   
   const userMenu=()=> {
      if(userLoginState.userType==='ADMIN')setSettings((state)=>[...state,'Register Admin',"Users",'Logout']);
@@ -78,7 +80,7 @@ function Header() {
   }
   React.useEffect(()=>{ setSettings(initialSettingsState);userMenu(); },[userLoginState?.userType])
 
-  console.log(settings);
+
 
 
   return (

@@ -1,7 +1,7 @@
 import './App.css';
 import Home from './pages/Home';
 import MainLayout from './layouts/MainLayout.js';
-import {  useReducer} from "react"
+import {  useReducer,useState} from "react"
 import HolidayPlanForm from './pages/HolidayPlanForm';
 import  React,{ useEffect} from 'react';
 import {Route, Routes,useNavigate,useRoutes,useLocation} from 'react-router-dom';
@@ -17,6 +17,8 @@ import QueryTicket from './pages/QueryTicket';
 import AdminLayout from './layouts/AdminLayout';
 import UserLayout from './layouts/UserLayout';
 import ListUser from './pages/ListUsers';
+import {LogoutUser} from './utils/User';
+//import Cookies from 'universal-cookie';
 const initialState = {
   isAuthenticated: false,
   access_token: null,
@@ -33,11 +35,10 @@ const reducer = (state, action) => {
        let user = initialState;
        try{
           user =jwtDecode(action.payload?.access_token).user;
-          console.log(user);
        }catch(e){
-         console.log(action.payload);
          console.error(e);
        }
+      
       return {
         ...state,
         isAuthenticated: true,
@@ -48,6 +49,10 @@ const reducer = (state, action) => {
         username:user.username,
         userType: user.userType
       };
+    case "UPDATE_TOKEN":
+
+        return {...state, access_token:action.payload.access_token}
+
     case "LOGOUT":
       
       return {
@@ -66,25 +71,35 @@ const reducer = (state, action) => {
 }
 const App=()=>{
     const navigate = useNavigate();
+    
+    //const cookies = new Cookies();
+    const [cookies, setCookie] = useState("")
+
+   
+
     //Login registered user
     const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
-    const location = useLocation();
-    let from = location.state?.from?.path ||"/"
 
+  
 
     useEffect(()=>{
-         const Path = userLoginState.userType==="USER"?
-                                  "/home-user":userLoginState.userType==="ADMIN"?"/home-admin":"/"
-        /*if(userLoginState.userType=="ADMIN") navigate(Path)
-        else if(userLoginState.userType=="USER")navigate(Path)
-        else navigate("/")*/
-        from = Path;
-        //if(userLoginState.isAuthenticated){
-                   console.log(from)
-                  navigate(from,{replace:true});
-        //}
+      if(userLoginState.isAuthenticated && userLoginState.access_token){
 
-    } ,[userLoginState]);
+        window.localStorage.setItem("access_token",userLoginState.access_token);
+      }
+
+      const Path = userLoginState.userType==="USER"?
+                "/home-user":userLoginState.userType==="ADMIN"&&"/home-admin"
+      navigate(Path);
+    }, [userLoginState])
+
+    useEffect(()=>{
+
+      const myCookie = window.localStorage.getItem("access_token");
+      if(myCookie !==null)  setCookie(myCookie);
+      dispatchLogin({type:"LOGIN", payload:{access_token:myCookie}})
+           
+    }, [])
 
     return (
     <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>

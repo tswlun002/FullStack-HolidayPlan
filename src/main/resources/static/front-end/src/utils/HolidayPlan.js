@@ -1,15 +1,15 @@
 
-export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
-      console.log(setData);
-      console.log(useAxiosPrivate)
+export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
+
+
       const API= '/holiday-plan/api/holiday/holidays/';
-      useAxiosPrivate.get(API)
+       useAxiosPrivate.get(API, {signal:controller.signal})
        .then(response =>
            {
              if(response.ok || response.status===200){
                console.log("Ok");
                console.log(response.data)
-               setData({
+              setData({
                     type:"replace",
                    payload:response.data,
                    isResponseSuccess:true,
@@ -17,6 +17,7 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
                 });
 
              }
+
            }
        ).catch(err =>
          {
@@ -41,6 +42,7 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData) => {
 
          }
        )
+
 }
 
 //Add new holiday plan
@@ -48,7 +50,7 @@ export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
 
     const API = '/holiday-plan/api/holiday/save/';
      useAxiosPrivate.post(API, HolidayPlanData)
-   .then(response =>
+    .then(response =>
        {
          if(response.ok || response.status===200){
            console.log("Ok");
@@ -78,10 +80,7 @@ export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
 
 
         }
-
         else setData({isDataCorrect:false,  errorMessage: err.response.data.statusText});
-
-
      }
    )
 }

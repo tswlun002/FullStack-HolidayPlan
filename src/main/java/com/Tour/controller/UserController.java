@@ -10,7 +10,10 @@ import com.Tour.security.CustomerUserDetailsService;
 import com.Tour.service.UserBYAdminDTO;
 import com.Tour.service.UserDTO;
 import com.Tour.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,6 +35,11 @@ public class UserController {
     private UserService userService;
     @Autowired private CustomerUserDetailsService customerUserDetailsService;
 
+     @GetMapping(value = "logout/",consumes = "application/json")
+     public  ResponseEntity<Boolean> logout(HttpServletRequest request, HttpServletResponse response){
+          System.out.println("Logged out .................................................................");
+         return  new ResponseEntity<>(true, HttpStatus.OK);
+     }
 
     @PostMapping(value="authenticate/user/save/",consumes = {"application/json"})
     public ResponseEntity<Boolean> save(@RequestBody  @Validated RegisterUserRequest request){
@@ -67,6 +75,7 @@ public class UserController {
     }
     @GetMapping(path="admin/user/users/")
     public ResponseEntity<Set<UserBYAdminDTO>> getAllUsersByAdmin(){
+         System.out.println("Username: "+userService.getLoginedUser());
         var users = userService.getUsers()
                 .stream().map(user->
                         UserBYAdminDTO.builder().userType(user.getUserType()).age(user.getAge())

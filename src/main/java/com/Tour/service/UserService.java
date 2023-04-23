@@ -160,6 +160,7 @@ public class UserService implements OnUser {
     @Override
     public User getLoginedUser() {
             String userName= SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            System.out.println("username :" + userName);
             return getUser(userName);
 
     }

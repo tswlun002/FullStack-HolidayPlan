@@ -37,14 +37,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         if( request.getServletPath().equals("/holiday-plan/api/authenticate/user/login")||
-                request.getServletPath().equals("/holiday-plan/api/authenticate/refresh")){
+                request.getServletPath().equals("/holiday-plan/api/authenticate/refresh/")){
             filterChain.doFilter(request,response);
+
             return;
         }
 
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        String username = null;
+        String username ;
 
         if (authHeader == null || !authHeader.startsWith(TokenAlgorithm.Bearer.getName()+" ")){
             filterChain.doFilter(request, response);
@@ -82,6 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(APPLICATION_JSON_VALUE);
             new ObjectMapper().writeValue(response.getOutputStream(),tokens);
+            return;
         }
 
 

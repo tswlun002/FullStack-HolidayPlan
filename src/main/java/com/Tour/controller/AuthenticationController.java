@@ -1,5 +1,6 @@
 package com.Tour.controller;
 
+import com.Tour.security.AuthenticationResponse;
 import com.Tour.service.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -30,16 +32,19 @@ public class AuthenticationController {
     public void refreshToken(HttpServletRequest request,
                                              HttpServletResponse response ) throws IOException {
 
-      System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-      System.out.println(request.toString());
-      var tokens= authenticationService.refreshToken( request.getHeader("Authorization"));
-      if(tokens.tokens().size()>1) {
+      System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+      var token= authenticationService.refreshToken(request);
+      AuthenticationResponse responseMessage= new AuthenticationResponse(new HashMap<>());
+      if(token!=null) {
           response.setStatus(HttpStatus.OK.value());
+          responseMessage.tokens().put("access_token",token);
 
       }else{
-        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
+        responseMessage.tokens().put("message","Invalid User credential ");
+
       }
       response.setContentType(APPLICATION_JSON_VALUE);
-      new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+      new ObjectMapper().writeValue(response.getOutputStream(), responseMessage);
     }
 }

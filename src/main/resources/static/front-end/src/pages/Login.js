@@ -1,17 +1,16 @@
-import {  Link , useNavigate, useLocation} from "react-router-dom";
+import {  Link } from "react-router-dom";
 import './Login.css'
 import {Typography,Box,Card,CardContent,CardActions}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
 import { LogInUser} from '../utils/User';
-import React,{ useReducer, useEffect} from 'react';
+import React,{ useReducer} from 'react';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 
 
 const Login =()=>{
-    const {userLoginState, dispatchLogin } = React.useContext(CreateAuthContext);
-     const  navigate = useNavigate();
+    const {dispatchLogin } = React.useContext(CreateAuthContext);
 
     const useAxiosPrivate = UseAxiosPrivate();
 
@@ -94,7 +93,10 @@ const Login =()=>{
                             variant="outlined"
                             color="secondary" type="password" className="password-input" placeholder="password" 
                             autoComplete='new-password' value={formState.password}
-                        onChange={(e)=>dispatchForm({password:e.target.value})}></CssTextField>
+                        onChange={(e)=>{
+                             setError({isLoginError:false,message:null});
+                            dispatchForm({password:e.target.value})
+                        }}></CssTextField>
 
 
                         <ColorButton variant="contained" style={{marginTop:"30px", color:"white"}}

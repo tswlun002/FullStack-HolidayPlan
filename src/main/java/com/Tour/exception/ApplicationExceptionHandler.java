@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeoutException;
+
 @Builder
 @ControllerAdvice
 public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler {
@@ -43,6 +45,15 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
         ErrorDetails details = ErrorDetails.builder().message(ex.getMethod()+":"+ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(value={com.Tour.exception.TimeoutException.class})
+    public  ResponseEntity<Object> timeoutException(com.Tour.exception.TimeoutException ex,
+                                                    WebRequest request){
+        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+                .date(LocalDateTime.now()).build();
+        return  new ResponseEntity<>(details, HttpStatus.GATEWAY_TIMEOUT);
+
     }
     @ExceptionHandler(ApplicationConstrainViolationException.class)
     public ResponseEntity<Object> constrainViolationException(

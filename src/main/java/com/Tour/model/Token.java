@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
 
@@ -28,7 +29,8 @@ public class Token {
     @NotBlank
     @NotEmpty
     @NonNull
-    @Column(unique = true, nullable = false,length = 3072)
+    @Column(unique = true, nullable = false,length = 1536, name = "token")
+    @Unique
     private String token;
     @NonNull
     @Column(name = "token_type")

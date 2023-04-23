@@ -2,6 +2,7 @@ package com.Tour.security;
 
 import com.Tour.service.JwtService;
 import com.Tour.service.TokenService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -80,8 +81,25 @@ public class SecurityConfiguration {
                .addFilter(customerAuthFilter)
                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                .logout().logoutUrl("/holiday-plan/api/logout/").
-               addLogoutHandler(logoutHandler)
-               .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()));
+                addLogoutHandler(logoutHandler)
+               .logoutSuccessHandler(((request, response, authentication) -> {
+                   // Cookie cookie = new Cookie("username", null);
+
+                   for(var cookie :request.getCookies()) {
+                       cookie.setAttribute("token",null);
+                       cookie.setMaxAge(0);
+                       cookie.setSecure(true);
+                       cookie.setHttpOnly(true);
+                       cookie.setPath("/");
+                       response.addCookie(cookie);
+
+                   }
+                   SecurityContextHolder.clearContext();
+                   response.setStatus(HttpServletResponse.SC_OK);
+
+               }
+
+               ));
 
        return  http.build();
 

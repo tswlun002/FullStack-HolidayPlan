@@ -16,9 +16,13 @@ export default function ListUser() {
     isDataAvailable:false,isRequestError:false, errorMessage:"",
    })
 
+
    React.useEffect(()=>{
 
-       FetchUsers(usePrivateAxios, dispatchUsers)
+        let isMounted = true;
+        const controller = new AbortController();
+        isMounted && FetchUsers(usePrivateAxios, dispatchUsers,controller);
+        return ()=>{isMounted=false; controller.abort();}
    },[])
 
 
@@ -34,20 +38,20 @@ export default function ListUser() {
         alignItems="center"
         minHeight="100vh"
         backgroundColor="#dfe0e6"
-        marginTop="5rem"
+        marginTop="2rem"
 
 
     >
         <List sx={{ width: '100%',
-                            maxWidth: 550,
-                            bgcolor: 'background.paper',
-                            position: 'relative',
-                            overflow: 'auto',
-                             maxHeight:"80vh",
+                    maxWidth: 550,
+                    bgcolor: 'background.paper',
+                    position: 'relative',
+                    overflow: 'auto',
+                     maxHeight:"80vh",
 
-                            '& ul': { padding: 0 },}}>
-        <ListSubheader><Typography color="primary" align="center" variant="h3">Users</Typography></ListSubheader>
-        {users.isDataAvailable?UsersItems:<Typography color="red" align="center" variant="h3">{users.errorMessage || "No Users"}</Typography>}
+                    '& ul': { padding: 0 },}}>
+        <ListSubheader sx={{backgroundColor:"transparent",}}><Typography sx={{textDecoration:"underline"}}color="primary" align="center" variant="h3">Users</Typography></ListSubheader>
+        {users.isDataAvailable?UsersItems:<Typography color="red" align="center" variant="h3">{users.errorMessage }</Typography>}
         </List>
 
     </Box>

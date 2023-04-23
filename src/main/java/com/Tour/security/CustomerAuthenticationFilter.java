@@ -36,6 +36,9 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
     private final TokenService tokenService;
 
     private final CustomerUserDetailsService userDetailsService;
+
+
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
        String username = request.getParameter("username");
@@ -54,15 +57,24 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         var user = userDetailsService.loadUserByUsername(username).getUser();
         var access_token  = jwtService.generateAccessToken(user);
         var refresh_token = jwtService.generateRefreshToken(user);
-        revokeAllUserToken(user,REFRESH_TOKEN);
-        revokeAllUserToken(user, ACCESS_TOKEN);
+        tokenService.revokeAllUserToken(user,REFRESH_TOKEN);
+        tokenService.revokeAllUserToken(user, ACCESS_TOKEN);
         saveUserToken(user,access_token, ACCESS_TOKEN);
         saveUserToken(user, refresh_token,REFRESH_TOKEN);
         Map<String,String> tokens = new HashMap<>();
         tokens.put("access_token",access_token);
-       response.addCookie(new Cookie("token", refresh_token));
+
+        Cookie cookie = new Cookie("token", refresh_token);
+        cookie.setMaxAge(24 * 60 * 60); // expires in 7 days
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/"); // global cookie accessible everywhere
+        //add cookie to response
+        response.addCookie(cookie);
        response.setContentType(APPLICATION_JSON_VALUE);
        new ObjectMapper().writeValue(response.getOutputStream(),tokens);
+        System.out.println("customerjwtfilter **********************************************************************************");
+
     }
 
 
@@ -80,13 +92,7 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         tokenService.save(token);
     }
 
-    private void revokeAllUserToken(User user, TokenType tokenType) {
-        var validUserTokens  = tokenService.findByAllValidToken(user,tokenType);
-        if(validUserTokens.isEmpty())return;
 
-        validUserTokens.forEach(token -> {token.setRevoked(true);token.setExpired(true); tokenService.save(token);});
-
-    }
 
 
 
