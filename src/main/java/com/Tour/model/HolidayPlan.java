@@ -58,8 +58,8 @@ public class HolidayPlan {
     @NonNull
     @NotBlank(message = "pictureLink is required")
     @NotEmpty(message = "pictureLink is required")
-    @Size(min = 8, max = 1000, message = "city must contain 8 to 1000 characters.")
-    @Column(name = "picture_link", nullable = false)
+    @Size(min = 8, message = "picture_link is invalid.")
+    @Column(name = "picture_link", nullable = false, length = 3072)
     private String pictureLink;
     @NonNull
     @Column(name = "priority_level", nullable = false)

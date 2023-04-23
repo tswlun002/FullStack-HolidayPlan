@@ -52,7 +52,7 @@ public class RoleService implements  OnRole{
         if (role.getName() == UserRole.USER) {
             addPermissions(role, Set.of(HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ));
         } else if (role.getName() == UserRole.ADMIN) {
-            addPermissions(role, Set.of(HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ, USER_WRITE, USER_READ));
+            addPermissions(role, Set.of(HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ, USER_WRITE, USER_READ,QUERY_WRITE,QUERY_READ));
         }
     }
 
@@ -167,7 +167,7 @@ public class RoleService implements  OnRole{
        var roles  = rolesRepository.getRolesByPermission(permission.getId());
        roles.forEach(
                role -> {
-                   rolesRepository.deleteRolePermission(role.getId(), permission.getId());
+                   rolesRepository.deletePermissionFromRole(role.getId(), permission.getId());
                    updateRole(role);
                }
        );
@@ -196,7 +196,7 @@ public class RoleService implements  OnRole{
         boolean deleted  =false;
 
         try {
-            rolesRepository.deleteRolePermission(role.getId(), permissions.get(0).getId());
+            rolesRepository.deletePermissionFromRole(role.getId(), permissions.get(0).getId());
             updateRole(role);
             deleted = true;
 

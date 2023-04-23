@@ -41,14 +41,24 @@ public class JwtService {
 
     public String generateAccessToken(Map<String, Object> extraClaims, User user) {
         if(user==null)throw new NullException("User is invalid");
-        return  buildJwtToken(extraClaims,user, 15);
+        if(extraClaims!=null && extraClaims.isEmpty()){
+            getExtraClaims(extraClaims, user);
+        }
+        return  buildJwtToken(extraClaims,user, 30);
     }
     public String generateRefreshToken(User user) {
         if(user==null)throw new NullException("User is invalid");
         return  generateRefreshToken(new HashMap<>(),user);
     }
+    private void getExtraClaims(Map<String, Object> extraClaims, User user){
+        extraClaims.put("user",
+                new UserDTO(user.getFirstname(),user.getLastname(),user.getAge(),user.getUsername(),user.getUserType()));
+    }
     public String generateRefreshToken(Map<String, Object> extraClaims, User user) {
         if(user==null)throw new NullException("User is invalid");
+        if(extraClaims!=null && extraClaims.isEmpty()){
+            getExtraClaims(extraClaims, user);
+        }
         return  buildJwtToken(extraClaims,user, 1440);
     }
     private String buildJwtToken(  Map<String, Object> extraClaims,

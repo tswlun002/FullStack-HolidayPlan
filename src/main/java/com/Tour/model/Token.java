@@ -25,12 +25,10 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-
-
     @NotBlank
     @NotEmpty
     @NonNull
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false,length = 3072)
     private String token;
     @NonNull
     @Column(name = "token_type")

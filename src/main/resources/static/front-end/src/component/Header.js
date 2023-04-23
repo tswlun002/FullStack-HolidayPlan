@@ -13,39 +13,22 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { useNavigate } from "react-router-dom";
 import {CreateAuthContext} from '../context/CreateAuthContext';
-import {UserInformation,LogoutUser} from '../utils/User';
+import {LogoutUser} from '../utils/User';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
-const pages = ['My Holiday Plans'];
-const settings = [ 'Account', 'Home', 'Logout'];
 
 
 
+/***
+ 1,2, 3, 5, 6, 7, 9
+**/
 
-function ResponsiveAppBar() {
-   const useAxiosPrivate = UseAxiosPrivate();
-  const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)
-
-  const [userState, dispatchUserInformation] = React.useReducer(
-   (state, action)=> {
-       return {...state, ...action.payload}
-   },
-   {
-       username:null,
-       firstname:null,
-       lastname:null,
-   }
-
-)
-  React.useEffect(()=>{
-       if(userLoginState.isAuthenticated)
-       UserInformation(userLoginState.access_token,dispatchUserInformation,useAxiosPrivate);
-  },[userLoginState])
-
+function Header() {
   const navigate = useNavigate();
 
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-
+  const  useAxiosPrivate=UseAxiosPrivate();
+  const [isLoggedOut, setIsLoggedOut] = React.useState(false);
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -59,19 +42,45 @@ function ResponsiveAppBar() {
 
   const handleCloseUserMenu = (item) => {
     console.warn(item)
-    if(item==="Home")navigate("/home")
-    else if(item==="Account")navigate("/profile")
-    else if(item==="Logout"){
-      dispatchLogin({
-        type:"LOGOUT",  
-       });
-      LogoutUser(dispatchLogin.refresh_token, dispatchUserInformation)
-      navigate("/")
+    let path = (userLoginState?.userType==="USER")?"/home-user":
+    (userLoginState?.userType==="ADMIN")?"/home-admin":"/unknown"
+    if(userLoginState?.isAuthenticated){
+        if(item==="Home"){
+           navigate(path)
+        }
+        else if(item==="Account")navigate(`${path}/profile`)
+        else if(item==='Register Admin') navigate(`${path}/register-admin`)
+        else if(item==='Query Ticket') navigate(`${path}/query`)
+        else if(item==='Queries') navigate(`${path}/user-queries`)
+        else if(item==='Users') navigate(`${path}/users`)
+
+        else if(item==="Logout"){
+          LogoutUser(useAxiosPrivate, dispatchLogin, navigate)
+
+        }
+
     }
 
     setAnchorElUser(null);
   };
-  // console.log( userLoginState.isAuthenticated)
+
+
+  const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)
+
+  const pages = [ `${userLoginState.firstname} ${userLoginState.lastname} Holiday Plans`];
+  const initialSettingsState = [ 'Account', 'Home'];
+  const [settings, setSettings] = React.useState(initialSettingsState);
+  console.log(`Is user an admin ${userLoginState?.userType==='ADMIN'}`)
+  
+  const userMenu=()=> {
+     if(userLoginState.userType==='ADMIN')setSettings((state)=>[...state,'Register Admin',"Users",'Logout']);
+     else if(userLoginState.userType==='USER')setSettings((state)=> [...state,'Query Ticket','Queries','Logout']);
+  }
+  React.useEffect(()=>{ setSettings(initialSettingsState);userMenu(); },[userLoginState?.userType])
+
+  console.log(settings);
+
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -94,11 +103,12 @@ function ResponsiveAppBar() {
               onClose={handleCloseNavMenu}
               sx={{
                 display: { xs: 'block', md: 'none' },
+                color:"white"
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={e=>handleCloseNavMenu(e)}>
-                  <Typography textAlign="center">{page}</Typography>
+                <MenuItem className="item-tittle" sx={{color:"white"}}key={page} onClick={e=>handleCloseNavMenu(e)}>
+                  <Typography textAlign="center" sx={{color:"white"}}>"Lunga"</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -117,17 +127,20 @@ function ResponsiveAppBar() {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar>{
-                         userState.firstname!==null && userState.lastname!==null  &&
-                        `${userState.firstname.substring(0,1)}${userState.lastname.substring(0,1)}`
-                        }
-                </Avatar>
-              </IconButton>
-            </Tooltip>
+
+            {  <Tooltip title="Open settings">
+             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar sx={{backgroundColor:"orange"}}>{
+                             (userLoginState.firstname!==null && userLoginState.lastname!==null)?
+                            `${userLoginState.firstname.substring(0,1)}${userLoginState.lastname.substring(0,1)}`:"OFF"
+                            }
+                    </Avatar>
+                  </IconButton>
+               </Tooltip>
+              }
+
             <Menu
-              sx={{ mt: '45px' }}
+              sx={{ mt: '50px' }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -142,11 +155,13 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-            {  userLoginState.isAuthenticated && settings.map((setting) => (
-                <MenuItem key={setting} value ={setting} onClick={()=>handleCloseUserMenu(setting)}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+             {  settings.map((setting) =>(<MenuItem key={setting} sx={{width:"100%"}}value ={setting} onClick={()=>handleCloseUserMenu(setting)}>
+                                               <Typography textAlign="center">{setting}</Typography>
+                                             </MenuItem>
+                         )
+             )
+             }
+
             </Menu>
           </Box>
         </Toolbar>
@@ -154,4 +169,4 @@ function ResponsiveAppBar() {
     </AppBar>
   );
 }
-export default ResponsiveAppBar;
+export default Header;

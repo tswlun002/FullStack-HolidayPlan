@@ -3,7 +3,7 @@ import  {FaTrash,FaMapMarkerAlt} from 'react-icons/fa'
 import { IconButton } from '@material-ui/core'
 import {useState} from "react"
 import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel, Paper } from '@mui/material';
-import { FetchHolidayPlan,DeleteHolidayPlan,UpdateHolidayPlan } from '../utils/HolidayPlan';
+import {DeleteHolidayPlan,UpdateHolidayPlan } from '../utils/HolidayPlan';
 
 
 const priorityLevelRate = [1, 2, 3];

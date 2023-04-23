@@ -1,5 +1,6 @@
 package com.Tour.service;
 
+import com.Tour.controller.EditUserRequest;
 import com.Tour.exception.CatchException;
 import com.Tour.exception.DuplicateException;
 import com.Tour.exception.NotFoundException;
@@ -8,23 +9,28 @@ import com.Tour.model.User;
 import com.Tour.model.UserRole;
 import com.Tour.model.UserType;
 import com.Tour.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.micrometer.common.util.StringUtils;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements OnUser {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ApplicationEventPublisher publisher;
-   @Autowired private  OnRole onRole;
+
+    private final UserRepository userRepository;
+    private final ApplicationEventPublisher publisher;
+    private  final  OnRole onRole;
 
 
 
@@ -40,7 +46,7 @@ public class UserService implements OnUser {
     public boolean saveUser(@Validated User user)
     {
         if(user ==null) throw  new NullPointerException("Can not save null User");
-        if(getUser(user.getUsername())!=null) throw  new DuplicateException("User already exists");
+        if(getUser(user.getUsername())!=null) throw  new DuplicateException("User exists with  email");
         boolean saved = false;
         try {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
@@ -53,6 +59,11 @@ public class UserService implements OnUser {
         return saved;
     }
 
+
+    @Override
+    public User getUser(long id) {
+        return userRepository.getUser(id);
+    }
 
 
     public Set<User> getUsers(){
@@ -79,7 +90,7 @@ public class UserService implements OnUser {
     }
 
     @Override
-    public List<User> getUsers(int age) {
+    public List<User> getUsers(LocalDate age) {
         return userRepository.getUsers(age);
     }
     private  void delete(User user){
@@ -152,6 +163,12 @@ public class UserService implements OnUser {
             return getUser(userName);
 
     }
+
+    public  boolean confirmPassword(String currentPassword){
+        return     new BCryptPasswordEncoder().matches(currentPassword,getLoginedUser().getPassword());
+
+    }
+
     @Override
     public boolean addNewRoleToUser(UserRole userRole,String userName)  {
         boolean added =false;
@@ -173,6 +190,12 @@ public class UserService implements OnUser {
         return added;
 
     }
+
+    @Override
+    public void queryIsUpdated(User user) {
+
+    }
+
     private  void updateUser(User user) {
         try{
             userRepository.save(user);
@@ -180,9 +203,40 @@ public class UserService implements OnUser {
             CatchException.catchException(e);
         }
     }
+    interface  StringIsValid{
+        boolean isValid(String value);
+    }
 
-   /* private  void catchException(Exception e){
-       CatchException.catchException(e);
-    }*/
+    public Optional<User> updateUserDetails(EditUserRequest user) {
+        if (user == null) throw new NullPointerException("User is invalid");
+        var user1 = getLoginedUser();
+        if (user1 == null) throw new NotFoundException("User is not found");
+
+        StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));
+
+        if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
+        if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
+        if(isValid.isValid(user.username()) ) user1.setUsername(user.username());
+        if(isValid.isValid(user.newPassword()) ) user1.setPassword(new BCryptPasswordEncoder().encode(user.newPassword()));
+
+        User updatedUser =null;
+        try {
+            updatedUser =
+                    userRepository.save(user1);
+        }
+         catch (DataIntegrityViolationException e){
+            CatchException.catchException(new DuplicateException("User with email already exist"));
+         }
+        catch (Exception e){
+
+            System.out.println("************"+e.toString());
+            CatchException.catchException(e);
+
+        }
+
+        return Optional.ofNullable(updatedUser);
+    }
+
+
 
 }

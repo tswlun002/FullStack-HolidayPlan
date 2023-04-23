@@ -4,10 +4,15 @@
     position: fixed !important;
     top:0  !important;
     z-index: 1 !important;
+    color:white!important;
 }
 .nav-item{
     display: flex;
     align-items: center;
+}
+.css-1q39md6-MuiButtonBase-root-MuiButton-root{
+    color:white !important;
+    padding: 0rem 1rem !important;
 }
 
 .title{

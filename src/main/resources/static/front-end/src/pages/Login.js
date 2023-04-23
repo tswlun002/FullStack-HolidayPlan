@@ -1,18 +1,20 @@
-import {  Link } from "react-router-dom";
+import {  Link , useNavigate, useLocation} from "react-router-dom";
 import './Login.css'
-import {Paper,Typography}  from '@mui/material';
-import CssTextField from './CssTextField';
-import ColorButton from './ColorButton';
+import {Typography,Box,Card,CardContent,CardActions}  from '@mui/material';
+import CssTextField from '../component/CssTextField';
+import ColorButton from '../component/ColorButton';
 import { LogInUser} from '../utils/User';
-import React,{ useReducer} from 'react';
+import React,{ useReducer, useEffect} from 'react';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 
 
 const Login =()=>{
+    const {userLoginState, dispatchLogin } = React.useContext(CreateAuthContext);
+     const  navigate = useNavigate();
+
     const useAxiosPrivate = UseAxiosPrivate();
-    const { dispatchLogin } = React.useContext(CreateAuthContext);
-    
+
     const [formState, dispatchForm] = useReducer((state, action)=>{
             
             return {...state , ...action}}, 
@@ -29,6 +31,7 @@ const Login =()=>{
          errorMessage: null
         }
     )
+
   
     const OnSubmit = (e)=>{
         e.preventDefault(); 
@@ -49,17 +52,24 @@ const Login =()=>{
 
             }
             )
-    })
-}
+       })
+    }  
     return (
 
-        <div className="login">
-               <Paper className="login-container">
+        <Box display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    minHeight="100vh"
+                    backgroundColor="#dfe0e6"
+
+               >
+                   <Card sx={{ maxWidth: 400,padding:"2rem 0rem" ,display:"block"}}>
+                    <CardContent>
                     <h1 className="heading">Login</h1>
                     <form className="login-inputs" autoComplete='off'>
                         {
                             error.isLoginError &&
-                            <Typography aling="center"sx={{color:"red"}}>
+                            <Typography align="center"sx={{color:"red"}}>
                             {error.errorMessage}
                             </Typography>
                         }
@@ -70,7 +80,7 @@ const Login =()=>{
                             id="demo-helper-text-aligned"
                             label="Email"
                             variant="outlined"
-                            type="mail" className="email-input" placeholder="Enter email" 
+                            type="email" className="email-input" placeholder="Enter email"
                             value={formState.email} 
                             onChange={(e)=>{
                                 setError({isLoginError:false,message:null})
@@ -87,19 +97,19 @@ const Login =()=>{
                         onChange={(e)=>dispatchForm({password:e.target.value})}></CssTextField>
 
 
-                        <ColorButton variant="contained" style={{marginTop:"15px", color:"white"}}
+                        <ColorButton variant="contained" style={{marginTop:"30px", color:"white"}}
                         className="submit-btn" onClick={(e)=>OnSubmit(e)}>Login</ColorButton>
 
 
                     </form>
-
+                 </CardContent>
+                 <CardActions>
                     <div className="login-nav">
-                        <Link   to="/register" className="login-link" >Not registered?, click to register </Link>
+                           <Link   to="/register" className="login-link" >Not registered?, click to register </Link>
                     </div>
-            </Paper>
-            
-
-        </div>
+                 </CardActions>
+                </Card>
+        </Box>
     )
 }
 

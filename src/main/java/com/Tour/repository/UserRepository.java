@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("select u from  User u join fetch u.roles r where u.id=:userId")
     User getUser(long userId);
     @Query("select u from  User u join fetch u.roles r  where u.age=:age")
-    List<User> getUsers(int age);
+    List<User> getUsers(LocalDate age);
    @Query("SELECT u FROM User u JOIN fetch u.roles r WHERE r.id=:roleId")
     List<User> getUsersByRole(long roleId);
    @Transactional

@@ -1,6 +1,7 @@
 package com.Tour.model;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +17,11 @@ import java.util.Set;
 public class Role  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GenericGenerator(name="cmrSeq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = "sequence_ID", value = "SEQUENCE")}
+    )
+    @GeneratedValue(generator = "sequence_ID")
     @Column(name = "id", nullable = false)
     private Long id;
     @NonNull
