@@ -46,10 +46,12 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
 }
 
 //Add new holiday plan
-export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
+export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
 
     const API = '/holiday-plan/api/holiday/save/';
-     useAxiosPrivate.post(API, HolidayPlanData)
+     console.log(Images)
+
+     useAxiosPrivate.post(API,Images,{headers:{Accept:'multipart/form-data','Content-Type':'multipart/form-data'}})
     .then(response =>
        {
          if(response.ok || response.status===200){
@@ -62,6 +64,7 @@ export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
 
          }
        }
+
    ).catch(err =>
      {
         console.log(err);
@@ -81,8 +84,10 @@ export const AddHolidayPlan = (useAxiosPrivate, HolidayPlanData,setData)=> {
 
         }
         else setData({isDataCorrect:false,  errorMessage: err.response.data.statusText});
+
      }
    )
+   //
 }
 
  //delete  data

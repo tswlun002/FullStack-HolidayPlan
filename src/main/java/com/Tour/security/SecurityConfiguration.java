@@ -59,6 +59,8 @@ public class SecurityConfiguration {
              http.csrf().disable()
                .authorizeHttpRequests(auth -> auth
                        .requestMatchers(AUTHENTICATE_PATH).permitAll()
+                       .requestMatchers(HttpMethod.POST,SECURED_URLS_EDIT_USER_HOLIDAY).permitAll()
+
                        //.requestMatchers("/holiday-plan/api/admin/user/save/").permitAll()
                        .requestMatchers(SECURED_URLS_ADMIN).hasRole(ADMIN.name())
                        .requestMatchers(HttpMethod.DELETE,SECURED_URLS_EDIT_USER).hasAuthority(USER_WRITE.name())
@@ -70,7 +72,6 @@ public class SecurityConfiguration {
                        .requestMatchers(HttpMethod.DELETE,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name())
                        .requestMatchers(HttpMethod.PUT,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name())
                        .requestMatchers(HttpMethod.PATCH,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name())
-                       .requestMatchers(HttpMethod.POST,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name())
                        .requestMatchers(HttpMethod.GET,SECURED_URLS_EDIT_USER_HOLIDAY).hasAnyAuthority(HOLIDAYPLAN_WRITE.name(),HOLIDAYPLAN_READ.name())
 
                        .requestMatchers(SECURE_QUERY_END_POINT).hasAnyAuthority(QUERY_READ.name(),QUERY_WRITE.name())

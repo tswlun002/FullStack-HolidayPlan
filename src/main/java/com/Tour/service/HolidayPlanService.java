@@ -1,14 +1,19 @@
 package com.Tour.service;
 
 import com.Tour.exception.CatchException;
+import com.Tour.model.HolidayLocationImages;
 import com.Tour.model.HolidayPlan;
 import com.Tour.model.User;
+import com.Tour.repository.HolidayImagesRepository;
 import com.Tour.repository.HolidayPlanRepository;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.IntStream;
 
 @Service
 public class HolidayPlanService  implements  OnHolidayPlan{
@@ -16,21 +21,56 @@ public class HolidayPlanService  implements  OnHolidayPlan{
      private OnUser onUser;
     @Autowired
     private HolidayPlanRepository holidayPlanRepository;
+    @Autowired
+    private HolidayImagesRepository imagesRepository;
 
 
     @Override
-    public boolean saveHolidayPlan(HolidayPlan holidayPlan) {
+    public boolean saveHolidayPlan(HolidayPlaDTO dto, MultipartFile [] images) {
+        var saved =false;
+        var user  = onUser.getLoginedUser();
+       var holidayPlan = HolidayPlan.builder().event(dto.event()).description(dto.description())
+                .endDate(dto.endDate()).startDate(dto.startDate()).priorityLevel(Integer.parseInt(dto.priorityLevel().trim())).city(dto.city())
+                .location(dto.location()).user(user).build();
+        System.out.println(holidayPlan);
         System.out.println(holidayPlan);
         if(holidayPlan==null) throw  new NullPointerException("Can not save null HolidayPlan");
-        try {
-            holidayPlan.setUser(onUser.getLoginedUser());
-            holidayPlanRepository.save(holidayPlan);
-        }catch (Exception e){
-           CatchException.catchException(e);
-        }
-        return true;
+      try {
+
+           holidayPlan=holidayPlanRepository.save(holidayPlan);
+
+      }
+
+      catch (Exception e) {
+          CatchException.catchException(e);
+      }
+
+
+        return saveImages(images,holidayPlan);
     }
 
+    private  boolean saveImages(MultipartFile[] images, HolidayPlan holidayPlan){
+        var saved =false;
+        try {
+             for(var file:images){
+
+
+                imagesRepository.save(
+                        HolidayLocationImages.builder().image(file.getBytes()).holidayPlan(holidayPlan)
+                                .name(file.getOriginalFilename()).imageType(file.getContentType()).build());
+
+                saved=true;
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            CatchException.catchException(e);
+        }
+        return  saved;
+    }
+
+    public  Set<HolidayLocationImages>  holidayLocationImages(long holidayId){
+        return  imagesRepository.findByHolidayId(holidayId);
+    }
     @Override
     public Set<HolidayPlan> getHolidayPlans() {
         return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser());
@@ -60,7 +100,13 @@ public class HolidayPlanService  implements  OnHolidayPlan{
         HolidayPlan holidayPlan =getHolidayPlan(onUser.getLoginedUser(),holidayPlanId);
         if(holidayPlan==null)throw  new NullPointerException("Can not delete null HolidayPlan");
         try {
-            holidayPlanRepository.delete(holidayPlan);
+            var deletedRows = imagesRepository.deleteImageForHolidayPlan(holidayPlanId);
+            if(deletedRows>0 && deletedRows<=4) {
+                holidayPlanRepository.delete(holidayPlan);
+            }
+            else{
+                return false;
+            }
         }catch (Exception e){
              CatchException.catchException(e);
         }

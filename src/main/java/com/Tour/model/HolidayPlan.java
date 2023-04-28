@@ -3,6 +3,7 @@ package com.Tour.model;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,7 +12,9 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -55,12 +58,10 @@ public class HolidayPlan {
     @NotEmpty(message = "description is required")
     @Size(min = 10, max = 1000, message = "description must contain 10 to 50 characters.")
     private String description;
-    @NonNull
-    @NotBlank(message = "pictureLink is required")
-    @NotEmpty(message = "pictureLink is required")
-    @Size(min = 8, message = "picture_link is invalid.")
-    @Column(name = "picture_link", nullable = false, length = 3072)
-    private String pictureLink;
+
+    /*@JsonManagedReference
+    @OneToMany(mappedBy = "holidayPlan", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private Set<HolidayLocationImages> images = new HashSet<>();*/
     @NonNull
     @Column(name = "priority_level", nullable = false)
     private int priorityLevel;

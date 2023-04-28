@@ -22,7 +22,13 @@ const UseAxiosPrivate = ()=>{
             const responseInterceptor = AxiosPrivate.interceptors.response.use(
                 response=>response, 
                 async (error)=> {
-                    console.log(error.config)
+                    console.log(error.config);
+
+                    if(error.config.url==='/holiday-plan/api/holiday/save/'){
+                                            error.config.headers['Content-Type']="multipart/form-data";
+                    }
+                    console.log(error.config);
+
                     const previousRequest  = error?.config
                     if(error?.response?.status===403 && !previousRequest?.sent) {
                         previousRequest.sent = true;

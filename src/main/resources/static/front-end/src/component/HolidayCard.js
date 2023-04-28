@@ -1,4 +1,4 @@
-import {useState,useContext} from 'react';
+import {useState,useContext, useEffect} from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -28,6 +28,24 @@ const ExpandMore = styled((props) => {
         duration: theme.transitions.duration.shortest,
       }),
 }));
+function ImageSlider(images) {
+// Create state variables for the index and image array
+    const [index, setIndex] = useState(0);
+
+    // Use useEffect to increment the index and update the image every 5 seconds
+    useEffect(() => {
+    const intervalId = setInterval(() => {
+    setIndex(prevIndex => (prevIndex + 1) % images.length);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+    }, []);
+
+     const type = images[index].imageType;
+     const IMG  = images[index].image;
+    return `data:${type};base64, ${IMG}`;
+
+}
 
 export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayCard}) {
   const{userLoginState} = useContext(CreateAuthContext);
@@ -54,7 +72,6 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
         setExperience(parseInt(event.target.value));
         UpdateHolidayPlan( useAxiosPrivate,data.id, parseInt(event.target.value),setResponse);
         if(response.isResponseSuccess){
-          console.log(`**************************** updated ${index} ************** ${response.responseMessage}`);
            updateHolidayCard(index);
 
         }else alert("Failed to update");
@@ -63,8 +80,6 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
   const handleDelete = (event)=>{
         DeleteHolidayPlan(useAxiosPrivate,data.id,setResponse);
         if(response.isResponseSuccess){
-           console.log(`**************************** updated ${index} ************** ${response.responseMessage}`);
-           console.log(data);
            deleteHolidayCard(index);
 
        }else alert("Failed to delete");
@@ -122,14 +137,12 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
         }
     
         title={data.location}
-        subheader={`${data.city} from ${data.startDate} to ${data.endDate}`}
+        subheader={`${data.city} from ${data.startDate.substring(0,10)} to ${data.endDate.substring(0,10)}`}
       />
-      <CardMedia
-        component="img"
-        height="194"
-        image={data.pictureLink}
-        alt="Picture holiday location "
-      />
+      <CardMedia component="img" height="194" src={ ImageSlider(data.images)}/>
+
+
+
       <CardContent>
         <Typography variant="body2" color="text.secondary">
          Event: {data.event}

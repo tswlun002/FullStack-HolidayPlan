@@ -162,6 +162,59 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword
    )
 }
 
+
+
+export const DeleteUser = (useAxiosPrivate,controller,email,dispatchUserAccount) => {
+
+   const API = `/holiday-plan/api/user/delete/${email}`;
+   useAxiosPrivate.delete(API,{signal:controller.signal})
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+
+           dispatchUserAccount({
+               isDeleted:false,
+                errorMessage: "",
+                isRequestSucceeded:true,
+                requestResponseMessage:"User deleted successful"
+            });
+
+         }
+
+       }
+   ).catch(err =>
+     {
+        console.log(err);
+       console.log("Not ok");
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+               console.log("Not ok ,********");
+               errorMessage  ="Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  ="Denied access";
+             }
+             else{
+                   console.log(err.response.statusText);
+                   errorMessage  = getErrorMessage(err);
+             }
+             dispatchUserAccount({errorMessage:errorMessage,
+                             isDeleted:true,
+                             isRequestSucceeded:false,
+                             requestResponseMessage:""})
+        }else dispatchUserAccount({errorMessage:"Server Error",
+                                isDeleted:true,
+                                 isRequestSucceeded:false,
+                                 requestResponseMessage:""
+        })
+
+     }
+   )
+}
+
 export const RegisterAdmin = ({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister) => {
   const username=email.replace('/','-');
   console.log(JSON.stringify({firstname,lastname,username,password,age, userType}));
@@ -257,9 +310,8 @@ export const LogInUser = ({email, password},dispatchLogin,setError,controller) =
 
     }
   )
-
-
 }
+
 
 
 export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPrivate) => {

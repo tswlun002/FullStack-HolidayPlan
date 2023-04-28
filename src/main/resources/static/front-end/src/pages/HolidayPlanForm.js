@@ -7,13 +7,12 @@ import {CreateAuthContext} from '../context/CreateAuthContext';
 import {AddHolidayPlan} from '../utils/HolidayPlan';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CustomerTypography from '../component/CustomerTypography'
-
-
-
+import ApploadFile from '../component/ApploadFile'
 
 const HolidayPlanForm =()=>{
       const { dispatchLogin } = useContext(CreateAuthContext);
       const  useAxiosPrivate=UseAxiosPrivate();
+      const [imagePreview , setImagePreview] =useState([]);
 
        const [dateType1, setDateType1]= useState("text");
       const [dateType, setDateType]= useState("text");
@@ -22,28 +21,64 @@ const HolidayPlanForm =()=>{
 
   //Get HolidayPlan data from Form
   const[HolidayPlanData, DispatchHolidayPlanData] = useReducer((state, action)=>{
-    return {...state,...action,}
+    return {...state,...action}
   },
     {  location:"",city: "",startDate: "",endDate:"",event:"",description:"",pictureLink:"",
        priorityLevel:"",isDataCorrect:true,errorMessage:""}
     )
-
+  const[Files, setFiles]=useState([])
   //Extract data from form data and store data to Data state
   const StoreData = ()=>{
-      AddHolidayPlan(useAxiosPrivate,HolidayPlanData, DispatchHolidayPlanData)
+         const {startDate, location, endDate, event, city, description, priorityLevel}=HolidayPlanData;
+         const fd = new FormData();
+         fd.append("holiday",new Blob([JSON.stringify({startDate, location, endDate, event, city, description, priorityLevel}, {'Content-Type':'application/json'})]));
+         Files.forEach(file=>fd.append("images",file));
+        console.log(fd)
+      AddHolidayPlan(useAxiosPrivate,fd, DispatchHolidayPlanData)
   }
+
+
+   const urlToImage  =(url)=>{
+        DispatchHolidayPlanData({isDataCorrect:true, pictureLink:url});
+
+        fetch(url).
+        then(res=>res.Blob())
+        .then(blob=>{
+            const file = new File([blob],"image",{type:blob.type})
+            setFiles(()=>[...Files,file])
+            setImagePreview(()=>[...imagePreview, URL.createObjectURL(file)])
+
+
+        })
+        .catch(err=>
+                   DispatchHolidayPlanData({isDataCorrect:false, errorMessage:"Could not upload photo"})
+
+        );
+
+
+   }
 
   
    const isEmpty= (elementInputData)=>elementInputData.trim()==="";
 
-
+   const setImages = (fileData)=>{
+        const list =[];
+        const list1=[];
+        fileData.forEach(file=>{
+             list.push(URL.createObjectURL(file));
+             list1.push(file);
+        });
+        setImagePreview(list);
+        console.log(list1);
+        setFiles(list1);
+   };
 
    const OnSubmit= (e)=>{
         e.preventDefault();
         const isDataValid  = ()=>{
            return !( isEmpty(HolidayPlanData.location) && isEmpty(HolidayPlanData.city) &&
             isEmpty(HolidayPlanData.startDate) && isEmpty(HolidayPlanData.endDate)&&
-            isEmpty(HolidayPlanData.description) &&isEmpty(HolidayPlanData.pictureLink)&&
+            isEmpty(HolidayPlanData.description) &&( Files.length===null || isEmpty(HolidayPlanData.pictureLink))&&
             isEmpty(HolidayPlanData.priorityLevel))
         }
 
@@ -56,7 +91,7 @@ const HolidayPlanForm =()=>{
             store()
            if(HolidayPlanData.isDataCorrect)
            setTimeout(()=>{
-              DispatchHolidayPlanData(
+             /* DispatchHolidayPlanData(
                 {
                   location: "",
                   city: "",
@@ -64,16 +99,18 @@ const HolidayPlanForm =()=>{
                   endDate: "",
                   description: "",
                   event: "",
-                  pictureLink: "",
+                  images: [],
+                  pictureLink:"",
                   priorityLevel: "",
 
                 }
-              )
+              )*/
 
            },2000);
         }else{
 
              console.log(HolidayPlanData)
+
              DispatchHolidayPlanData({isDataCorrect:false, errorMessage:"All data is required"})
         }
 
@@ -175,19 +212,33 @@ const HolidayPlanForm =()=>{
                             value={HolidayPlanData.description}
                           />
 
+                         <Box
+                                sx={{display:"flex"}}
+                              >
+                            <CssTextField
+                                required
 
-                        <CssTextField
-                            required
+                                sx={{maxWidth:"75%"}}
+                                id="demo-helper-text-aligned"
+                                label="Link Picture"
+                                variant="outlined"
 
-                            id="demo-helper-text-aligned"
-                            label="Link Picture"
-                            variant="outlined"
+                                type="text" name="images" placeholder="Enter pictureLink mall" className="pictureLink"min={4}
+                                onChange={(e)=>urlToImage(e.currentTarget.value) }
+                                value={HolidayPlanData.pictureLink}
+                              />
+                              <ApploadFile setImages={setImages} margin="1rem 0rem" maxWidth={"100%"} />
+                         </Box>
+                         <Box display="flex"
+                          justifyContent="center"
+                          alignItems="center">
+                              {
+                              imagePreview.map((image, index)=>
+                                <img style={{maxWidth:"25%", margin:"0rem 0.3rem"}}key={index} src={image}/>
+                              )
 
-                            type="text" name="pictureLink" placeholder="Enter pictureLink mall" className="pictureLink"min={4}
-                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,pictureLink:e.currentTarget.value}) }
-                            value={HolidayPlanData.pictureLink}
-                          />
-
+                              }
+                         </Box>
                         <PriorityLevelComponent HolidayPlanData={HolidayPlanData}DispatchHolidayPlanData={DispatchHolidayPlanData}/>
                         <ColorButton style={{marginTop:"15px"}} type="submit" onClick={(e)=>OnSubmit(e)}
                         className="btn btn-primary" >Save</ColorButton>

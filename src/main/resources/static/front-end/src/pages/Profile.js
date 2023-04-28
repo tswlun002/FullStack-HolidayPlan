@@ -16,33 +16,22 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import ColorButton from '../component/ColorButton';
 import {UpdateUser} from '../utils/User';
+import AccountButton from '../component/AccountButton';
 
 
-    const AccountButton = styled(Button)({
-      '&:hover': {
-        border:"1px solid red",
-      },
-      '&.Mui-focused': {
-        border:"1px solid red",
-      },
 
+const ExpandMore = styled((props) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+    })(({ theme, expand }) => ({
+      transform: !expand.showInfo ? 'rotate(0deg)' : 'rotate(180deg)',
+      marginLeft: 'auto',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+      }),
+}));
 
-    });
-
-
-   const ExpandMore = styled((props) => {
-      const { expand, ...other } = props;
-      return <IconButton {...other} />;
-        })(({ theme, expand }) => ({
-          transform: !expand.showInfo ? 'rotate(0deg)' : 'rotate(180deg)',
-          marginLeft: 'auto',
-          transition: theme.transitions.create('transform', {
-            duration: theme.transitions.duration.shortest,
-          }),
-   }));
-
-
-  const Profile = ()=> {
+const Profile = ()=> {
       const useAxiosPrivate = UseAxiosPrivate();
 
       const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)

@@ -42,7 +42,6 @@ const UserQuery =  ()=>{
 
    }
    const updateQueryCard = (index)=>{
-         console.log(`**************************** Solved ${index} **************`);
         const isDataAvailable = queryData.array?.length>0?true:false;
         const data  = queryData.array?.slice(index, index+1);
         data.queryStatus="SOLVED";

@@ -18,7 +18,7 @@ import AdminLayout from './layouts/AdminLayout';
 import UserLayout from './layouts/UserLayout';
 import ListUser from './pages/ListUsers';
 import {LogoutUser} from './utils/User';
-//import Cookies from 'universal-cookie';
+
 const initialState = {
   isAuthenticated: false,
   access_token: null,
@@ -71,8 +71,7 @@ const reducer = (state, action) => {
 }
 const App=()=>{
     const navigate = useNavigate();
-    
-    //const cookies = new Cookies();
+
     const [cookies, setCookie] = useState("")
 
    

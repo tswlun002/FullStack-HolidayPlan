@@ -1,5 +1,11 @@
 package com.Tour.exception;
+import com.Tour.service.ApplicationConstraintViolationException;
+import com.Tour.service.HolidayPlaDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.Builder;
 import lombok.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +21,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @Builder
 @ControllerAdvice
@@ -92,16 +99,19 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
         return new ResponseEntity<>(details, HttpStatus.NOT_ACCEPTABLE);
     }
 
+    @ExceptionHandler(value ={ApplicationConstraintViolationException.class, ConstraintViolationException.class})
+    public ResponseEntity<Object> ConstraintViolationException(
+            ApplicationConstraintViolationException ex, WebRequest request) throws JsonProcessingException {
 
+        ErrorDetails details = ErrorDetails.builder().message(
+                        new  ObjectMapper().writeValueAsString(ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.toSet())))
 
-    @ExceptionHandler(value ={ApplicationDataIntegrityViolationException.class, DataIntegrityViolationException.class})
-    public ResponseEntity<Object> dataIntegrityViolationException(
-            ApplicationDataIntegrityViolationException ex, WebRequest request) {
-
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
+
+
+
 
     @ExceptionHandler(value ={IllegalTypeException.class, IllegalArgumentException.class})
     public ResponseEntity<Object> illegalTypeException(

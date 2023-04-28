@@ -43,7 +43,7 @@ export default function ListUser() {
 
     >
         <List sx={{ width: '100%',
-                    maxWidth: 550,
+                    maxWidth: 650,
                     bgcolor: 'background.paper',
                     position: 'relative',
                     overflow: 'auto',
