@@ -164,10 +164,10 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword
 
 
 
-export const DeleteUser = (useAxiosPrivate,controller,email,dispatchUserAccount) => {
+export const DeleteUser = (useAxiosPrivate,email,dispatchUserAccount) => {
 
    const API = `/holiday-plan/api/user/delete/${email}`;
-   useAxiosPrivate.delete(API,{signal:controller.signal})
+   useAxiosPrivate.delete(API)
    .then(response =>
        {
          if(response.ok || response.status===200){
@@ -175,8 +175,7 @@ export const DeleteUser = (useAxiosPrivate,controller,email,dispatchUserAccount)
            console.log(response.data)
 
            dispatchUserAccount({
-               isDeleted:false,
-                errorMessage: "",
+               isRequestError:false,
                 isRequestSucceeded:true,
                 requestResponseMessage:"User deleted successful"
             });
@@ -201,14 +200,14 @@ export const DeleteUser = (useAxiosPrivate,controller,email,dispatchUserAccount)
                    console.log(err.response.statusText);
                    errorMessage  = getErrorMessage(err);
              }
-             dispatchUserAccount({errorMessage:errorMessage,
-                             isDeleted:true,
+             dispatchUserAccount({
+                             isRequestError:true,
                              isRequestSucceeded:false,
-                             requestResponseMessage:""})
-        }else dispatchUserAccount({errorMessage:"Server Error",
-                                isDeleted:true,
+                             requestResponseMessage:errorMessage})
+        }else dispatchUserAccount({
+                                isRequestError:true,
                                  isRequestSucceeded:false,
-                                 requestResponseMessage:""
+                                 requestResponseMessage:"Server Error"
         })
 
      }

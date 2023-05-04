@@ -11,16 +11,10 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,NavLink} from "react-router-dom";
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import {LogoutUser} from '../utils/User';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
-
-
-
-/***
- 1,2, 3, 5, 6, 7, 9
-**/
 
 function Header() {
   const navigate = useNavigate();
@@ -41,20 +35,11 @@ function Header() {
   };
 
   const handleCloseUserMenu = (item) => {
-    console.warn(item)
+    console.log(item)
     let path = (userLoginState?.userType==="USER")?"/home-user":
     (userLoginState?.userType==="ADMIN")?"/home-admin":"/unknown"
     if(userLoginState?.isAuthenticated){
-        if(item==="Home"){
-           navigate(path)
-        }
-        else if(item==="Account")navigate(`${path}/profile`)
-        else if(item==='Register Admin') navigate(`${path}/register-admin`)
-        else if(item==='Query Ticket') navigate(`${path}/query`)
-        else if(item==='Queries') navigate(`${path}/user-queries`)
-        else if(item==='Users') navigate(`${path}/users`)
-
-        else if(item==="Logout"){
+    if(item==="Logout"){
           LogoutUser(useAxiosPrivate, dispatchLogin, navigate)
           window.localStorage.removeItem('access_token');
           dispatchLogin({type:"LOGOUT"})
@@ -68,63 +53,114 @@ function Header() {
 
 
   const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)
+  let path = (userLoginState?.userType==="USER")?"/home-user":
+          (userLoginState?.userType==="ADMIN")?"/home-admin":"/unknown"
 
-  const pages = [ `${userLoginState.firstname} ${userLoginState.lastname} Holiday Plans`];
-  const initialSettingsState = [ 'Account', 'Home'];
+  const initialSettingsState = [ ['Account',`${path}/profile`],['Logout',`/`]];
   const [settings, setSettings] = React.useState(initialSettingsState);
+  const [pages, setPages] = React.useState([[]]);
+  const [settingAndPages, setSettingAndPages] = React.useState([[]]);
 
-  
+  const userHeader = `${userLoginState.firstname} ${userLoginState.lastname} `;
   const userMenu=()=> {
-     if(userLoginState.userType==='ADMIN')setSettings((state)=>[...state,'Register Admin',"Users",'Logout']);
-     else if(userLoginState.userType==='USER')setSettings((state)=> [...state,'Query Ticket','Queries','Logout']);
+
+     if(userLoginState.userType==='ADMIN'){
+
+        setPages(()=>[
+                        ['Home',path],['Register Admin',`${path}/register-admin`],["Users",`${path}/users` ]
+        ]);
+         setSettingAndPages(()=>[initialSettingsState[0],['Home',path],['Register Admin',`${path}/register-admin`],["Users",`${path}/users` ], initialSettingsState[1]]);
+     }
+     else if(userLoginState.userType==='USER'){
+        setPages(()=> [
+                              ['Home',path],['Query',`${path}/query`],['My Queries',`${path}/user-queries`]
+        ]);
+        setSettingAndPages(()=>[initialSettingsState[0],  ['Home',path],['Query',`${path}/query`],['My Queries',`${path}/user-queries`], initialSettingsState[1]]);
+     }
+     else setPages([[]]);
+
   }
   React.useEffect(()=>{ setSettings(initialSettingsState);userMenu(); },[userLoginState?.userType])
 
+  const linkStyle =(page,isActive=false, isPending=false)=>{
+     return{textDecoration:"none",
+             my: 1,display: 'block' ,
+             padding:"0rem 3rem",
 
+              color:isActive?"orange":isPending?"green":"white",
 
+          }
+  }
+    const menuItemStyle =(page,isActive=false, isPending=false)=>{
+       return{textDecoration:"none",
+               my: 1,display: 'block' ,
+               padding:"0.5rem",
+
+                color:isActive?"orange":isPending?"green":"black",
+
+            }
+    }
+  console.log(settingAndPages)
 
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            
+          <Typography sx={{padding:"2rem 0rem"}}>{`${userHeader} ${userLoginState.isAuthenticated?"'s":""} Holiday Plans`}</Typography>
+
+          <Box sx={{ flexGrow: 1, display:"block"}}>
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
               anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
+                vertical: 'top',
+                horizontal: 'right',
               }}
               keepMounted
               transformOrigin={{
                 vertical: 'top',
-                horizontal: 'left',
+                horizontal: 'right',
               }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
+
               sx={{
                 display: { xs: 'block', md: 'none' },
-                color:"white"
+                color:"black",
+                marginTop:"50px",
+
               }}
+               open={Boolean(anchorElUser)}
+               onClose={handleCloseUserMenu}
             >
-              {pages.map((page) => (
-                <MenuItem className="item-tittle" sx={{color:"white"}}key={page} onClick={e=>handleCloseNavMenu(e)}>
-                  <Typography textAlign="center" sx={{color:"white"}}>"Lunga"</Typography>
-                </MenuItem>
-              ))}
+              {
+
+               settingAndPages.map((arr) => (
+                    <MenuItem className="item-tittle" sx={{color:"black",display:"block", width:"100%"}}key={arr[0]} onClick={()=>handleCloseUserMenu(arr[0])}>
+                          <NavLink
+                              to={arr[1]}
+                              key={arr[0]}
+
+                              end={arr[0]==="Home"}
+                              style={({isPending, isActive})=>{console.log(isActive) ;console.log(isPending);return menuItemStyle(arr[0],isActive,isPending)}}
+                              >
+                             {arr[0]}
+                        </NavLink>
+                    </MenuItem>
+                  ))}
             </Menu>
           </Box>
          
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+          <Box  justifyContent="end" alignItems="center" sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+
+            {pages.map((arr) => (
+              <NavLink
+                to={arr[1]}
+                key={arr[0]}
+                end={arr[0]==="Home"}
+                style={({isPending, isActive})=>{console.log(isActive) ;console.log(isPending);return linkStyle(arr[0],isActive,isPending)}
+                      }
               >
-                {page}
-              </Button>
+                {arr[0]}
+              </NavLink>
             ))}
           </Box>
 
@@ -142,7 +178,7 @@ function Header() {
               }
 
             <Menu
-              sx={{ mt: '50px' }}
+
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -154,14 +190,23 @@ function Header() {
                 vertical: 'top',
                 horizontal: 'right',
               }}
+              sx={{ flexGrow: 1, marginTop:"50px", display: { xs: 'none', md: 'flex' } }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-             {  settings.map((setting) =>(<MenuItem key={setting} sx={{width:"100%"}}value ={setting} onClick={()=>handleCloseUserMenu(setting)}>
-                                               <Typography textAlign="center">{setting}</Typography>
-                                             </MenuItem>
-                         )
-             )
+             {  settings.map((arr) =>(<MenuItem key={arr[0]} sx={{width:"100%"}}value ={arr[0]} onClick={()=>handleCloseUserMenu(arr[0])}>
+                  <NavLink
+                      to={arr[1]}
+                      key={arr[0]}
+
+                      end={arr[0]==="Home"}
+                      style={({isPending, isActive})=>{console.log(isActive) ;console.log(isPending);return menuItemStyle(arr[0],isActive,isPending)}}
+                      >
+                     {arr[0]}
+                </NavLink>
+                </MenuItem>
+                ))
+
              }
 
             </Menu>

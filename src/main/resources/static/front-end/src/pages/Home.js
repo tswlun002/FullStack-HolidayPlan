@@ -9,6 +9,7 @@ import { FetchHolidayPlan} from '../utils/HolidayPlan';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import Typography from '@mui/material/Typography';
+import ColorButton from '../component/ColorButton';
 
 const useStyles = makeStyles({
   containerBox0:{
@@ -27,7 +28,7 @@ function HomeContent({isDataAvailable,Cards, errorMessage}) {
 
 
   return <div>{!isDataAvailable?
-                     <Typography align="center"><h2 style={{color:"white"}}>{errorMessage}</h2></Typography>
+                     <Typography align="center"><h2 style={{color:"red"}}>{`${errorMessage}, use the button below  to add HolidayPlan`}</h2></Typography>
                      :<Box className={classes.containerBox0}>
                            {isDataAvailable && Cards}
                        </Box>
@@ -108,11 +109,15 @@ const AddMoreHolidayPlan = ({isDataAvailable}) => {
      const navigate = useNavigate();
      const ButtonPosition= isDataAvailable?
     {bottom: "5%", right: "3%",}:{ bottom: "20%", right: "50%"};
-  
+
     return (
-      <Button className="add-new-holiday"variant="contained"  
-      style={ButtonPosition}
-      onClick={()=>navigate("/home-user/addHolidayPlan")} size="small" >{<AddIcon/>}Add HolidayPlan</Button>)
+      <ColorButton className="add-new-holiday"variant="contained"
+      style={ { ...ButtonPosition, maxWidth:"11rem",
+                    color: "white",   zIndex:1,position:"fixed",
+                    boxShadow: "inset 0 0 16px rgba(0, 0, 0, 0.5)" ,
+                    cursor: "pointer"}}
+
+      onClick={()=>navigate("/home-user/addHolidayPlan")} size="small" >{<AddIcon/>}Add HolidayPlan</ColorButton>)
   }
 
 export default Home;

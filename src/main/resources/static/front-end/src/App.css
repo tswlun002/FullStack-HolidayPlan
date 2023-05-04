@@ -8,18 +8,8 @@ html{
     height: 100vh;
 }
 
-.add-new-holiday{
-    max-width:11rem !important;
-    color:blue  !important;
-    z-index:1 !important;
-    position:fixed !important;
-    box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.5) !important;
-    cursor: pointer;
-}
-.add-new-holiday:hover{
-        color: white !important;
-        background-color: blue !important;
-}
+
+
 
 
 

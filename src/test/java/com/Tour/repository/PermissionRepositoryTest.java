@@ -2,20 +2,19 @@ package com.Tour.repository;
 
 import com.Tour.model.Permission;
 import com.Tour.model.UserPermission;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.Tour.model.UserPermission.*;
-import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 class PermissionRepositoryTest {
     @Autowired private PermissionRepository repository;

@@ -54,14 +54,14 @@ const UserQuery =  ()=>{
     
     return (
         <Box   sx={{display:"flex",
-                    justifyContent:"start",
-                    alignItems:"start",
+                    justifyContent:!queryData.isDataAvailable?"center":"start",
+                    alignItems:!queryData.isDataAvailable?"center":"start",
                     minHeight:"100vh",
                     flexFlow:"row wrap",
                     padding:"10% 0%"
                     }}
                 >
-            {!queryData.isDataAvailable?<Typography align="center" sx={{color:"red"}}>{queryData.errorMessage}</Typography>:Cards}
+            {!queryData.isDataAvailable?<Typography variant="h5" align="center" sx={{color:"red"}}>{queryData.errorMessage}</Typography>:Cards}
 
         </Box>
     )

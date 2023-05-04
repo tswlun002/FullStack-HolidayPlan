@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
 import { Button ,CardActions, Box,Stack} from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import { deepOrange } from '@mui/material/colors';
@@ -14,11 +13,8 @@ import CssTextField from '../component/CssTextField'
 import CustomerTypography from '../component/CustomerTypography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
-import ColorButton from '../component/ColorButton';
-import {UpdateUser} from '../utils/User';
+import {UpdateUser,DeleteUser} from '../utils/User';
 import AccountButton from '../component/AccountButton';
-
-
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -48,6 +44,8 @@ const Profile = ()=> {
           setExpanded({showInfo:!expanded.showInfo,showEdit:!expanded.showEdit});
        }
 
+
+
        const OnSubmit =(e)=>{
            e.preventDefault();
            if(profile.email.trim() === ""&& profile.newPassword.trim() === "" &&  profile.firstname.trim() === ""&&
@@ -71,17 +69,27 @@ const Profile = ()=> {
 
               }
            }
-         const ClearForm= ()=>{
-               setTimeout(()=>{
-                   dispatchProfile(
-                     {
-                       firstname:"",lastname:"",email:"",newPassword:"",currentPassword:"",requestResponseMessage:""
 
-                     }
-                   )
-               },200)
-           }
+
        }
+        const[userAccount, dispatchUserAccount]  = React.useReducer((state, action)=>{return {state, ...action}}, {isDeleted:false,
+                                                                                  errorMessage: "",
+                                                                                  isRequestSucceeded:false,
+                                                                                  requestResponseMessage:""})
+
+        const deleteAccount =()=>{
+           DeleteUser(useAxiosPrivate,userLoginState.email,dispatchUserAccount);
+        }
+        const ClearForm= ()=>{
+          setTimeout(()=>{
+              dispatchProfile(
+                {
+                  firstname:"",lastname:"",email:"",newPassword:"",currentPassword:"",requestResponseMessage:""
+
+                }
+              )
+          },200)
+        }
 
 
 
