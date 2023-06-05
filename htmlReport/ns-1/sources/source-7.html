@@ -1,0 +1,103 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > RolesRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.Tour.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: RolesRepository (com.Tour.repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RolesRepository</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.Tour.repository;
+&nbsp;
+&nbsp;import com.Tour.model.Role;
+&nbsp;import com.Tour.model.UserRole;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Modifying;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface RolesRepository  extends JpaRepository&lt;Role, Integer&gt; {
+&nbsp;
+&nbsp;    @Query(&quot;select r from Role r left join fetch r.permissions where r.name=:role&quot;)
+&nbsp;    Role getRole(UserRole role);
+&nbsp;    @Query(&quot;select r from Role r left join fetch r.permissions where r.id=:id&quot;)
+&nbsp;    Role getRole(long id);
+&nbsp;    @Query(&quot;select r from  Role r left join fetch r.permissions&quot;)
+&nbsp;    List&lt;Role&gt; getRoles(UserRole role);
+&nbsp;
+&nbsp;    @Query(&quot;select r from Role r join fetch r.permissions p where p.id=:permissionId&quot;)
+&nbsp;    List&lt;Role&gt; getRolesByPermission(long permissionId);
+&nbsp;    @Query(&quot;select r from Role r join fetch r.permissions p where r.id=:roleId and p.id=:permissionId&quot;)
+&nbsp;    Role getRole(long roleId, long permissionId);
+&nbsp;    @Modifying
+&nbsp;    @Query(&quot;delete from Role r where r.name=:role&quot;)
+&nbsp;    void deleteRole(String role);
+&nbsp;
+&nbsp;    @Modifying
+&nbsp;    @Query(value = &quot;delete from Role_Permission as rp where rp.role_id=:roleId and rp.permission_id=:permissionId&quot;,
+&nbsp;            nativeQuery = true)
+&nbsp;    void deletePermissionFromRole(long roleId, long permissionId);
+&nbsp;    @Query(&quot;select r from Role r inner join fetch r.permissions p&quot;)
+&nbsp;    Set&lt;Role&gt; findAllRoles();
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-08 15:30</div>
+</div>
+</body>
+</html>

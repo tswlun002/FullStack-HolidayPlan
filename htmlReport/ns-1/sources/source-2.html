@@ -1,0 +1,95 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TokenRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.Tour.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: TokenRepository (com.Tour.repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">TokenRepository</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.Tour.repository;
+&nbsp;
+&nbsp;import com.Tour.model.Token;
+&nbsp;import com.Tour.security.TokenType;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface TokenRepository  extends JpaRepository&lt;Token, Long&gt; {
+&nbsp;    @Query(&quot;select t from Token t join fetch t.user &quot; +
+&nbsp;            &quot;where t.token=:token and (t.expired=false or t.revoked=false)&quot;)
+&nbsp;    List&lt;Token&gt; findValidByToken(String token);
+&nbsp;
+&nbsp;    @Query(&quot;select t from Token t join fetch t.user u &quot; +
+&nbsp;            &quot;where u.id=:userId and (t.revoked=false or t.expired=false ) and t.tokenType=:tokenType&quot;)
+&nbsp;    List&lt;Token&gt; findValidByTokenByUser(long userId, TokenType tokenType);
+&nbsp;
+&nbsp;    @Query(&quot;select t from Token t join fetch t.user u &quot; +
+&nbsp;            &quot;where u.id=:userId and t.tokenType=:tokenType&quot;)
+&nbsp;    List&lt;Token&gt; findAllByTokenByUser(long userId, TokenType tokenType);
+&nbsp;
+&nbsp;    @Query(&quot;select t from Token t join fetch t.user &quot; +
+&nbsp;            &quot;where t.token=:token&quot;)
+&nbsp;    Optional&lt;Token&gt; findByToken(String token);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-08 15:30</div>
+</div>
+</body>
+</html>
