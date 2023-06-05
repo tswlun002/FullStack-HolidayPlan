@@ -5,24 +5,13 @@ import com.Tour.model.UserQuery;
 
 
 import java.util.List;
-import java.util.Optional;
 
 public interface OnUserQuery {
 
+    List<UserQuery> findByUsername(String username);
 
-
-    Optional<UserQuery> findById(long id);
-
-    Optional<UserQuery> findByIdAndUserId(long id, long userId);
-
-
-    List<UserQuery> findByUserId(long userId);
-
-
-    List<UserQuery> findAllUserQueryByUserAndQueryStatus(long userId,      QueryStatus queryStatus);
-
-    List<UserQuery> findAllUserQueryByQueryStatus(QueryStatus queryStatus);
-    Optional<UserQuery>findAllUserQueryByUser(long queryId,long userId, QueryStatus queryStatus);
-
+    List<UserQuery> findQueryByStatus(QueryStatus queryStatus);
     List<UserQuery> findByAllQuery();
+
+    List<UserQuery> getQueryByUserAndStatus(String username, QueryStatus queryStatus);
 }

@@ -25,14 +25,11 @@ public class UserQuery {
     @NonNull
     @Column(name = "query_description", nullable = false,length = 3072)
     private String queryDescription;
-    @NonNull
     @Column(name = "user_type")
     @Enumerated(EnumType.STRING)
     private QueryStatus queryStatus = QueryStatus.ACTIVE;
     @Column(length = 3072)
     private String response;
-
-    @NonNull
     @Setter(value = AccessLevel.PRIVATE)
     private LocalDateTime localDateTime = LocalDateTime.now();
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,18 +1,15 @@
 package com.Tour.service;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import com.Tour.dto.UserEvent;
+import lombok.NonNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
-@Data
 @Service
-public class QueryEventListeners {
-    private  final  QueryService queryService;
+public record QueryEventListeners(QueryService queryService) {
    @EventListener
-   public  void onDeleteUser(QueryEvent queryEvent){
-       queryService.deleteUserQueries(queryEvent.user());
+   public  void deleteUser(@NonNull UserEvent event){
+       queryService.deleteUserQueries(event.user());
    }
 
 }

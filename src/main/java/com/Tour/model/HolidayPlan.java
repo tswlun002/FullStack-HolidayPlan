@@ -1,9 +1,5 @@
 package com.Tour.model;
-
-
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,9 +8,8 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
+
 
 @Entity
 @NoArgsConstructor
@@ -44,8 +39,7 @@ public class HolidayPlan {
     @Column(name = "end_date", nullable = false)
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date startDate;
-    @NonNull
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date endDate;
     @NonNull
@@ -58,16 +52,12 @@ public class HolidayPlan {
     @NotEmpty(message = "description is required")
     @Size(min = 10, max = 1000, message = "description must contain 10 to 50 characters.")
     private String description;
-
-    /*@JsonManagedReference
-    @OneToMany(mappedBy = "holidayPlan", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private Set<HolidayLocationImages> images = new HashSet<>();*/
     @NonNull
     @Column(name = "priority_level", nullable = false)
     private int priorityLevel;
-
+    @NonNull
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
-    @JoinColumn(name = "tourist_id")
+    @JoinColumn(name = "tourist_id", nullable = false)
     private User user;
     public Long getId() {
         return id;

@@ -1,6 +1,8 @@
 package com.Tour.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.checkerframework.common.aliasing.qual.Unique;
 import org.hibernate.annotations.GenericGenerator;
@@ -24,10 +26,10 @@ public class Permission  implements  Comparable<Permission>{
     @Column(name = "id", nullable = false)
     private Long id;
     @NonNull @Unique
-    @Column(name = "user_permission",unique = true)
-    @Enumerated(EnumType.STRING)
-    private UserPermission name;
-
+    @Size(min = 3, message = "Permission name must be 3 letters minimum")
+    @NotBlank(message = "Permission name cannot be blank")
+    @Column(name = "user_permission",unique = true, nullable = false)
+    private String name;
     public Long getId() {
         return id;
     }

@@ -14,7 +14,6 @@ import java.util.Set;
 public interface HolidayImagesRepository extends JpaRepository<HolidayLocationImages, Long> {
     @Query("select h from  HolidayLocationImages h  join fetch h.holidayPlan hp where hp.id=:holidayId")
     Set<HolidayLocationImages> findByHolidayId(long holidayId);
-
     @Modifying
     @Transactional
     @Query(value = "delete h from HolidayPlanImages as h where h.holidayPlan_id=:holidayPlanId", nativeQuery = true)

@@ -1,58 +1,53 @@
 package com.Tour.controller;
 
+import com.Tour.dto.RegisterUserRequest;
 import com.Tour.exception.CatchException;
-import com.Tour.exception.InvalidCredentials;
 import com.Tour.exception.NotFoundException;
 import com.Tour.model.User;
-import com.Tour.model.UserRole;
-import com.Tour.model.UserType;
+import com.Tour.dto.UserResponseToAdmin;
 import com.Tour.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin( origins = "*")
 @RequestMapping("/holiday-plan/api/admin/")
+@AllArgsConstructor
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
     @PostMapping(value="user/save/",consumes = {"application/json"})
-    public ResponseEntity<Boolean> saveAdmin(@RequestBody @Validated RegisterUserRequest request){
-        boolean saved =false;
-        var type = getType(request.usertype());
-        try {
+    public ResponseEntity<Boolean> saveAdmin(@RequestBody @Validated @NonNull RegisterUserRequest request){
+
             var user  = User.builder().firstname(request.firstname()).lastname(request.lastname())
                     .age(request.age()).username(request.username()).password(request.password())
-                    .userType(type).roles(new HashSet<>()).build();
-
-            saved= userService.saveUser(user) ;
-        }
-        catch (Exception e){
-            CatchException.catchException(e);
-        }
+                   .roles(new HashSet<>()).build();
+        var    saved= userService.saveUser(user) ;
         return saved?
                 new ResponseEntity<>(true, HttpStatus.OK) :
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
-
-
     @GetMapping(path="users/")
-    public ResponseEntity<Set<User>> getAllUsers(){
-        var users = userService.getUsers();
-
+    public ResponseEntity<Set<UserResponseToAdmin>> getAllUsersByAdmin(){
+        System.out.println("Username: "+userService.getLoginedUser());
+        var users = userService.getUsers()
+                .stream().map(user-> UserResponseToAdmin.builder().age(user.getAge())
+                        .username(user.getUsername()).lastname(user.getLastname())
+                        .firstname(user.getFirstname()).roles(user.getRoles()).permissions(user.getPermissions()).build())
+                .collect(Collectors.toSet());
         if(users.size()==0)throw new NotFoundException("User(s) is not found");
         return  new ResponseEntity<>(users,HttpStatus.OK);
     }
 
 
-    @GetMapping(path = "user-details/")
+    @GetMapping(path = "user/details/")
     public ResponseEntity<User> getMyDetails()  {
 
         User user =  userService.getLoginedUser();
@@ -61,7 +56,7 @@ public class AdminController {
         return  new ResponseEntity<>(user, HttpStatus.FOUND);
 
     }
-    @GetMapping(path = "user-name/{userName}")
+    @GetMapping(path = "username/{userName}")
     public ResponseEntity<User> get(@PathVariable("userName") String userName) throws NotFoundException {
         User user =  userService.getUser(userName);
         if(user ==null)throw  new NotFoundException("User is not found");
@@ -70,39 +65,20 @@ public class AdminController {
     }
     @PatchMapping(value = "add/role/")
     public ResponseEntity<Boolean> addNewRoleToUser(
-            @RequestParam UserRole userRole, @RequestParam  String userName){
-        return  userService.addNewRoleToUser(userRole,userName)?
+            @RequestParam String roleName, @RequestParam  String username){
+        return  userService.addNewRoleToUser(username, roleName)?
                 new ResponseEntity<>(true, HttpStatus.OK):
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
-    private  UserRole getRole(String userRole){
-        UserRole role ;
-        try{
-            role = UserRole.valueOf(userRole.trim().toUpperCase());
-        }catch (IllegalArgumentException e){
-            throw  new InvalidCredentials("Invalid user role "+e.getMessage().substring(e.getMessage().lastIndexOf(".")+1)
-                    .toLowerCase());
-        }
-        return role;
-    }
-    private  UserType getType(String userType){
-        UserType type ;
-        try{
-            type = UserType.valueOf(userType.trim().toUpperCase());
-        }catch (IllegalArgumentException e){
-            throw  new InvalidCredentials("Invalid user role "+e.getMessage().substring(e.getMessage().lastIndexOf(".")+1)
-                    .toLowerCase());
-        }
-        return type;
-    }
-    @DeleteMapping(value = "/delete-role-from-user/")
+
+    @DeleteMapping(value = "/delete/user/")
     public ResponseEntity<Boolean>   deleteRoleFromUser(@RequestParam String userName, @RequestParam String userRole){
-       var role = getRole(userRole);
-        return  userService.deleteRoleFromUser(userName,role)?
+
+        return  userService.deleteRoleFromUser(userName,userRole)?
                 new ResponseEntity<>(true, HttpStatus.OK):
                 new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }
-    @DeleteMapping("delete-user/{userName}" )
+    @DeleteMapping("delete/user/{userName}" )
     public  ResponseEntity<Boolean> delete(@PathVariable String userName){
         boolean deleted= userService.deleteUser(userName);
         if(deleted)return  new ResponseEntity<>(true, HttpStatus.OK);

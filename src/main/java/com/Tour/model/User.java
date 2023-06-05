@@ -5,6 +5,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -13,20 +15,21 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
-@Entity(name = "User")
+@Entity
 @Getter
 @Setter
 @ToString
 @Builder
-public class User   {
+@Table(name = "Users")
+public class User{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GenericGenerator(name="cmrSeq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+            parameters = {
+                    @org.hibernate.annotations.Parameter(name = "sequence_ID", value = "SEQUENCE")}
+    )
+    @GeneratedValue(generator = "sequence_ID")
     @Column(name = "id", nullable = false)
     private Long id;
-    @NonNull
-    @Column(name = "user_type")
-    @Enumerated(EnumType.STRING)
-    private UserType userType;
     @NonNull
     @Column(name = "user_name", nullable = false,unique = true)
     private  String username;
@@ -36,16 +39,25 @@ public class User   {
     @Column(name = "last_name" ,nullable=false)
     private String lastname;
      @NonNull
-     @Column(nullable = false,unique = true)
+     @Column(nullable = false)
     private  String password;
-    @NonNull
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "User_Role",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
-    private Set<Role> roles = new HashSet<>();
+    @Builder.Default
+    private Set<Role> roles =new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "User_Permission",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "permission_id")}
+    )
+    @Builder.Default
+    private Set<Permission> permissions =new HashSet<>();
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date age;
     public void setId(Long id) {
@@ -64,8 +76,5 @@ public class User   {
         return getClass().hashCode();
     }
 
-   @PostConstruct
-    void toUpper(){
-        userType =UserType.valueOf(userType.name().toUpperCase());
-   }
+
 }

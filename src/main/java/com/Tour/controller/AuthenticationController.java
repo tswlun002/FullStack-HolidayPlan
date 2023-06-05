@@ -1,38 +1,38 @@
 package com.Tour.controller;
 
+import com.Tour.dto.RegisterUserRequest;
+import com.Tour.model.User;
 import com.Tour.security.AuthenticationResponse;
 import com.Tour.service.AuthenticationService;
+import com.Tour.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @CrossOrigin( origins = "*")
 @RequestMapping("/holiday-plan/api/authenticate/")
+@AllArgsConstructor
 public class AuthenticationController {
 
-   @Autowired
-   private AuthenticationService authenticationService;
 
-
-
-    @GetMapping(value = "refresh/")
+   private final AuthenticationService authenticationService;
+   private  final UserService userService;
+    @GetMapping(value = "token/refresh/")
     public void refreshToken(HttpServletRequest request,
                                              HttpServletResponse response ) throws IOException {
 
-      System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
       var token= authenticationService.refreshToken(request);
       AuthenticationResponse responseMessage= new AuthenticationResponse(new HashMap<>());
       if(token!=null) {
@@ -46,5 +46,15 @@ public class AuthenticationController {
       }
       response.setContentType(APPLICATION_JSON_VALUE);
       new ObjectMapper().writeValue(response.getOutputStream(), responseMessage);
+    }
+    @PostMapping(value="user/save/",consumes = {"application/json"})
+    public ResponseEntity<Boolean> save(@RequestBody  @Validated RegisterUserRequest request){
+        var user  = User.builder().firstname(request.firstname()).lastname(request.lastname())
+                .age(request.age()).username(request.username()).password(request.password())
+                .roles(new HashSet<>()).build();
+        var saved= userService.saveUser(user) ;
+        return saved?
+                new ResponseEntity<>(true, HttpStatus.OK) :
+                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
 }

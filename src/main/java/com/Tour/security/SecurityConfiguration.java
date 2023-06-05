@@ -2,6 +2,7 @@ package com.Tour.security;
 
 import com.Tour.service.JwtService;
 import com.Tour.service.TokenService;
+import com.Tour.utils.Roles;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import static com.Tour.utils.Permissions.*;
 
-import static com.Tour.model.UserPermission.*;
-import static com.Tour.model.UserType.ADMIN;
 
 @EnableWebSecurity
 @Configuration
@@ -62,7 +62,7 @@ public class SecurityConfiguration {
                        .requestMatchers(HttpMethod.POST,SECURED_URLS_EDIT_USER_HOLIDAY).permitAll()
 
                        //.requestMatchers("/holiday-plan/api/admin/user/save/").permitAll()
-                       .requestMatchers(SECURED_URLS_ADMIN).hasRole(ADMIN.name())
+                       .requestMatchers(SECURED_URLS_ADMIN).hasRole(Roles.ADMIN.name())
                        .requestMatchers(HttpMethod.DELETE,SECURED_URLS_EDIT_USER).hasAuthority(USER_WRITE.name())
                        .requestMatchers(HttpMethod.PUT,SECURED_URLS_EDIT_USER).hasAuthority(USER_WRITE.name())
                        .requestMatchers(HttpMethod.PATCH,SECURED_URLS_EDIT_USER).hasAuthority(USER_WRITE.name())
@@ -106,7 +106,6 @@ public class SecurityConfiguration {
 
    }
 
-
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return  new BCryptPasswordEncoder();
@@ -116,5 +115,6 @@ public class SecurityConfiguration {
     public AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
 
 }

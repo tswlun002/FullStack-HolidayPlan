@@ -43,7 +43,6 @@ public class AuthenticationService {
            if (user == null) throw new NotFoundException("User not found");
            access_token = jwtService.generateAccessToken(user);
            if(!tokenService.revokeAllUserToken(user, ACCESS_TOKEN)) throw  new RuntimeException("Not all token are revoked");
-           System.out.println("TOKEN -------------------- "+access_token);
            saveUserToken(user,access_token);
 
        }catch (Exception e){

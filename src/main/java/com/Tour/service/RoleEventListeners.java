@@ -1,19 +1,12 @@
 package com.Tour.service;
-
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import com.Tour.dto.PermissionEvent;
+import lombok.NonNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-
-@RequiredArgsConstructor
-@Data
 @Service
-public class RoleEventListeners {
-    private  final  UserService userService;
+public record RoleEventListeners(RoleService service) {
     @EventListener
-    public  void deleteRoleFromUser(RoleEvent event){
-       userService.deleteRoleFromUser(event.role());
+    public  void deletePermissionFromRole(@NonNull PermissionEvent event){
+       service.deletePermissionFromRoles(event.permission());
     }
-
-
 }

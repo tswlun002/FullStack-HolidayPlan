@@ -1,7 +1,7 @@
 package com.Tour.repository;
 
 import com.Tour.model.Permission;
-import com.Tour.model.UserPermission;
+import com.Tour.utils.Permissions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import static com.Tour.model.UserPermission.*;
+import static com.Tour.utils.Permissions.*;
 @DataJpaTest
 class PermissionRepositoryTest {
     @Autowired private PermissionRepository repository;
@@ -22,10 +22,10 @@ class PermissionRepositoryTest {
    Permission []permissionList;
     @BeforeEach
     void setUp() {
-         perm1 = Permission.builder().name(USER_WRITE).build();
-         perm2 = Permission.builder().name(UserPermission.USER_READ).build();
-        perm3 = Permission.builder().name(UserPermission.HOLIDAYPLAN_WRITE).build();
-        perm4 = Permission.builder().name(UserPermission.HOLIDAYPLAN_READ).build();
+         perm1 = Permission.builder().name(USER_WRITE.name()).build();
+         perm2 = Permission.builder().name(USER_READ.name()).build();
+        perm3 = Permission.builder().name(HOLIDAYPLAN_WRITE.name()).build();
+        perm4 = Permission.builder().name(HOLIDAYPLAN_READ.name()).build();
         repository.save(perm1);repository.save(perm2);repository.save(perm3);repository.save(perm4);
 
         permissionList = new Permission[]{perm1, perm2, perm3, perm4};
@@ -40,13 +40,13 @@ class PermissionRepositoryTest {
 
     @ParameterizedTest
     @CsvSource(delimiter = ':',value = {"0:USER_WRITE","1:USER_READ","2:HOLIDAYPLAN_WRITE","3:HOLIDAYPLAN_READ"})
-    void CheckFindPermissionByCorrectName(int index, UserPermission permission) {
+    void CheckFindPermissionByCorrectName(int index, String permission) {
         var expectedOutput  = index==0?perm1:index==1?perm2:index==2?perm3:perm4;
         Assertions.assertEquals(expectedOutput,repository.findByName(permission));
     }
     @ParameterizedTest
     @CsvSource(delimiter = ':',value = {"0:USER_WRITE","1:USER_READ","2:HOLIDAYPLAN_WRITE","3:HOLIDAYPLAN_READ"})
-    void CheckFindPermissionByNotCorrectName(int index, UserPermission permission) {
+    void CheckFindPermissionByNotCorrectName(int index, String permission) {
         var expectedOutput  = index==0?perm1:index==1?perm2:index==2?perm3:perm4;
         repository.delete(expectedOutput);
         Assertions.assertNull(repository.findByName(permission));
@@ -69,12 +69,12 @@ class PermissionRepositoryTest {
 
     @Test
     void deletePermission() {
-        var userPermissions = new UserPermission[]{USER_WRITE, USER_READ, HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ};
+        var userPermissions = new Permissions[]{USER_WRITE, USER_READ, HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ};
         int size  = repository.findAll().size();
         IntStream.range(0,userPermissions.length).forEach(index-> {
             var expectedOutput  = size-(index+1);
-            repository.deletePermission(userPermissions[index]);
-            Assertions.assertNull(repository.findByName(userPermissions[index]));
+            repository.deletePermission(userPermissions[index].name());
+            Assertions.assertNull(repository.findByName(userPermissions[index].name()));
             Assertions.assertEquals(expectedOutput, repository.findAll().size());
         });
         Assertions.assertEquals(0, repository.findAll().size());

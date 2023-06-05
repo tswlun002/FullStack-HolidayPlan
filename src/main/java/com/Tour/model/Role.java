@@ -1,5 +1,7 @@
 package com.Tour.model;
+import com.Tour.utils.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -14,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
+@Table(name = "Role")
 public class Role  {
 
     @Id
@@ -25,19 +28,17 @@ public class Role  {
     @Column(name = "id", nullable = false)
     private Long id;
     @NonNull
+    @Size(min =2, message = "Role name must be 3 letters minimum")
     @Column(name = "user_role", unique = true)
-    @Enumerated(EnumType.STRING)
-    private UserRole name;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private String name;
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "Role_Permission",
             joinColumns = {@JoinColumn(name = "role_id")},
             inverseJoinColumns = {@JoinColumn(name = "permission_id")}
     )
-
+     @Builder.Default
     private Set<Permission> permissions =  new HashSet<>();
-
-
     public Long getId() {
         return id;
     }
@@ -45,4 +46,5 @@ public class Role  {
     public void setId(Long id) {
         this.id = id;
     }
+
 }

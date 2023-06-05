@@ -2,79 +2,93 @@ package com.Tour.repository;
 
 import com.Tour.model.Permission;
 import com.Tour.model.Role;
-import com.Tour.model.UserPermission;
-import com.Tour.model.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import java.util.Collections;
-import java.util.List;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
-import static com.Tour.model.UserPermission.HOLIDAYPLAN_WRITE;
-import static com.Tour.model.UserPermission.USER_WRITE;
-import static com.Tour.model.UserRole.ADMIN;
-import static com.Tour.model.UserRole.USER;
+import static com.Tour.utils.Roles.ADMIN;
+import static com.Tour.utils.Roles.USER;
+import static com.Tour.utils.Permissions.*;
 
 
 @DataJpaTest
-
 class RolesRepositoryTest {
-
-
     @Autowired
     private RolesRepository repository;
     @Autowired
     private PermissionRepository permissionRe;
-    private Role role, role2;
-    Role[] roleList;
+    private Role role_user, role2_admin;
+    private Role[] roleList;
+    private  Set<Permission> permissionsSet ;
 
     @BeforeEach
     void setUp() {
+         MockitoAnnotations.openMocks(this);
+        role_user = Role.builder().name(USER.name()).build();
+        role2_admin = Role.builder().name(ADMIN.name()).build();
+        permissionsSet =new HashSet<>();
 
-        role = Role.builder().name(USER).build();
-        role2 = Role.builder().name(ADMIN).build();
+        Permission p1=Permission.builder().name(USER_WRITE.name()).build(),
+                p2= Permission.builder().name(USER_READ.name()).build(),
+               p3= Permission.builder().name(HOLIDAYPLAN_WRITE.name()).build(),
+               p4= Permission.builder().name(HOLIDAYPLAN_READ.name()).build();
 
-        repository.save(role);repository.save(role2);
 
-        roleList = new Role[]{role, role2};
+        permissionsSet.addAll(Set.of(p1,p2,p3,p4)
+
+         );
+         permissionRe.saveAll(permissionsSet);
+
+         role_user.getPermissions().addAll(permissionsSet);
+        role2_admin.getPermissions().addAll(Set.of(
+               p3,p4
+        ));
+
+        repository.save(role_user);
+        repository.save(role2_admin);
+
+        roleList = new Role[]{role_user, role2_admin};
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown(){
         repository.deleteAll();
-        role = role2 =null;
+        role_user = role2_admin =null;
+        permissionsSet.clear();
+        permissionsSet=null;
         roleList =null;
-
+        permissionRe.deleteAll();
     }
 
     @ParameterizedTest
     @CsvSource(delimiter = ':',value = {"0:USER" ,"1:ADMIN"})
-    void getRolesWithCorrectName(int index, UserRole userRole) {
-        var expectedOutput  = index==0?role:role2;
-        Assertions.assertEquals(expectedOutput,repository.getRole(userRole));
+    void getRolesWithCorrectName(int index, String role) {
+        var expectedOutput  = index==0? role_user : role2_admin;
+       Assertions.assertEquals(expectedOutput,repository.getRole(role));
     }
     @ParameterizedTest
     @CsvSource(delimiter = ':',value = {"0:USER" ,"1:ADMIN"})
-    void getRolesWithIncorrectName(int index,UserRole userRole) {
-
-        var role_  = index==0?role:role2;
-        repository.delete(role_);
-        Assertions.assertNull(repository.getRole(userRole));
-    }
-
-    @Test
-    void getRole() {
+    void getRolesWithNameDoesNotExist(int index, String role) {
+        var role_  = index==0? role_user : role2_admin;
+        role_.getPermissions().forEach(p->repository.deletePermissionFromRole(role_.getId(),p.getId()));
+        role_.getPermissions().clear();
+        permissionRe.deleteAll();
+        repository.deleteAll();
+        Assertions.assertNull(repository.getRole(role));
     }
 
     @ParameterizedTest
     @CsvSource(value = {"1","2"})
     void findByIdWithCorrectId(int index) {
-        var role_  = index==0?role:role2;
+        var role_  = index==0? role_user : role2_admin;
         Assertions.assertEquals(role_,repository.getRole(role_.getId()));
     }
     @ParameterizedTest
@@ -82,78 +96,78 @@ class RolesRepositoryTest {
     void findByIdWithIncorrectId(int id) {
         Assertions.assertNull(repository.getRole(id));
     }
-
+    @ParameterizedTest
+    @CsvSource(value = {"USER","ADMIN"})
+    void checkRoleExitsByCorrectName(String name){
+        Assertions.assertTrue(repository.checkRoleExitsByName(name));
+    }
+    @ParameterizedTest
+    @CsvSource(value = {"USER","ADMIN"})
+    void checkRoleExitsByIncorrectName(String name){
+        repository.deleteAll();
+        Assertions.assertFalse(repository.checkRoleExitsByName(name));
+    }
     @Test
-    void getRolesByPermissionWithCorrectPermissionId(){
-        var perm1 = Permission.builder().name(USER_WRITE).build();
-        var perm2 = Permission.builder().name(UserPermission.USER_READ).build();
-        var perm3 = Permission.builder().name(UserPermission.HOLIDAYPLAN_WRITE).build();
-        var perm4 = Permission.builder().name(UserPermission.HOLIDAYPLAN_READ).build();
-        permissionRe.save(perm1);
-        permissionRe.save(perm2);
-        permissionRe.save(perm3);
-        permissionRe.save(perm4);
-        role.setPermissions(Set.of(perm1,perm2,perm3,perm4));
-        role2.setPermissions(Set.of(perm1,perm2,perm4));
-        permissionRe.findAll().forEach(p-> {
-            System.out.println();
-            if(p.getName()==HOLIDAYPLAN_WRITE)Assertions.assertArrayEquals(new Role[]{role},
-                    repository.getRolesByPermission(p.getId()).toArray() );
-            else Assertions.assertArrayEquals(roleList,
-                    repository.getRolesByPermission(p.getId()).toArray() );
+    void getRolesByCorrectPermissionId(){
 
-        });
+        for(var permission : permissionsSet){
+            //If permission is user read|write, it will return 1 role else 2 roles
+            var expectedNumberRoles = (permission.getName().equals(USER_WRITE.name()) || permission.getName().equals(USER_READ.name())) ?1:2;
+            //expected role list
+            var expectedRolesList = (permission.getName().equals(USER_WRITE.name()) || permission.getName().equals(USER_READ.name())) ?
+                    new Role[]{role_user}:new Role[]{role2_admin, role_user};
 
+            var list =   repository.getRolesByPermission(permission.getName()).stream().sorted(
+                    Comparator.comparing(Role::getName)
+            ).toArray();
+            var size = list.length;
+            Assertions.assertArrayEquals(expectedRolesList,list);
+
+            Assertions.assertEquals(expectedNumberRoles, size);
+        }
     }
 
     @Test
-    void getRolesByPermissionWithInvalidPermissionId(){
-        var perm1 = Permission.builder().id(1L).name(USER_WRITE).build();
-        var perm2 = Permission.builder().id(2L).name(UserPermission.USER_READ).build();
-        var perm3 = Permission.builder().id(3L).name(UserPermission.HOLIDAYPLAN_WRITE).build();
-        var perm4 = Permission.builder().id(5L).name(UserPermission.HOLIDAYPLAN_READ).build();
+    void getRolesByPermissionIdThatDoesNotExits(){
+        permissionRe.deleteAll();
+       for(var r: roleList){
+            r.setPermissions(Set.of());
 
+        }
+        for(var permission : permissionsSet){
 
-        permissionRe.save(perm2);
-        permissionRe.save(perm3);
-        permissionRe.save(perm4);
+          var list =   repository.getRolesByPermission(permission.getName()).stream().sorted(
+                    Comparator.comparing(p -> p.getName())
+            ).toArray();
+            var size = list.length;
+            Assertions.assertArrayEquals(new Permission[]{},list);
 
-        List.of(perm1, perm2, perm3,perm4).forEach(p-> {
-            System.out.println(p);
-            Assertions.assertArrayEquals(Collections.EMPTY_SET.toArray(),
-                    repository.getRolesByPermission(perm1.getId()).toArray());
-        });
-
+            Assertions.assertEquals(0, size);
+        }
     }
 
     @Test
     void deletePermissionFromRoleWithValidPermissions() {
-        var perm1 = Permission.builder().name(USER_WRITE).build();
-        var perm2 = Permission.builder().name(UserPermission.USER_READ).build();
-        var perm3 = Permission.builder().name(UserPermission.HOLIDAYPLAN_WRITE).build();
-        var perm4 = Permission.builder().name(UserPermission.HOLIDAYPLAN_READ).build();
-        permissionRe.save(perm1);
-        permissionRe.save(perm2);
-        permissionRe.save(perm3);
-        permissionRe.save(perm4);
-        role.setPermissions(Set.of(perm1,perm2,perm3,perm4));
-        role2.setPermissions(Set.of(perm1,perm2,perm4));
-        permissionRe.findAll().forEach(p-> {
-            if(p.getName()==HOLIDAYPLAN_WRITE)
-                repository.deletePermissionFromRole(role.getId(),p.getId() );
-            else {
-                repository.deletePermissionFromRole(role.getId(),p.getId());
-                repository.deletePermissionFromRole(role2.getId(), p.getId());
-            }
-            Assertions.assertArrayEquals(Collections.EMPTY_SET.toArray(),
-                    repository.getRolesByPermission(p.getId()).toArray());
-            System.out.println(role);
-
-        });
+        var p1= permissionsSet.stream().filter(p->p.getName().equals(USER_WRITE.name())).toList().get(0);
+        var p2= permissionsSet.stream().filter(p->p.getName().equals(HOLIDAYPLAN_READ.name())).toList().get(0);
+         var deletedPermission_1 =repository.deletePermissionFromRole(roleList[0].getId(),p1.getId());
+        var deletedPermission_2 =repository.deletePermissionFromRole(roleList[1].getId(),p2.getId());
+        Assertions.assertEquals(1,deletedPermission_1);
+        Assertions.assertEquals(1,deletedPermission_2);
 
     }
-
     @Test
-    void deleteRole() {
+    void deletePermissionFromRoleWithInValidPermissions() {
+        var p1= permissionsSet.stream().filter(p->p.getName().equals(USER_WRITE.name())).toList().get(0);
+        var p2= permissionsSet.stream().filter(p->p.getName().equals(HOLIDAYPLAN_READ.name())).toList().get(0);
+        var deletedPermission_1 =repository.deletePermissionFromRole(-100,p1.getId());
+        var deletedPermission_2 =repository.deletePermissionFromRole(700,p2.getId());
+        var deletedPermission_3 =repository.deletePermissionFromRole(roleList[0].getId(),1000);
+        var deletedPermission_4 =repository.deletePermissionFromRole(roleList[1].getId(),-2);
+        Assertions.assertEquals(0,deletedPermission_1);
+        Assertions.assertEquals(0,deletedPermission_2);
+        Assertions.assertEquals(0,deletedPermission_3);
+        Assertions.assertEquals(0,deletedPermission_4);
+
     }
 }

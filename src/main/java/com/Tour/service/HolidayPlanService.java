@@ -1,96 +1,67 @@
 package com.Tour.service;
 
+import com.Tour.dto.HolidayPlaDTO;
 import com.Tour.exception.CatchException;
 import com.Tour.model.HolidayLocationImages;
 import com.Tour.model.HolidayPlan;
 import com.Tour.model.User;
 import com.Tour.repository.HolidayImagesRepository;
 import com.Tour.repository.HolidayPlanRepository;
-import jakarta.validation.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.Part;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.IntStream;
-
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+@AllArgsConstructor
 @Service
 public class HolidayPlanService  implements  OnHolidayPlan{
-     @Autowired
-     private OnUser onUser;
-    @Autowired
-    private HolidayPlanRepository holidayPlanRepository;
-    @Autowired
-    private HolidayImagesRepository imagesRepository;
-
+    private final OnUser onUser;
+    private final HolidayPlanRepository holidayPlanRepository;
+    private final HolidayImagesRepository imagesRepository;
 
     @Override
-    public boolean saveHolidayPlan(HolidayPlaDTO dto, MultipartFile [] images) {
-        var saved =false;
+    public boolean saveHolidayPlan(HolidayPlaDTO dto, List<Part> images) {
+
         var user  = onUser.getLoginedUser();
        var holidayPlan = HolidayPlan.builder().event(dto.event()).description(dto.description())
-                .endDate(dto.endDate()).startDate(dto.startDate()).priorityLevel(Integer.parseInt(dto.priorityLevel().trim())).city(dto.city())
+                .endDate(dto.endDate()).startDate(dto.startDate()).priorityLevel
+                       (Integer.parseInt(dto.priorityLevel().trim())).city(dto.city())
                 .location(dto.location()).user(user).build();
-        System.out.println(holidayPlan);
-        System.out.println(holidayPlan);
         if(holidayPlan==null) throw  new NullPointerException("Can not save null HolidayPlan");
-      try {
-
-           holidayPlan=holidayPlanRepository.save(holidayPlan);
-
-      }
-
-      catch (Exception e) {
-          CatchException.catchException(e);
-      }
-
-
+        try {
+               holidayPlan=holidayPlanRepository.save(holidayPlan);
+        }
+        catch (Exception e) {
+              CatchException.catchException(e);
+        }
         return saveImages(images,holidayPlan);
     }
 
-    private  boolean saveImages(MultipartFile[] images, HolidayPlan holidayPlan){
+    private  boolean saveImages(List<Part> images, HolidayPlan holidayPlan){
         var saved =false;
         try {
              for(var file:images){
-
-
                 imagesRepository.save(
-                        HolidayLocationImages.builder().image(file.getBytes()).holidayPlan(holidayPlan)
-                                .name(file.getOriginalFilename()).imageType(file.getContentType()).build());
-
-                saved=true;
+                        HolidayLocationImages.builder().image(file.getInputStream().readAllBytes()).holidayPlan(holidayPlan)
+                                .name(file.getName()).imageType(file.getContentType()).build());
             }
+            saved=true;
         } catch (IOException e) {
-            System.out.println(e.getMessage());
             CatchException.catchException(e);
         }
         return  saved;
     }
 
-    public  Set<HolidayLocationImages>  holidayLocationImages(long holidayId){
+    public  Set<HolidayLocationImages> getHolidayPlanImages(long holidayId){
         return  imagesRepository.findByHolidayId(holidayId);
     }
     @Override
     public Set<HolidayPlan> getHolidayPlans() {
-        return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser());
+        return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser().getId());
     }
 
-    @Override
-    public Set<HolidayPlan> getHolidayPlan(String location, String city) {
-        return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser(),location,city);
-    }
-
-    @Override
-    public Set<HolidayPlan> getHolidayPlan(String location, String city, Date start_date) {
-        return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser(),location,city,start_date);
-    }
-
-    @Override
-    public Set<HolidayPlan> getHolidayPlan(String location, String city, Date start_date, Date end_date) {
-        return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser(),location,city,start_date,end_date);
-
-    }
    @Override
    public  HolidayPlan getHolidayPlan(User user, long id){
         return  holidayPlanRepository.getHolidayPlan(user,id);
@@ -99,40 +70,76 @@ public class HolidayPlanService  implements  OnHolidayPlan{
     public boolean deleteHolidayPlan(long holidayPlanId) {
         HolidayPlan holidayPlan =getHolidayPlan(onUser.getLoginedUser(),holidayPlanId);
         if(holidayPlan==null)throw  new NullPointerException("Can not delete null HolidayPlan");
+        var deleted =false;
         try {
-            var deletedRows = imagesRepository.deleteImageForHolidayPlan(holidayPlanId);
-            if(deletedRows>0 && deletedRows<=4) {
+
+            if( deleteImage(holidayPlanId)) {
                 holidayPlanRepository.delete(holidayPlan);
+                deleted=true;
             }
-            else{
-                return false;
-            }
+
         }catch (Exception e){
              CatchException.catchException(e);
         }
-         return true;
+         return deleted;
     }
   @Override
   public boolean deleteAllHolidayPlan(User user) {
          if(user ==null) throw  new NullPointerException("Can not delete HolidayPlan of null User");
+         AtomicBoolean deleted = new AtomicBoolean(false);
          try {
-             holidayPlanRepository.deleteAll(getHolidayPlans());
+             var holidays  = getHolidayPlans(user.getId());
+             System.out.println(holidays.size());
+             holidays.forEach(holidayPlan -> {
+
+                    if(deleteImage(holidayPlan.getId())) {
+                        holidayPlanRepository.delete(holidayPlan);
+                        deleted.set(true);
+                    }
+                    else throw  new RuntimeException("Failed to deleted all images");
+             });
+
          }catch (Exception e){
             CatchException.catchException(e);
-             return false;
+
          }
-         return true;
+         return deleted.get();
+    }
+
+    private Set<HolidayPlan> getHolidayPlans(Long id) {
+       return holidayPlanRepository.getHolidayPlan(id);
+    }
+
+    /**
+     * Delete the holidayPlan images using holidayPlan id
+     * @param holidayPlanId is long type id of the HolidayPlan
+     * @Return true if all images are deleted of the holiday
+     * @Return  false if failed to  delete all images
+     */
+    private boolean deleteImage(long holidayPlanId){
+        var deleted =false;
+        try{
+             var deletedRow =imagesRepository.deleteImageForHolidayPlan(holidayPlanId);
+            deleted  = deletedRow>0 && deletedRow<=4;
+        }catch (Exception e){
+            CatchException.catchException(e);
+        }
+        return  deleted;
     }
 
     @Override
     public boolean updateHolidayPlan(long holidayPlaId,int level) {
         HolidayPlan holidayPlan = getHolidayPlan(onUser.getLoginedUser(),holidayPlaId);
         if(holidayPlan==null) throw new NullPointerException("Can not update null HolidayPlan");
+        var updated=false;
         try{
             holidayPlan.setPriorityLevel(level);
             holidayPlanRepository.save(holidayPlan);
-        }catch (Exception e){CatchException.catchException(e);return false;}
-        return true;
+            updated=true;
+        }catch (Exception e){
+            CatchException.catchException(e);
+        }
+        return updated;
     }
 
 

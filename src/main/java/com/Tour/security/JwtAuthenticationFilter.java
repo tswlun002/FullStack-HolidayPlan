@@ -1,6 +1,5 @@
 package com.Tour.security;
 
-import com.Tour.exception.CatchException;
 import com.Tour.service.JwtService;
 import com.Tour.service.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
                 //if the token on the header and database is still valid, update security holder context
-                if(jwtService.isTokenValid(jwt,userDetails.getUser()) && isTokenValid){
+                if(jwtService.isTokenValid(jwt,userDetails.user()) && isTokenValid){
                     var authenticationToken =
                             new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

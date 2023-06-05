@@ -1,18 +1,14 @@
 package com.Tour.service;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import com.Tour.dto.UserEvent;
+import lombok.NonNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-
-@RequiredArgsConstructor
-@Data
 @Service
-public class TokenEventListeners {
-    private  final  TokenService tokenService;
+public record TokenEventListeners(TokenService tokenService){
    @EventListener
-   public  void onDeleteUser(TokenEvent tokenEvent){
-       tokenService.deleteAllToken(tokenEvent.user());
+   public  void deleteUser(@NonNull UserEvent event){
+       tokenService.deleteAllToken(event.user());
    }
 
 }

@@ -1,4 +1,5 @@
 package com.Tour.service;
+import com.Tour.dto.UserResponseToAdmin;
 import com.Tour.exception.*;
 import com.Tour.model.User;
 import io.jsonwebtoken.Claims;
@@ -52,7 +53,9 @@ public class JwtService {
     }
     private void getExtraClaims(Map<String, Object> extraClaims, User user){
         extraClaims.put("user",
-                new UserDTO(user.getFirstname(),user.getLastname(),user.getAge(),user.getUsername(),user.getUserType()));
+                UserResponseToAdmin.builder().age(user.getAge())
+                        .username(user.getUsername()).lastname(user.getLastname())
+                        .firstname(user.getFirstname()).roles(user.getRoles()).permissions(user.getPermissions()).build());
     }
     public String generateRefreshToken(Map<String, Object> extraClaims, User user) {
         if(user==null)throw new NullException("User is invalid");

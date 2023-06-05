@@ -1,18 +1,14 @@
 package com.Tour.service;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import com.Tour.dto.UserEvent;
+import lombok.NonNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-
-@RequiredArgsConstructor
-@Data
 @Service
-public class HolidayPlanEventListeners {
-    private  final  HolidayPlanService holidayPlanService;
+public record HolidayPlanEventListeners(HolidayPlanService holidayPlanService){
    @EventListener
-   public  void onDeleteUser(HolidayPlanEvent holidayPlanEvent){
-       holidayPlanService.deleteAllHolidayPlan(holidayPlanEvent.user());
+   public  void deleteUser(@NonNull UserEvent event){
+       holidayPlanService.deleteAllHolidayPlan(event.user());
    }
 
 }

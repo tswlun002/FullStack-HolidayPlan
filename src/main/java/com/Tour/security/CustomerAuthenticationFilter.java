@@ -54,7 +54,7 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
                                             Authentication authResult) throws IOException, ServletException {
 
         var username=  authResult.getPrincipal().toString();
-        var user = userDetailsService.loadUserByUsername(username).getUser();
+        var user = userDetailsService.loadUserByUsername(username).user();
         var access_token  = jwtService.generateAccessToken(user);
         var refresh_token = jwtService.generateRefreshToken(user);
         tokenService.revokeAllUserToken(user,REFRESH_TOKEN);
@@ -73,7 +73,6 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         response.addCookie(cookie);
        response.setContentType(APPLICATION_JSON_VALUE);
        new ObjectMapper().writeValue(response.getOutputStream(),tokens);
-        System.out.println("customerjwtfilter **********************************************************************************");
 
     }
 

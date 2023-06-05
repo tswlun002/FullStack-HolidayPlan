@@ -3,16 +3,15 @@ package com.Tour.controller;
 import com.Tour.exception.ApplicationExceptionHandler;
 import com.Tour.exception.NotFoundException;
 import com.Tour.model.Role;
-import com.Tour.model.UserPermission;
-import com.Tour.model.UserRole;
+import com.Tour.utils.Roles;
 
 import com.Tour.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -21,7 +20,7 @@ import java.util.Set;
 public class RoleController  {
     @Autowired private RoleService service;
     @PostMapping(value = "save/")
-    public void saveRole(@RequestBody  Role role) {
+    public void saveRole(@RequestBody  @Validated Role role) {
         service.saveRole(role);
     }
     @GetMapping(value = "roles/")
@@ -34,37 +33,28 @@ public class RoleController  {
     public Role getRole(@PathVariable("id") long id) {
         return service.getRole(id);
     }
-    @GetMapping(value = "get/name/{userRole}")
-    public Role getRole(@PathVariable String userRole) {
-        return service.getRole(UserRole.valueOf(userRole.toUpperCase()));
+    @GetMapping(value = "get/name/{roleName}")
+    public Role getRole(@PathVariable String roleName) {
+        return service.getRole(roleName);
     }
     @PatchMapping(value = "add/permission/role/")
-    public ResponseEntity<Boolean> addNewPermissionToRole(@RequestParam UserRole userRole,
-                                                 @RequestParam UserPermission userPermission) throws NotFoundException{
-        boolean  added  = false;
-        try{
-            userPermission = UserPermission.valueOf(userPermission.name().toUpperCase());
-            userRole = UserRole.valueOf(userRole.name().toUpperCase());
-
-            service.addNewPermissionToRole(userRole,userPermission);
-            added=true;
-        }catch (Exception e){
-            ApplicationExceptionHandler.builder().build();
-        }
+    public ResponseEntity<Boolean> addNewPermissionToRole(@RequestParam String roleName,
+                                                 @RequestParam String permissionName){
+        var added= service.addNewPermissionToRole(roleName,permissionName);
         if(added) return  new ResponseEntity<>(true, HttpStatus.OK);
         else return  new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
 
     }
     @DeleteMapping(value = "delete/permission/role/")
     public ResponseEntity<Boolean>  deletePermissionFromRole(
-            @RequestParam UserRole userRole,@RequestParam UserPermission userPermission){
+            @RequestParam String roleName, @RequestParam String permissionName){
 
-            service.deletePermissionFromRole(userRole,userPermission);
+            service.deletePermissionFromRole(roleName,permissionName);
             return  new ResponseEntity<>(true, HttpStatus.OK);
     }
     @DeleteMapping(value = "delete/")
-    public ResponseEntity<Boolean>  deleteRole(@RequestParam("userRole") UserRole userRole) {
-        return  service.deleteRole(userRole)
+    public ResponseEntity<Boolean>  deleteRole(@RequestParam("roleName") String roleName) {
+        return  service.deleteRole(roleName)
                 ? new ResponseEntity<>(true, HttpStatus.OK):
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
