@@ -53,6 +53,15 @@ public class HolidayPlan {
     @Size(min = 10, max = 1000, message = "description must contain 10 to 50 characters.")
     private String description;
     @NonNull
+<<<<<<< HEAD
+=======
+    @NotBlank(message = "pictureLink is required")
+    @NotEmpty(message = "pictureLink is required")
+    @Size(min = 8, message = "picture_link is invalid.")
+    @Column(name = "picture_link", nullable = false, length = 3072)
+    private String pictureLink;
+    @NonNull
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
     @Column(name = "priority_level", nullable = false)
     private int priorityLevel;
     @NonNull

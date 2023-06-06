@@ -5,8 +5,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
+<<<<<<< HEAD
 import org.hibernate.annotations.GenericGenerator;
 
+=======
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -48,6 +51,7 @@ public class User{
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
+<<<<<<< HEAD
     @Builder.Default
     private Set<Role> roles =new HashSet<>();
     @ManyToMany(fetch = FetchType.LAZY)
@@ -58,6 +62,9 @@ public class User{
     )
     @Builder.Default
     private Set<Permission> permissions =new HashSet<>();
+=======
+    private Set<Role> roles = new HashSet<>();
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date age;
     public void setId(Long id) {

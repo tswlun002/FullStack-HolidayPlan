@@ -22,6 +22,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
     private final HolidayImagesRepository imagesRepository;
 
     @Override
+<<<<<<< HEAD
     public boolean saveHolidayPlan(HolidayPlaDTO dto, List<Part> images) {
 
         var user  = onUser.getLoginedUser();
@@ -29,6 +30,10 @@ public class HolidayPlanService  implements  OnHolidayPlan{
                 .endDate(dto.endDate()).startDate(dto.startDate()).priorityLevel
                        (Integer.parseInt(dto.priorityLevel().trim())).city(dto.city())
                 .location(dto.location()).user(user).build();
+=======
+    public boolean saveHolidayPlan(HolidayPlan holidayPlan) {
+        System.out.println(holidayPlan);
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
         if(holidayPlan==null) throw  new NullPointerException("Can not save null HolidayPlan");
         try {
                holidayPlan=holidayPlanRepository.save(holidayPlan);

@@ -45,7 +45,11 @@ public class JwtService {
         if(extraClaims!=null && extraClaims.isEmpty()){
             getExtraClaims(extraClaims, user);
         }
+<<<<<<< HEAD
         return  buildJwtToken(extraClaims,user, 15);
+=======
+        return  buildJwtToken(extraClaims,user, 30);
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
     }
     public String generateRefreshToken(User user) {
         if(user==null)throw new NullException("User is invalid");
@@ -53,9 +57,13 @@ public class JwtService {
     }
     private void getExtraClaims(Map<String, Object> extraClaims, User user){
         extraClaims.put("user",
+<<<<<<< HEAD
                 UserResponseToAdmin.builder().age(user.getAge())
                         .username(user.getUsername()).lastname(user.getLastname())
                         .firstname(user.getFirstname()).roles(user.getRoles()).permissions(user.getPermissions()).build());
+=======
+                new UserDTO(user.getFirstname(),user.getLastname(),user.getAge(),user.getUsername(),user.getUserType()));
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
     }
     public String generateRefreshToken(Map<String, Object> extraClaims, User user) {
         if(user==null)throw new NullException("User is invalid");

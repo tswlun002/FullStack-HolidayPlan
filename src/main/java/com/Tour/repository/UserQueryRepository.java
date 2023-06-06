@@ -16,6 +16,7 @@ public interface UserQueryRepository extends JpaRepository<UserQuery, Long> {
     Optional<UserQuery> findById(long id);
     @Query("select t from UserQuery t join fetch t.user u " +
             "where t.id=:id and user.id=:userId")
+<<<<<<< HEAD
     Optional<UserQuery> findByIdAndUserId(Long id,Long userId);
 
     @Query("select t from UserQuery t join fetch t.user u " +
@@ -23,13 +24,31 @@ public interface UserQueryRepository extends JpaRepository<UserQuery, Long> {
     List<UserQuery> findByusername(String username);
 
     @Query("select t from UserQuery t join fetch t.user u " +
+=======
+    Optional<UserQuery> findByIdAndUserId(long id,long userId);
+
+    @Query("select t from UserQuery t join fetch t.user u " +
+            "where u.id=:userId")
+    List<UserQuery> findByUserId(long userId);
+
+    @Query("select t from UserQuery t join fetch t.user u " +
+            "where u.id=:userId and t.queryStatus=:queryStatus")
+    List<UserQuery> findAllUserQueryByUserAndQueryStatus(long userId,      QueryStatus queryStatus);
+    @Query("select t from UserQuery t join fetch t.user u " +
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
             "where  t.queryStatus=:queryStatus")
     List<UserQuery> findAllUserQueryByQueryStatus(QueryStatus queryStatus);
     @Query("select t from Token t join fetch t.user " +
             "where t.token=:token")
     List<UserQuery> findByAllQuery();
+<<<<<<< HEAD
 
     @Query("select t from UserQuery t join fetch t.user u " +
             "where  u.username=:username  and t.queryStatus=:queryStatus")
     List<UserQuery> getQueryByUserAndStatus(String username, QueryStatus queryStatus);
+=======
+    @Query("select t from UserQuery t join fetch t.user u " +
+            "where t.id=:queryId and u.id=:userId  and t.queryStatus=:queryStatus")
+    Optional<UserQuery> findAllValidUserQueryByUser(long queryId, long userId, QueryStatus queryStatus);
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
 }

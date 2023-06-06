@@ -1,5 +1,6 @@
 package com.Tour.service;
 
+<<<<<<< HEAD
 import com.Tour.dto.UserEvent;
 import com.Tour.exception.AppInternalException;
 import com.Tour.exception.DuplicateException;
@@ -328,4 +329,33 @@ class UserServiceTest {
         assertThat(actual).isEqualTo(true);
     }
 
+=======
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class UserServiceTest {
+
+    @BeforeEach
+    void setUp() {
+    }
+
+    @AfterEach
+    void tearDown() {
+    }
+
+    @Test
+    void saveUser() {
+    }
+
+    @Test
+    void getUser() {
+    }
+
+    @Test
+    void testGetUser() {
+    }
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
 }

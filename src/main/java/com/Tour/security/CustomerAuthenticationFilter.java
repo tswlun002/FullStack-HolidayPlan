@@ -63,6 +63,7 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         saveUserToken(user, refresh_token,REFRESH_TOKEN);
         Map<String,String> tokens = new HashMap<>();
         tokens.put("access_token",access_token);
+<<<<<<< HEAD
 
         Cookie cookie = new Cookie("token", refresh_token);
         cookie.setMaxAge(24 * 60 * 60); // expires in 7 days
@@ -71,6 +72,9 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         cookie.setPath("/"); // global cookie accessible everywhere
         //add cookie to response
         response.addCookie(cookie);
+=======
+       response.addCookie(new Cookie("token", refresh_token));
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
        response.setContentType(APPLICATION_JSON_VALUE);
        new ObjectMapper().writeValue(response.getOutputStream(),tokens);
 

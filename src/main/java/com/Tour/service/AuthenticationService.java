@@ -31,12 +31,19 @@ public class AuthenticationService {
     }
     public String refreshToken(HttpServletRequest request){
 
+<<<<<<< HEAD
 
         var refresh_token = getRefreshFromCookie(request);
         if(refresh_token==null ) throw new InvalidCredentials("Credentials are not valid");
 
 
         String access_token = null;
+=======
+    public AuthenticationResponse refreshToken(String authHeader){
+        System.out.println(authHeader);
+        if(authHeader==null || !authHeader.startsWith("Bearer ")) throw new InvalidCredentials("Credentials are not valid");
+        AuthenticationResponse response= new AuthenticationResponse(new HashMap<>());
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
         try {
            String username = jwtService.extractUsername(refresh_token);
            User user = userService.getUser(username);

@@ -31,8 +31,66 @@ public class RoleService implements  OnRole{
      */
     @Override
     public void saveRole(Role role) {
+<<<<<<< HEAD
       if(role==null)throw  new NullException("Role is invalid");
       else if(exist(role.getName())) throw new DuplicateException("Role already exists");
+=======
+      if(role==null)throw  new NullPointerException("Can not save invalid role");
+      else if(exist(role)) throw new DuplicateException("Role already exists");
+      else {
+          try {
+
+              addDefaultPermission(role);
+              rolesRepository.save(role);
+
+          } catch (Exception e) {
+
+              catchException(e);
+          }
+
+
+      }
+
+    }
+
+    private  void addDefaultPermission(Role role){
+        if (role.getName() == UserRole.USER) {
+            addPermissions(role, Set.of(HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ));
+        } else if (role.getName() == UserRole.ADMIN) {
+            addPermissions(role, Set.of(HOLIDAYPLAN_WRITE, HOLIDAYPLAN_READ, USER_WRITE, USER_READ,QUERY_WRITE,QUERY_READ));
+        }
+    }
+
+    /**
+     * Add permission to role
+     * @param role to add permissions into
+     * @param permissions to be added to role
+     */
+   private  void addPermissions(Role role,Set<UserPermission>permissions){
+
+       for(UserPermission userPermission: permissions){
+           var permission = onPermission.getPermission(userPermission);
+           if(permission == null) throw  new NotFoundException("Permission is not found");
+           role.getPermissions().add(permission);
+       }
+   }
+
+
+
+    /**
+     * Invoke permission to update about the added role
+     * @param role being added
+     */
+   private  void publicRoleEvent(Role role){
+      publisher.publishEvent(new RoleEvent(role));
+
+   }
+   @Override
+  public boolean addNewPermissionToRole(UserRole userRole, UserPermission userPermission)  {
+       Role role = getRole(userRole);
+       if(role==null )throw  new NotFoundException("Role is not found");
+
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
       try {
           role.setName(role.getName().toUpperCase());
           rolesRepository.save(role);
@@ -121,8 +179,13 @@ public class RoleService implements  OnRole{
        var roles  = rolesRepository.getRolesByPermission(permission.getName());
        roles.forEach(
                role -> {
+<<<<<<< HEAD
                   var deleted= rolesRepository.deletePermissionFromRole(role.getId(), permission.getId());
                   if(deleted==1) updateRole(role);
+=======
+                   rolesRepository.deletePermissionFromRole(role.getId(), permission.getId());
+                   updateRole(role);
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
                }
        );
     }
@@ -147,10 +210,17 @@ public class RoleService implements  OnRole{
         if(permissions.get(0)==null)throw  new NotFoundException("Permission is not found");
         boolean deleted  =false;
         try {
+<<<<<<< HEAD
            deleted= rolesRepository.deletePermissionFromRole(role.getId(), permissions.get(0).getId())==1;
             if(deleted){
                 updateRole(role);
             }
+=======
+            rolesRepository.deletePermissionFromRole(role.getId(), permissions.get(0).getId());
+            updateRole(role);
+            deleted = true;
+
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
         } catch (Exception e) {
             catchException(e);
         }

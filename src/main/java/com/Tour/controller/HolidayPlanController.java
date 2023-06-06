@@ -43,9 +43,17 @@ public class HolidayPlanController {
 
     }
     @GetMapping(value = "holiday/holidays/")
+<<<<<<< HEAD
     public ResponseEntity<Set<HolidayPlanResponseDTO>> getHolidayPlans()  {
         var holidayPlans=  holidayPlanService.getHolidayPlans();
         if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan");
+=======
+    public ResponseEntity<Set<HolidayPlan>> getHolidayPlans()  {
+        var holidayPlans=  holidayPlanService.getHolidayPlans();
+        if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan");
+        HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("desc","HolidayPlans");
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
 
         var response =  holidayPlans.stream().map(hp->{
              var images  = holidayPlanService.getHolidayPlanImages(hp.getId());
@@ -67,7 +75,12 @@ public class HolidayPlanController {
     @PatchMapping("holiday/update/holiday-plan/")
     public  ResponseEntity<Boolean>  updateHolidayPlan(@RequestParam long holidayPlanId,@RequestParam int level){
         boolean updatedHolidayPlan= holidayPlanService.updateHolidayPlan( holidayPlanId,level);
+<<<<<<< HEAD
         if(updatedHolidayPlan) return  new ResponseEntity<>(true, OK);
         return  new ResponseEntity<>(false, NOT_ACCEPTABLE);
+=======
+        if(updatedHolidayPlan) return  new ResponseEntity<>(true,HttpStatus.OK);
+        return  new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
+>>>>>>> 7b2db3b323bebdbcb7585a6150e7667b7744d5e7
     }
 }

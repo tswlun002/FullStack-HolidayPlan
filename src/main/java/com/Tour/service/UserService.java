@@ -15,6 +15,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 import static com.Tour.utils.Permissions.*;
 
 @Service
+@RequiredArgsConstructor
 @RequiredArgsConstructor
 public class UserService implements OnUser {
     private final UserRepository userRepository;
@@ -375,6 +377,31 @@ public class UserService implements OnUser {
             CatchException.catchException(e);
         }
     }
+    interface  StringIsValid{
+        boolean isValid(String value);
+    }
+
+    public Optional<User> updateUserDetails(EditUserRequest user) {
+        if (user == null) throw new NullPointerException("User is invalid");
+        var user1 = getLoginedUser();
+        if (user1 == null) throw new NotFoundException("User is not found");
+
+        StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));
+
+        if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
+        if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
+        if(isValid.isValid(user.username()) ) user1.setUsername(user.username());
+        if(isValid.isValid(user.newPassword()) ) user1.setPassword(new BCryptPasswordEncoder().encode(user.newPassword()));
+
+        User updatedUser =null;
+        try {
+            updatedUser =
+                    userRepository.save(user1);
+        }
+         catch (DataIntegrityViolationException e){
+            CatchException.catchException(new DuplicateException("User with email already exist"));
+         }
+        catch (Exception e){
 
     /**
      * Delete permission from user
