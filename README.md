@@ -17,5 +17,5 @@ I use VS Code for ReactJS, use following commanand on VS Code terminal
 ```
  npm run build  # to compile/build
  npm start      # to run site  
- npm run clean  # To clean up enviroment
+ npm run eject  # To clean up enviroment
 ```
