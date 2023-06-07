@@ -21,7 +21,7 @@ export default function Permissions(){
         {
             permissionToadd:[]
         }
-    )
+    );
     const theme = useTheme();
     const small =useMediaQuery(theme.breakpoints.down('sm'));
     const [addPermission, setAddPermission] =  useState(false);
@@ -35,93 +35,81 @@ export default function Permissions(){
     );
 
     const useAxiosPrivate = UsePrivateAxios();
+    //Fetch all permissions from server	
     useEffect(()=>{
+	let isMounted = true;
+	const controller = new AbortController();
+	const API = '/holiday-plan/api/admin/permission/permissions/';
+	isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
+	.then(response => {
+		if(response.ok || response.status===200){
+			setPermissions({
+				listPermissions:response.data,
+				exceptionMessage:"Succefully fetched permissions"
+			});
+		}
+	})
+	.catch(err => {
 
-	    let isMounted = true;
-	    const controller = new AbortController();
-	    
-		const API = '/holiday-plan/api/admin/permission/permissions/';
-		isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
-		.then(response => {
-		    if(response.ok || response.status===200){
-		      setPermissions(
-		        {
-		          listPermissions:response.data,
-		          exceptionMessage:"Succefully fetched permissions"
-		        }
-		      );
+		if(!err?.response.ok){
+			const errorMessage  = getErrorMessage(err);
+			setPermissions({exceptionMessage:errorMessage});
+		}
+		else{
+			setPermissions({exceptionMessage:"Server Error"});
+		} 
+	});
+	return ()=>{isMounted=false; controller.abort();}
 
-		    }
-		})
-		.catch(err => {
-
-		    if(!err?.response.ok){
-		      const errorMessage  = getErrorMessage(err);
-		      setPermissions({exceptionMessage:errorMessage});
-		    }
-		    else{
-		      setPermissions({exceptionMessage:"Server Error"});
-		    } 
-              });
-	     return ()=>{isMounted=false; controller.abort();}
-
-   },[]);
-
+  },[]);
+  // Delete permissions 
    const deteletePermissions = async (permissionList)=>{
-      /* let  results =[]
-       for(let permissionToDelete of permissionList){
-            deletePermissionApi(permissionToDelete.name).
-            \
-                {
-                    console.log(resp);
-                    results.push(resp);
-                }
-           
-            console.log(JSON.stringify(results));
-           if(results.isRequestError){
-                results.message=`Failed to delete permission: ${permissionToDelete.name}`
-                break;
-           }
-       }
-       alert(JSON.stringify(results));
-       setResponse(results);*/
-       
+	let  results =null
+	let lastPermission=null;
+	for(let permissionToDelete of permissionList){
+		results= await deletePermissionApi(permissionToDelete.name);
+		lastPermission = permissionToDelete; 
+		if(results.isRequestError){
+			break;
+		}
+	}
+	if(results.isRequestError){
+		results.message=`Failed to delete permission: ${lastPermission.name}`;
+	}
+	alert(JSON.stringify(results));
+	setResponse(results);
    }
+  //Delete permission by name
    const deletePermissionApi  = (permissionName)=>{
     
 	const API = `/holiday-plan/api/admin/permission/delete/name/?permissionName=${permissionName}`;
 	const newRequestResponse ={isRequestSuccessful:false,isRequestError:false,message:""};
+	   
 	return useAxiosPrivate.delete(API)
 	.then(response => {
 
 	    if(response.ok || response.status===200){                
-            newRequestResponse.isRequestSuccessful=true;
-            newRequestResponse.isRequestError=false;
-            newRequestResponse.message="Succefully delete permission"
+		    newRequestResponse.isRequestSuccessful=true;
+		    newRequestResponse.isRequestError=false;
+		    newRequestResponse.message="Succefully delete permission"
 	   }
-	   console.log("*****************");
-	   console.log(newRequestResponse);
-	   console.log("*****************");
-	   	   
 	  return newRequestResponse;
 	})
 	.catch(err => {
 	    if(!err?.response.ok){
-            const errorMessage  = getErrorMessage(err);
-            newRequestResponse.isRequestSuccessful=false;
-            newRequestResponse.isRequestError=true;
-            newRequestResponse.message=errorMessage;
-	 
+		    const errorMessage  = getErrorMessage(err);
+		    newRequestResponse.isRequestSuccessful=false;
+		    newRequestResponse.isRequestError=true;
+		    newRequestResponse.message=errorMessage;
 	    }
 	    else{
-            newRequestResponse.isRequestSuccessful=false;
-            newRequestResponse.isRequestError=true;
-            newRequestResponse.message="Server Error";
+		    newRequestResponse.isRequestSuccessful=false;
+		    newRequestResponse.isRequestError=true;
+		    newRequestResponse.message="Server Error";
 	   } 
 	   return newRequestResponse;
 	});
-	console.log(newRequestResponse);
-	//return newRequestResponse;
+	
    }
            
     return (
