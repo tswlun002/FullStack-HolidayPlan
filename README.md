@@ -13,7 +13,7 @@ Or VS Code  but need to install  Java Development Kit (JDK), Extension Pack for 
 [see here](https://code.visualstudio.com/docs/java/java-spring-boot)
 
 ## Running Front-end
-I use VS Code for ReactJS, use following commanand on VS Code terminal
+I use VS Code for ReactJS, use following command on VS Code terminal
 ```
  npm run build  # to compile/build
  npm start      # to run site  
