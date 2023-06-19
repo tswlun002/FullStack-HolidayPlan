@@ -1,0 +1,59 @@
+version: "3"
+services:
+  # database
+  mysqldb:
+    image: mysql:${DATABASE_TAG}
+    container_name:  ${DATABASE_SERVICE}
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    networks:
+      - tour-server-net
+    environment:
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_ROOT_PASSWORD: ${PASSWORD}
+      MYSQL_PASSWORD: ${PASSWORD}
+    env_file:
+      - .env
+  # back-end 
+  tour-server:
+    image: tswlun002/tour-back-end:${SERVER_TAG}
+    container_name: ${SERVER_SERVICE}
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    networks:
+      - tour-server-net
+      - tour-client-net
+    restart: on-failure
+    env_file:
+      - .env
+    expose:
+     - ${SERVER_PORT}
+    environment:
+      HOST_API: ${BASE_URL}
+      DATABASE_PORT: ${DATABASE_PORT}
+      SPRING_DATASOURCE_USERNAME: ${TOUR_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      SPRING_DATASOURCE_URL: ${DATABASE_URL}
+    depends_on:
+      - mysqldb
+
+ # Frontend Service
+  tour-client:
+    container_name: ${CLIENT_SERVICE}
+    image: tswlun002/tour-front-end:${CLIENT_TAG}
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    expose:
+      - ${CLIENT_PORT}
+    depends_on:
+      - ${SERVER_SERVICE}
+    networks:
+      - tour-client-net
+    restart: on-failure
+    env_file:
+      - .env
+
+networks:
+  tour-server-net:
+  tour-client-net:

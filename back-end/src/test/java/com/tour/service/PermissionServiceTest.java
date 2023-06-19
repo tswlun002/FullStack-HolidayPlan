@@ -16,7 +16,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,9 +36,24 @@ class PermissionServiceTest {
     private PermissionRepository repository;
     @Mock
     private ApplicationEventPublisher publisher;
+
+    @Mock
+    private Environment environment;
     @BeforeEach
     void setUp() {
-        service =  new PermissionService(repository,publisher);
+
+        service =  new PermissionService(repository,publisher, environment);
+    }
+
+    @Test
+    void saveDefaultPermission(){
+        var permissionNames ="SOFTWARE_READ,SOFTWARE_WRITE";
+        var permission = Permission.builder().name("SOFTWARE_READ").build();
+        when(environment.getProperty("permission.default.names")).thenReturn(permissionNames);
+        when(repository.findByName(anyString())).thenReturn(permission);
+        service.saveDefaultPermission();
+        verify(environment,times(1)).getProperty("permission.default.names");
+        verify(repository, times(2)).findByName(anyString());
     }
 
 

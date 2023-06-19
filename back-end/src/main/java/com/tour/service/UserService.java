@@ -1,6 +1,7 @@
 package com.tour.service;
 
 import com.tour.dto.EditUserRequest;
+import com.tour.dto.RoleEvent;
 import com.tour.dto.UserEvent;
 import com.tour.exception.CatchException;
 import com.tour.exception.DuplicateException;
@@ -51,39 +52,20 @@ public class UserService implements OnUser {
         boolean saved = false;
         try {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            user.getRoles().addAll(defaultRoles());
+            var defaultRoleName = onRole.getNameDefaultRole();
+            var role  = onRole.getRole(defaultRoleName);
+            if(role==null) throw  new NotFoundException("Role is not found");
+            user.getRoles().add(role);
             userRepository.save(user);
             saved=true;
         }catch(Exception e){
+            System.out.println(e.getMessage());
             CatchException.catchException(e);
         }
         return saved;
     }
 
-    /**
-     * Get default roles
-     * @return set of default role
-     */
-    private  Set<Role> defaultRoles(){
-       return Stream.of(Roles.USER.name()).map(roleName->{
-           var role  = onRole.getRole(roleName);
-           if(role==null) throw  new NotFoundException("Cannot add permission on a null role");
-           role.setPermissions(defaultPermissions());
-           onRole.saveRole(role);
-           return  role;
-       }).collect(Collectors.toSet());
-    }
 
-    /**
-     * Get default permissions
-     * @return Set of permissions
-     */
-    private  Set<Permission> defaultPermissions(){
-        return Set.of(USER_WRITE.name(),USER_READ.name(),
-                QUERY_READ.name(),QUERY_WRITE.name()).stream().
-                map(onPermission::getPermission)
-                .collect(Collectors.toSet());
-    }
 
     /**
      * Retrieve all users

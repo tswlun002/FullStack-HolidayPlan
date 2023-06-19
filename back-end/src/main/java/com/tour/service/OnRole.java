@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Service
 public interface OnRole {
-
+    String getNameDefaultRole();
     void saveRole(Role role);
 
     Role getRole(long id);

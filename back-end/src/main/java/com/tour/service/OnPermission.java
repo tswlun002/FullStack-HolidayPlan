@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Service
 public interface OnPermission {
-
+    String[]  getNamesDefaultedPermission();
     void save(Permission permission);
 
     Permission getPermission(String userPermission);

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -30,15 +31,11 @@ public class SecurityConfiguration {
     private  final  String[] SECURED_URLS_EDIT_USER_HOLIDAY = {"/holiday-plan/api/holiday/**"};
     private  final  String[]  AUTHENTICATE_PATH={"/holiday-plan/api/authenticate/**","/holiday-plan/api/logout/"};
     private  final  String[] SECURE_QUERY_END_POINT ={"/holiday-plan/api/user-query/**"};
-    @Autowired
-    private CustomerAuthenticationProvider authenticationProvider;
-    @Autowired
-    private  CustomerUserDetailsService userDetailsService;
-
-
+    @Autowired @Lazy
+    private  CustomerAuthenticationProvider authenticationProvider;
+    private final CustomerUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private  final  LogoutService logoutHandler;
-
     private final JwtService jwtService;
     private final TokenService tokenService;
    private  final  AuthenticationConfiguration authenticationConfiguration;

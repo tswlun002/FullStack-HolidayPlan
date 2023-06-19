@@ -16,13 +16,19 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
+
 import java.sql.Date;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.tour.utils.Permissions.*;
 import static com.tour.utils.Roles.ADMIN;
-import static com.tour.utils.Roles.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +42,8 @@ class UserServiceTest {
      @Mock private  OnPermission permissionObj;
      @Mock private ApplicationEventPublisher publisher;
      @InjectMocks UserService service;
+     @Mock
+     private Environment environment;
 
     @BeforeEach
     void setUp() {
@@ -45,34 +53,31 @@ class UserServiceTest {
 
     @Test
     void saveUser() {
+        var ROLE_NAME ="SENIOR_SOFTWARE_DEVELOPER";
+        var PERMISSION_NAMES = "SOFTWARE_READ,SOFTWARE_WRITE".split(",");
+        var permissions = Arrays.stream(PERMISSION_NAMES).map(name->Permission.builder().name(name).build())
+                .collect(Collectors.toSet());
+        var role  = Role.builder().permissions(permissions).name(ROLE_NAME).build();
+       when(roleObj.getNameDefaultRole()).thenReturn(ROLE_NAME);
+        when(roleObj.getRole(ROLE_NAME)).thenReturn(role);
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
+        when(roleObj.getNameDefaultRole()).thenReturn(ROLE_NAME);
+
         when(repository.getUser(user.getUsername())).thenReturn(null);
-        when(roleObj.getRole(USER.name())).thenReturn(
-                Role.builder().name(USER.name()).build()
-        );
-        when(permissionObj.getPermission(USER_WRITE.name())).thenReturn(
-                Permission.builder().name(USER_WRITE.name()).build()
-        );
-        when(permissionObj.getPermission(USER_READ.name())).thenReturn(
-                Permission.builder().name(USER_READ.name()).build()
-        );
-        when(permissionObj.getPermission(QUERY_WRITE.name())).thenReturn(
-                Permission.builder().name(QUERY_WRITE.name()).build()
-        );
-        when(permissionObj.getPermission(QUERY_READ.name())).thenReturn(
-                Permission.builder().name(QUERY_READ.name()).build()
-        );
+
+        when(roleObj.getRole(ROLE_NAME)).thenReturn(role);
+
         var actual =service.saveUser(user);
         verify(repository,times(1)).getUser(user.getUsername());
         verify(repository, times(1)).save(user);
         var roles = user.getRoles();
-        var permissions  = ((Role)roles.toArray()[0]).
+        var permissions_out  = ((Role)roles.toArray()[0]).
                 getPermissions().stream().sorted(Comparator.comparing(Permission::getName)).toList();
         assertTrue(actual);
         assertThat(roles.size()).isEqualTo(1);
-        assertThat(permissions.size()).isEqualTo(4);
+        assertThat(permissions_out.size()).isEqualTo(permissions.size());
 
     }
     @Test

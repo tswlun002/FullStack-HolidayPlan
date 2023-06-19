@@ -31,9 +31,9 @@ public class Token {
     @GeneratedValue(generator = "sequence_ID")
     @Column(name = "id", nullable = false)
     private Long id;
-    @Size(min = 50, message="Token must be at least 20 characters")
-    @NotBlank(message = "Token is required. Token must be at least 20 characters")
-    @NotEmpty(message = "Token is required. Token must be at least 20 characters")
+    @Size(min = 50, message="Token must be at least 50 characters")
+    @NotBlank(message = "Token is required. Token must be at least 50 characters")
+    @NotEmpty(message = "Token is required. Token must be at least 50 characters")
     @NonNull
     @Column(unique = true, nullable = false,length = 1536, name = "token")
     @Unique
