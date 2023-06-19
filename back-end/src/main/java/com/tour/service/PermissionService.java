@@ -7,11 +7,14 @@ import com.tour.exception.NotFoundException;
 import com.tour.exception.NullException;
 import com.tour.model.Permission;
 import com.tour.repository.PermissionRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Set;
 @AllArgsConstructor
 @Service
@@ -20,7 +23,32 @@ public class PermissionService  implements  OnPermission{
     private final  PermissionRepository repository;
 
     private  final ApplicationEventPublisher publisher;
+    private final Environment environment;
 
+   @Override
+    public String[] getNamesDefaultedPermission(){
+        String names = environment.getProperty("permission.default.names");
+        if(names==null || names.trim().length()<=1) throw  new NullException("Invalid permission name");
+        return names.split(",");
+    }
+
+    /**
+     * Save default permission
+     */
+    @PostConstruct
+    protected void  saveDefaultPermission(){
+        String []nameList = getNamesDefaultedPermission();
+        try {
+            for (var name : nameList) {
+                if (getPermission(name) == null) {
+                    var permission = Permission.builder().name(name.toUpperCase()).build();
+                    repository.save(permission);
+                }
+            }
+        }catch (Exception e){
+            catchException(e);
+        }
+    }
     private  void catchException(Exception e){
         CatchException.catchException(e);
     }
@@ -44,6 +72,7 @@ public class PermissionService  implements  OnPermission{
                }
            }
     }
+
 
     /**
      * Check is permission exits

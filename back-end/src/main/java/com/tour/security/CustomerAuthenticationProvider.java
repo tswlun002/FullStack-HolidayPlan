@@ -1,6 +1,6 @@
 package com.tour.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,14 +8,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
+@AllArgsConstructor
 @Component
 public class CustomerAuthenticationProvider implements AuthenticationProvider {
-    @Autowired
-    private  CustomerUserDetailsService userDetailsService;
-
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private  final  CustomerUserDetailsService userDetailsService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 

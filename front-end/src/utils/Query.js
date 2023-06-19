@@ -104,9 +104,11 @@ export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=
 
 export const SendQueryResponse = (username, queryId,useAxiosPrivate,{response, queryStatus}, dispatchQuery)=>{
 
-  const API = `/holiday-plan/api/user-query/query/update/?username=${username}&queryId=${queryId}`;
+  const API =
+  `/holiday-plan/api/user-query/query/update/?
+  username=${username}&queryId=${queryId}&response={response}&queryStatus={queryStatus}`;
 
-  useAxiosPrivate.patch(API,{response, queryStatus})
+  useAxiosPrivate.patch(API)
   .then(response =>
       {
         if(response.ok || response.status===200){
