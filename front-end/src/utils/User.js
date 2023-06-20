@@ -112,7 +112,7 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword
    let isMounted = true;
    const controller = new AbortController();
   const username=email.replace('/','-');
-   const API = '/holiday-plan/api/user/update/user/';
+   const API = '/holiday-plan/api/user/update/';
    useAxiosPrivate.patch(API,{firstname,lastname,username,newPassword,currentPassword,signal:controller.signal})
    .then(response =>
        {

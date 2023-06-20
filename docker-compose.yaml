@@ -8,14 +8,21 @@ services:
       - ${DATABASE_PORT}:${DATABASE_PORT}
     networks:
       - tour-server-net
+    volumes:
+      - tour-storage:/var/lib/mysql
     environment:
       MYSQL_DATABASE: ${DATABASE_NAME}
       MYSQL_ROOT_PASSWORD: ${PASSWORD}
       MYSQL_PASSWORD: ${PASSWORD}
-    env_file:
-      - .env
+
   # back-end 
   tour-server:
+    build:
+      context: ./back-end
+      args:
+        - JWT_SIGNING_KEY=${JWT_SIGNING_KEY}
+        - DEFAULT_ROLE=${DEFAULT_ROLE}
+        - DEFAULT_PERMISSIONS=${DEFAULT_PERMISSIONS}
     image: tswlun002/tour-back-end:${SERVER_TAG}
     container_name: ${SERVER_SERVICE}
     ports:
@@ -24,8 +31,6 @@ services:
       - tour-server-net
       - tour-client-net
     restart: on-failure
-    env_file:
-      - .env
     expose:
      - ${SERVER_PORT}
     environment:
@@ -40,6 +45,8 @@ services:
 
  # Frontend Service
   tour-client:
+    build:
+      context: ./front-end
     container_name: ${CLIENT_SERVICE}
     image: tswlun002/tour-front-end:${CLIENT_TAG}
     ports:
@@ -51,9 +58,9 @@ services:
     networks:
       - tour-client-net
     restart: on-failure
-    env_file:
-      - .env
-
 networks:
   tour-server-net:
   tour-client-net:
+volumes:
+  tour-storage:
+
