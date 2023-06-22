@@ -37,6 +37,7 @@ public class RoleService implements  OnRole{
          String names = environment.getProperty("role.default.names");
          if(names==null)throw  new NullException("Invalid default role names ");
          return names.split(",");
+
      }
     /**
      * Save defaulted role
@@ -57,12 +58,9 @@ public class RoleService implements  OnRole{
         }
         catch(Exception e){
             CatchException.catchException(e);
+
         }
     }
-
-
-
-
     /**
      * Save role
      * @param role is the role to save

@@ -15,6 +15,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import java.sql.Date;
@@ -63,15 +65,11 @@ class UserServiceTest {
         var permissions = Arrays.stream(PERMISSION_NAMES).map(name->Permission.builder().name(name).build())
                 .collect(Collectors.toSet());
         var role  = Role.builder().permissions(permissions).name(ROLE_NAME).build();
-
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-
         when(repository.getUser(user.getUsername())).thenReturn(null);
-
         when(roleObj.getRole(anyString())).thenReturn(role);
-
         var actual =service.saveUser(user);
         verify(repository,times(1)).getUser(user.getUsername());
         verify(repository, times(1)).save(user);

@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import java.util.HashSet;
@@ -40,7 +41,6 @@ class PermissionServiceTest {
     private Environment environment;
     @BeforeEach
     void setUp() {
-
         service =  new PermissionService(repository,publisher, environment);
     }
 
@@ -56,18 +56,6 @@ class PermissionServiceTest {
     }
 
     @ParameterizedTest
-
-
-
-
-
-
-
-
-
-
-
-
     @ValueSource(strings = {"USER_WRITE","USER_READ", "QUERY_READ","HOLIDAY_READ"})
     void saveValidPermissions(String permissionName) {
         var permission = Permission.builder().name(permissionName).build();

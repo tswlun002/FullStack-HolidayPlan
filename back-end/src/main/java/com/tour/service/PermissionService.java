@@ -22,7 +22,6 @@ public class PermissionService  implements  OnPermission{
     private final  PermissionRepository repository;
     private  final ApplicationEventPublisher publisher;
     private final Environment environment;
-
     /**
      * Retrieve default permission names
      * @return array of string names
@@ -31,6 +30,7 @@ public class PermissionService  implements  OnPermission{
     public String[] getNamesDefaultedPermission(){
         String names = environment.getProperty("permission.default.names");
         if(names==null || names.trim().length()<=1) throw  new NullException("Invalid default permission name");
+
         return names.split(",");
     }
 

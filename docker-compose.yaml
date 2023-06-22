@@ -31,7 +31,6 @@ services:
       - tour-server-net
       - tour-client-net
     restart: on-failure
-
     expose:
      - ${SERVER_PORT}
     environment:
@@ -59,7 +58,6 @@ services:
     networks:
       - tour-client-net
     restart: on-failure
-
 networks:
   tour-server-net:
   tour-client-net:

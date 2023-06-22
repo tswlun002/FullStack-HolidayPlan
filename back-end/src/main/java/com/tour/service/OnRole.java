@@ -8,17 +8,13 @@ import java.util.Set;
 @Service
 public interface OnRole {
     String[] getNamesDefaultRoles();
-
     void saveRole(Role role);
-
     Role getRole(long id);
     Role getRole(String role);
     boolean deleteRole(String role);
     boolean addNewPermissionToRole(String role, String userPermission) throws NotFoundException;
-
     void deletePermissionFromRoles(Permission permission);
     boolean deletePermissionFromRole(String role, String userPermission);
-
      Set<Role> getRoles();
 
 

@@ -28,14 +28,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import static com.tour.utils.Permissions.*;
 
 @Service
@@ -109,6 +107,7 @@ public class UserService implements OnUser {
             userRepository.save(user);
             saved=true;
         }catch(Exception e){
+            System.out.println(e.getMessage());
             CatchException.catchException(e);
         }
         return saved;

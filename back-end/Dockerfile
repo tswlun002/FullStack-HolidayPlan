@@ -15,3 +15,4 @@ ENV permission.default.names=${DEFAULT_PERMISSIONS}
 ENV user.default.user=${DEFAULT_USER}
 COPY target/*.jar /opt/app.jar
 ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
+
