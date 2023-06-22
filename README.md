@@ -15,7 +15,8 @@ and Spring Boot Extension Pack, [see here](https://code.visualstudio.com/docs/ja
 ### Front-end Configuration
 I use VS Code for ReactJS, use the following command on VS Code terminal
 Generate jar file using Maven, [more info, click here](https://www.jetbrains.com/help/idea/compiling-applications.html)
-After generating the jar file, run the commands below:
+
+### After generating the jar file, run the commands below:
 ```
 $ docker compose config && docker compose up -d   # run container/service
 ```
