@@ -6,17 +6,15 @@ Admins can respond to user questions.
 Made this site to show the use of role-based and permission-based using spring boot with JWT and MYSQL back-end
 And use ReactJS front-end
 
-## Running using  docker 
-
-### Back-end Configuration
+### APP Configuration
 I use IntelliJ Or VS Code  but need to install  Java Development Kit (JDK), Extension Pack for Java, 
 and Spring Boot Extension Pack, [see here](https://code.visualstudio.com/docs/java/java-spring-boot)
 
-### Front-end Configuration
 I use VS Code for ReactJS, use the following command on VS Code terminal
+
 Generate jar file using Maven, [more info, click here](https://www.jetbrains.com/help/idea/compiling-applications.html)
 
-### After generating the jar file, run the commands below:
+### After generating the jar file, run the commands below start the app:
 ```
 $ docker compose config && docker compose up -d   # run container/service
 ```
