@@ -1,6 +1,12 @@
 package com.tour.service;
 
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.fasterxml.jackson.core.util.JsonParserDelegate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.tour.dto.EditUserRequest;
+import com.tour.dto.RegisterUserRequest;
 import com.tour.dto.RoleEvent;
 import com.tour.dto.UserEvent;
 import com.tour.exception.CatchException;
@@ -13,14 +19,17 @@ import com.tour.model.User;
 import com.tour.repository.UserRepository;
 import com.tour.utils.Roles;
 import io.micrometer.common.util.StringUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +45,48 @@ public class UserService implements OnUser {
     private final ApplicationEventPublisher publisher;
     private  final  OnRole onRole;
     private  final  OnPermission onPermission;
+    private final Environment environment;
+
+    /**
+     * Retrieve the defaulted user
+     * @throws  NullException if the details of user are not valid
+     * @return default user
+     */
+    private RegisterUserRequest getDefaultUser(){
+        String stringUser = environment.getProperty("user.default.user");
+        if(stringUser==null || stringUser.trim().length()<=1)throw  new NullException("Invalid default user");
+        if(stringUser.split(",").length<6)throw new NullException("Invalid default user details, all field are required");
+        RegisterUserRequest userDTO = null;
+        try{
+           userDTO= new ObjectMapper().readValue(stringUser,RegisterUserRequest.class);
+        }catch (Exception e){
+            CatchException.catchException(e);
+        }
+        if(userDTO==null) throw new NullException("Invalid default user details");
+        return userDTO;
+    }
+
+    /**
+     * Save the default user
+     */
+    @PostConstruct
+    protected void saveDefaultUser(){
+        try{
+            if(userRepository.count()==0){
+                var userDTO = getDefaultUser();
+                var role = onRole.getRole(userDTO.usertype().toUpperCase());
+                if(role == null) throw new NotFoundException("Role is not found.");
+                var user =User.builder().firstname(userDTO.firstname()).lastname(userDTO.lastname())
+                        .username(userDTO.username()).
+                        password(new BCryptPasswordEncoder().encode(userDTO.password())).
+                        age(userDTO.age())
+                        .roles(Set.of(role)).build();
+                userRepository.save(user);
+            }
+        }catch (Exception e){
+            CatchException.catchException(e);
+        }
+    }
     /**
      * Save user
      * @param user is the user to be saved
@@ -52,14 +103,12 @@ public class UserService implements OnUser {
         boolean saved = false;
         try {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            var defaultRoleName = onRole.getNameDefaultRole();
-            var role  = onRole.getRole(defaultRoleName);
+            var role  = onRole.getRole(Roles.USER.name());
             if(role==null) throw  new NotFoundException("Role is not found");
             user.getRoles().add(role);
             userRepository.save(user);
             saved=true;
         }catch(Exception e){
-            System.out.println(e.getMessage());
             CatchException.catchException(e);
         }
         return saved;

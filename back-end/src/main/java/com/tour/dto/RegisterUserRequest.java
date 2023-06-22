@@ -28,5 +28,6 @@ Date age,
 @Size(min = 5, max = 1000, message = "password must contain 3 to 50 characters.")
 String password,
 @NotEmpty(message = "usertype is required")
-String usertype) {
+String usertype
+) {
 }

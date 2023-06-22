@@ -1,7 +1,10 @@
 package com.tour.service;
 
 import com.tour.dto.PermissionEvent;
-import com.tour.exception.*;
+import com.tour.exception.AppInternalException;
+import com.tour.exception.DuplicateException;
+import com.tour.exception.NotFoundException;
+import com.tour.exception.NullException;
 import com.tour.model.Permission;
 import com.tour.repository.PermissionRepository;
 import jakarta.validation.ConstraintViolation;
@@ -16,15 +19,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
-
 import java.util.HashSet;
 import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -56,8 +55,19 @@ class PermissionServiceTest {
         verify(repository, times(2)).findByName(anyString());
     }
 
-
     @ParameterizedTest
+
+
+
+
+
+
+
+
+
+
+
+
     @ValueSource(strings = {"USER_WRITE","USER_READ", "QUERY_READ","HOLIDAY_READ"})
     void saveValidPermissions(String permissionName) {
         var permission = Permission.builder().name(permissionName).build();

@@ -7,7 +7,6 @@ import com.tour.exception.NullException;
 import com.tour.model.Permission;
 import com.tour.model.Role;
 import com.tour.repository.RolesRepository;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
@@ -21,11 +20,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+
 import java.util.HashSet;
 import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@TestPropertySource(properties = {"role.default.names=USER,ADMIN"})
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class RoleServiceTest {
    @Mock
@@ -36,22 +40,25 @@ class RoleServiceTest {
    private ApplicationEventPublisher publisher;
    @InjectMocks
    private  RoleService service;
-
     @Mock
     private Environment environment;
     @BeforeEach
     void setUp() {
+
         service = new RoleService(rolesRepository,publisher,permissionObj,environment);
     }
 
     @Test
+
     void testSaveDefaultRole(){
-        var role = Role.builder().name("SENIOR_SOFTWARE_DEVELOPER").build();
-        when(environment.getProperty("role.default.name")).thenReturn(role.getName());
-        when(rolesRepository.getRole(role.getName())).thenReturn(role);
+
+        var role ="SENIOR_SOFTWARE_DEVELOPER";
+        when(environment.getProperty("role.default.names")).thenReturn(role);
+        when(permissionObj.getNamesDefaultedPermission()).thenReturn(new String[]{"READ"});
+        when(permissionObj.getPermission(anyString())).thenReturn(Permission.builder().name("READ").build());
         service.saveDefaultRole();
-        verify(environment,times(1)).getProperty("role.default.name");
-        verify(rolesRepository,times(1)).getRole(role.getName());
+        verify(environment,times(1)).getProperty("role.default.names");
+
     }
 
     @ParameterizedTest

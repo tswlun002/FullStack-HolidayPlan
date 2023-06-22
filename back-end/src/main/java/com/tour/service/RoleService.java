@@ -8,7 +8,6 @@ import com.tour.exception.NullException;
 import com.tour.model.Permission;
 import com.tour.model.Role;
 import com.tour.repository.RolesRepository;
-import com.tour.utils.Roles;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -16,12 +15,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
 @Service
 @AllArgsConstructor
 public class RoleService implements  OnRole{
@@ -33,27 +30,36 @@ public class RoleService implements  OnRole{
 
     /**
      * Retrieve name of the default role
-     * @return string name of default role
+     * @return array of string name of default role
      */
     @Override
-     public String getNameDefaultRole(){
-         String name = environment.getProperty("role.default.name");
-         if(name==null || name.trim().length()<=1)throw  new NullException("Invalid role name");
-         return name;
+     public String[] getNamesDefaultRoles(){
+         String names = environment.getProperty("role.default.names");
+         if(names==null)throw  new NullException("Invalid default role names ");
+         return names.split(",");
      }
     /**
      * Save defaulted role
      */
     @PostConstruct
-    protected void saveDefaultRole(){
-        var  name = getNameDefaultRole();
-        if(getRole(name) == null){
-            var permissions = Arrays.stream(onPermission.getNamesDefaultedPermission()).
-                    map(onPermission::getPermission).collect(Collectors.toSet());
-            var role = Role.builder().permissions(permissions).name(name.toUpperCase()).build();
-            rolesRepository.save(role);
+    protected void saveDefaultRole() {
+
+        try{
+            if (rolesRepository.count() == 0) {
+                var names = getNamesDefaultRoles();
+                var permissions = Arrays.stream(onPermission.getNamesDefaultedPermission()).
+                        map(onPermission::getPermission).collect(Collectors.toSet());
+                for (var name : names) {
+                    var role = Role.builder().permissions(permissions).name(name.toUpperCase()).build();
+                    rolesRepository.save(role);
+                }
+            }
+        }
+        catch(Exception e){
+            CatchException.catchException(e);
         }
     }
+
 
 
 

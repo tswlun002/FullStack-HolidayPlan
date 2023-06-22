@@ -1,15 +1,17 @@
 ARG JWT_SIGNING_KEY
 ARG DEFAULT_ROLE
 ARG DEFAULT_PERMISSIONS
+ARG DEFAULT_USER
 FROM maven:3.8.3-openjdk-17
 LABEL authors="l.tsewu"
 WORKDIR /opt
 ARG DEFAULT_ROLE
 ARG DEFAULT_PERMISSIONS
 ARG JWT_SIGNING_KEY
-RUN echo ${JWT_SIGNING_KEY}
+ARG DEFAULT_USER
 ENV jwt.signing.key=${JWT_SIGNING_KEY}
-ENV role.default.name=${DEFAULT_ROLE}
+ENV role.default.names=${DEFAULT_ROLE}
 ENV permission.default.names=${DEFAULT_PERMISSIONS}
+ENV user.default.user=${DEFAULT_USER}
 COPY target/*.jar /opt/app.jar
 ENTRYPOINT exec java $JAVA_OPTS -jar app.jar

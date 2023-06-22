@@ -19,16 +19,18 @@ import java.util.Set;
 @AllArgsConstructor
 @Service
 public class PermissionService  implements  OnPermission{
-
     private final  PermissionRepository repository;
-
     private  final ApplicationEventPublisher publisher;
     private final Environment environment;
 
+    /**
+     * Retrieve default permission names
+     * @return array of string names
+     */
    @Override
     public String[] getNamesDefaultedPermission(){
         String names = environment.getProperty("permission.default.names");
-        if(names==null || names.trim().length()<=1) throw  new NullException("Invalid permission name");
+        if(names==null || names.trim().length()<=1) throw  new NullException("Invalid default permission name");
         return names.split(",");
     }
 

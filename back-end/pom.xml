@@ -92,6 +92,11 @@
 			<version>2.1.214</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>com.guicedee.services</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <version>62</version>
+        </dependency>
     </dependencies>
 
 	<build>

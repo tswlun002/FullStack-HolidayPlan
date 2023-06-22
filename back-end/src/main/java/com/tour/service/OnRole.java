@@ -2,14 +2,13 @@ package com.tour.service;
 
 import com.tour.exception.NotFoundException;
 import com.tour.model.*;
-import com.tour.utils.Roles;
 import org.springframework.stereotype.Service;
-
 import java.util.Set;
 
 @Service
 public interface OnRole {
-    String getNameDefaultRole();
+    String[] getNamesDefaultRoles();
+
     void saveRole(Role role);
 
     Role getRole(long id);

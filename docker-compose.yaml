@@ -22,6 +22,7 @@ services:
         - JWT_SIGNING_KEY=${JWT_SIGNING_KEY}
         - DEFAULT_ROLE=${DEFAULT_ROLE}
         - DEFAULT_PERMISSIONS=${DEFAULT_PERMISSIONS}
+        - DEFAULT_USER=${TOUR_MANAGER}
     image: tswlun002/tour-back-end:${SERVER_TAG}
     container_name: ${SERVER_SERVICE}
     ports:

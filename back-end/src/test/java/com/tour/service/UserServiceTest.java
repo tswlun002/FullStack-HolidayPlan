@@ -1,5 +1,4 @@
 package com.tour.service;
-
 import com.tour.dto.UserEvent;
 import com.tour.exception.AppInternalException;
 import com.tour.exception.DuplicateException;
@@ -16,22 +15,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
-
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import static com.tour.utils.Permissions.*;
 import static com.tour.utils.Roles.ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,10 +41,21 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new UserService(repository,publisher,roleObj,permissionObj);
+        service = new UserService(repository,publisher,roleObj,permissionObj,environment);
     }
 
-
+    @Test
+    void saveDefaultUser(){
+        var stringUser = "{\"firstname\":\"manager\", \"lastname\":\"manager\"," +
+                "\"username\":\"tour_01@tour.com\",\"password\":\"123456\",\"age\":\"2023-02-16\"," +
+                "\"usertype\":\"SENIOR_SOFTWARE_DEVELOPER\"}";
+        var role = Role.builder().name("SENIOR_SOFTWARE_DEVELOPER").build();
+        when(environment.getProperty("user.default.user")).thenReturn(stringUser);
+        when(roleObj.getRole(role.getName())).thenReturn(role);
+        service.saveDefaultUser();
+        verify(environment, times(1)).getProperty("user.default.user");
+        verify(roleObj,times(1)).getRole(role.getName());
+    }
     @Test
     void saveUser() {
         var ROLE_NAME ="SENIOR_SOFTWARE_DEVELOPER";
@@ -58,16 +63,14 @@ class UserServiceTest {
         var permissions = Arrays.stream(PERMISSION_NAMES).map(name->Permission.builder().name(name).build())
                 .collect(Collectors.toSet());
         var role  = Role.builder().permissions(permissions).name(ROLE_NAME).build();
-       when(roleObj.getNameDefaultRole()).thenReturn(ROLE_NAME);
-        when(roleObj.getRole(ROLE_NAME)).thenReturn(role);
+
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        when(roleObj.getNameDefaultRole()).thenReturn(ROLE_NAME);
 
         when(repository.getUser(user.getUsername())).thenReturn(null);
 
-        when(roleObj.getRole(ROLE_NAME)).thenReturn(role);
+        when(roleObj.getRole(anyString())).thenReturn(role);
 
         var actual =service.saveUser(user);
         verify(repository,times(1)).getUser(user.getUsername());
