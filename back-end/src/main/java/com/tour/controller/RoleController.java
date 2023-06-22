@@ -1,11 +1,9 @@
 package com.tour.controller;
 
-import com.tour.exception.ApplicationExceptionHandler;
 import com.tour.exception.NotFoundException;
 import com.tour.model.Role;
-import com.tour.utils.Roles;
-
 import com.tour.service.RoleService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +15,9 @@ import java.util.Set;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/holiday-plan/api/admin/role/")
+@AllArgsConstructor
 public class RoleController  {
-    @Autowired private RoleService service;
+    final private RoleService service;
     @PostMapping(value = "save/")
     public void saveRole(@RequestBody  @Validated Role role) {
         service.saveRole(role);

@@ -22,3 +22,4 @@ $ docker compose config && docker compose up -d   # run container/service
 ### OPEN following the link on your browser after running the above command successfully
 [Holiday-Plan-App](http://localhost:3000)
 After, the user can register and login
+
