@@ -7,7 +7,6 @@ import com.tour.exception.NullException;
 import com.tour.model.Permission;
 import com.tour.model.Role;
 import com.tour.repository.RolesRepository;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
@@ -21,8 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
+
 import java.util.HashSet;
 import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
