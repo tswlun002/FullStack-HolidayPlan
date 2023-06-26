@@ -13,45 +13,37 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-const containsText = (element, searchText) =>
-  element.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
-
+const containsText = (element, searchText) => element.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
 
 export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
-  const [selected, setSelected] = useState([]);
+        const [selected, setSelected] = useState([]);
+        const handleClick = (event, element) => {
+            console.log(element);
+            const selectedIndex = selected.indexOf(element);
+            let newSelected = [];
 
-  const handleClick = (event, element) => {
-    console.log(element);  
-    const selectedIndex = selected.indexOf(element);
-    let newSelected = [];
+            if (selectedIndex === -1) {
+                newSelected = newSelected.concat(selected, element);
+            } else if (selectedIndex === 0) {
+                newSelected = newSelected.concat(selected.slice(1));
+            } else if (selectedIndex === selected.length - 1) {
+                newSelected = newSelected.concat(selected.slice(0, -1));
+            } else if (selectedIndex > 0) {
+                newSelected = newSelected.concat(
+                    selected.slice(0, selectedIndex),
+                    selected.slice(selectedIndex + 1),
+               );
+            }
+            setSelected(newSelected);
+            setSelectedPermissions(newSelected);
+        }
+        const isSelected = (element) => selected.indexOf(element) !== -1;
+        const [searchText, setSearchText] = useState("");
+        const displayedOptions = useMemo(
+        () => allOptions.filter((option) => containsText(option, searchText)),
+        [searchText,allOptions]
+        );
 
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, element);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
-    setSelectedPermissions(newSelected);
-  }
-
-
-  const isSelected = (element) => selected.indexOf(element) !== -1;
-
-  const [searchText, setSearchText] = useState("");
-
-  const displayedOptions = useMemo(
-    () => allOptions.filter((option) => containsText(option, searchText)),
-    [searchText]
-  );
-  
 
   return (
     <Box minWidth={400}>
@@ -71,7 +63,6 @@ export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
 
             <TextField
               size="small"
-              // Autofocus on textfield
               autoFocus
               placeholder="Type to search..."
               fullWidth
@@ -85,7 +76,6 @@ export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
               onChange={(e) => setSearchText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key !== "Escape") {
-                  // Prevents autoselecting item while typing (default Select behaviour)
                   e.stopPropagation();
                 }
               }}

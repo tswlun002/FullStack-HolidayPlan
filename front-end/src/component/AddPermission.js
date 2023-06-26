@@ -6,36 +6,43 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import {IconButton} from "@mui/material";
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
-
-export default function AddPermission({setAddPermission, setPermission}){
+/**
+ Add new permission
+*/
+export default function AddPermission({ setAddPermissionOpen,setIsNewPermissionAdded}){
     const permissionRef = useRef(null);
     const [error , setError] = useState("");
-   const [reuqestResponse , setResponse] = useReducer((state, action)=>{return {...state,...action}},{isRequestError:false,message:"",isRequestSuccessful:false});
+   const [requestResponse , setResponse] = useReducer((state, action)=>{return {...state,...action}},{isRequestError:false,message:"",isRequestSuccessful:false});
+
+   //Extract name of permission
     const submit = (e)=>{
           e.preventDefault();
           console.log(permissionRef.current.value)
           if(permissionRef.current===null || permissionRef.current.value.trim()===''){
-            setError("Permission name is required");
+                setError("Permission name is required");
           }
           else {
-                 savePermission(permissionRef.current.value);
-          	setPermission(permissionRef.current);
+                savePermission(permissionRef.current.value);
           }
     }
     const theme = useTheme();
     const small =useMediaQuery(theme.breakpoints.down('sm'));
     const useAxiosPrivate = UsePrivateAxios();
+
+    //save permission
     const savePermission=(name)=>{
 	    const API = '/holiday-plan/api/admin/permission/save/';
 	    useAxiosPrivate.post(API, {name})
 	    .then(response => {
             if(response.ok || response.status===200){
+               setIsNewPermissionAdded(true);
               setResponse(
                 {
                   isRequestSuccessful:true,isRequestError:false,
-                  message:"Succefully add permission"
+                  message:"Successfully add permission"
                 }
               );
+
 
             }
 	    })
@@ -53,12 +60,10 @@ export default function AddPermission({setAddPermission, setPermission}){
     const customerStyle = {
             width:"100%",
             marginTop:"8px",
-          
             '& label.Mui-focused': {
               color: 'black',
              
             },
-            
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
                 borderColor: 'green',
@@ -66,14 +71,10 @@ export default function AddPermission({setAddPermission, setPermission}){
               '&:hover fieldset': {
                 border:"1px solid transparent",
                 borderBottom:'1.5px solid blueviolet',
-        
-           
               },
               '&.Mui-focused fieldset': {
                 border:"1px solid transparent",
                 borderBottom:'1.5px solid blueviolet',
-                
-               
               },
               '& fieldset': {
                 border:"1px solid transparent",
@@ -81,9 +82,6 @@ export default function AddPermission({setAddPermission, setPermission}){
               },
             },
         }
-        
-     
-    
     return (
         <Box 
            display="flex" 
@@ -95,21 +93,21 @@ export default function AddPermission({setAddPermission, setPermission}){
             <Card  sx={{ maxWidth: 400,padding:"2rem 0rem" ,display:"block"}}>
                 
                 <CardHeader
-                action={ <IconButton onClick={()=>setAddPermission(false)}>{<CancelIcon/>}</IconButton>}
+                action={ <IconButton onClick={()=>setAddPermissionOpen(false)}>{<CancelIcon/>}</IconButton>}
 
                  title="Add Permission"/>
                 <CardContent>
-                    {  ( Boolean(error) || reuqestResponse.isRequestSuccessful ||reuqestResponse.isRequestError) &&
+                    {  ( Boolean(error) || requestResponse.isRequestSuccessful ||requestResponse.isRequestError) &&
 		            <Typography 
 		                fontSize ="1rem" align="start"
-		                color={reuqestResponse.isRequestSuccessful?"green":"red"} variant="h4">
-		                {(reuqestResponse.isRequestSuccessful ||reuqestResponse.isRequestError)?reuqestResponse.message : error}
+		                color={requestResponse.isRequestSuccessful?"green":"red"} variant="h4">
+		                {(requestResponse.isRequestSuccessful ||requestResponse.isRequestError)?requestResponse.message : error}
 		            </Typography>
                    }
                     <form autoComplete='off' >
                         <TextField  
                        
-                            onChange={()=>setError('')} 
+                            onChange={()=>{setError(''); setResponse({isRequestError:false, isRequestSuccessful:false,message:""}); setIsNewPermissionAdded(false)}}
                             required
                             helpertext="field permission"
                             id="demo-helper-text-aligned"

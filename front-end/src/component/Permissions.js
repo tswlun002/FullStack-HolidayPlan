@@ -24,9 +24,11 @@ export default function Permissions(){
     );
     const theme = useTheme();
     const small =useMediaQuery(theme.breakpoints.down('sm'));
-    const [addPermission, setAddPermission] =  useState(false);
-    const [deletePermission, setDeletePermission] =  useState(false);
-    const [newPermission, setNewPermission] = useState("");
+    const [isAddPermissionOpen, setAddPermissionOpen] =  useState(false);
+    const [isNewPermissionAdded, setIsNewPermissionAdded] =  useState(false);
+    const [isPermissionDelete, setIsPermissionDelete] =  useState(false);
+
+    const [deletePermission, setDeletePermission] =  useState(false)
     const [selectedPermissions, setSelectedPermissions] = useState([])
 
     const [requestResponse , setResponse] = useReducer(
@@ -35,80 +37,91 @@ export default function Permissions(){
     );
 
     const useAxiosPrivate = UsePrivateAxios();
-    //Fetch all permissions from server	
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //                                  Fetch all permissions from server
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     useEffect(()=>{
-	let isMounted = true;
-	const controller = new AbortController();
-	const API = '/holiday-plan/api/admin/permission/permissions/';
-	isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
-	.then(response => {
-		if(response.ok || response.status===200){
-			setPermissions({
-				listPermissions:response.data,
-				exceptionMessage:"Succefully fetched permissions"
-			});
-		}
-	})
-	.catch(err => {
+        let isMounted = true;
+        const controller = new AbortController();
+        const API = '/holiday-plan/api/admin/permission/permissions/';
+        isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
+        .then(response => {
+            if(response.ok || response.status===200){
+                setPermissions({
+                    listPermissions:response.data,
+                    exceptionMessage:"Successfully fetched permissions"
+                });
+            }
+        })
+        .catch(err => {
 
-		if(!err?.response.ok){
-			const errorMessage  = getErrorMessage(err);
-			setPermissions({exceptionMessage:errorMessage});
-		}
-		else{
-			setPermissions({exceptionMessage:"Server Error"});
-		} 
-	});
-	return ()=>{isMounted=false; controller.abort();}
+            if(!err?.response.ok){
+                const errorMessage  = getErrorMessage(err);
+                setPermissions({exceptionMessage:errorMessage});
+            }
+            else{
+                setPermissions({exceptionMessage:"Server Error"});
+            }
+        });
+	    return ()=>{isMounted=false; controller.abort();}
 
-  },[]);
+  },[isNewPermissionAdded]);
+
+
   // Delete permissions 
-   const deteletePermissions = async (permissionList)=>{
-	let  results =null
-	let lastPermission=null;
-	for(let permissionToDelete of permissionList){
-		results= await deletePermissionApi(permissionToDelete.name);
-		lastPermission = permissionToDelete; 
-		if(results.isRequestError){
-			break;
-		}
-	}
-	if(results.isRequestError){
-		results.message=`Failed to delete permission: ${lastPermission.name}`;
-	}
-	alert(JSON.stringify(results));
-	setResponse(results);
+   const deletePermissions = async (permissionList)=>{
+
+        let  results =null
+        let lastPermission=null;
+        for(let permissionToDelete of permissionList){
+            results= await deletePermissionApi(permissionToDelete.name);
+            lastPermission = permissionToDelete;
+            if(results.isRequestError){
+                break;
+            }
+        }
+        if(results.isRequestError){
+            results.message=`Failed to delete permission: ${lastPermission.name}`;
+        }
+        if(results.isRequestSuccessful){
+
+        }
+        alert(JSON.stringify(results));
+        setResponse(results);
    }
-  //Delete permission by name
+
+  // Delete permission by name
    const deletePermissionApi  = (permissionName)=>{
     
-	const API = `/holiday-plan/api/admin/permission/delete/name/?permissionName=${permissionName}`;
-	const newRequestResponse ={isRequestSuccessful:false,isRequestError:false,message:""};
-	   
-	return useAxiosPrivate.delete(API)
-	.then(response => {
+        const API = `/holiday-plan/api/admin/permission/delete/name/?permissionName=${permissionName}`;
+        const newRequestResponse ={isRequestSuccessful:false,isRequestError:false,message:""};
 
-	    if(response.ok || response.status===200){                
-		    newRequestResponse.isRequestSuccessful=true;
-		    newRequestResponse.isRequestError=false;
-		    newRequestResponse.message="Succefully delete permission"
-	   }
-	  return newRequestResponse;
-	})
-	.catch(err => {
-	    if(!err?.response.ok){
-		    const errorMessage  = getErrorMessage(err);
-		    newRequestResponse.isRequestSuccessful=false;
-		    newRequestResponse.isRequestError=true;
-		    newRequestResponse.message=errorMessage;
-	    }
-	    else{
-		    newRequestResponse.isRequestSuccessful=false;
-		    newRequestResponse.isRequestError=true;
-		    newRequestResponse.message="Server Error";
-	   } 
-	   return newRequestResponse;
-	});
+        return useAxiosPrivate.delete(API)
+        .then(response => {
+
+            if(response.ok || response.status===200){
+                newRequestResponse.isRequestSuccessful=true;
+                newRequestResponse.isRequestError=false;
+                newRequestResponse.message="Successfully delete permission"
+           }
+          return newRequestResponse;
+        })
+        .catch(err => {
+            if(!err?.response.ok){
+                const errorMessage  = getErrorMessage(err);
+                newRequestResponse.isRequestSuccessful=false;
+                newRequestResponse.isRequestError=true;
+                newRequestResponse.message=errorMessage;
+            }
+            else{
+                newRequestResponse.isRequestSuccessful=false;
+                newRequestResponse.isRequestError=true;
+                newRequestResponse.message="Server Error";
+           }
+           return newRequestResponse;
+        });
 	
    }
            
@@ -143,7 +156,7 @@ export default function Permissions(){
                 
                 <CardActions> 
                     <ColorButton 
-                        onClick={()=>setAddPermission(true)}
+                        onClick={()=>setAddPermissionOpen(true)}
                         sx={{padding:"0rem 0.5rem"}} 
                         variant="contained">
                             Add
@@ -158,27 +171,26 @@ export default function Permissions(){
                </CardActions>
             
             </Card>
-            <Collapse in={addPermission} timeout="auto" unmountOnExit  sx={{display:{xs:"none",md:"block"}}}>
-                <AddPermission 
-                    setPermission={setNewPermission} 
-                    setAddPermission={setAddPermission}/>  
+            <Collapse in={isAddPermissionOpen} timeout="auto" unmountOnExit  sx={{display:{xs:"none",md:"block"}}}>
+                <AddPermission
+                     setAddPermission={setAddPermissionOpen}
+                    setIsNewPermissionAdded={setIsNewPermissionAdded}
+                />
             </Collapse>
             <Modal
-                open ={addPermission}
-                onClose={()=>setAddPermission(false)}
+                open ={isAddPermissionOpen}
+                onClose={()=>setAddPermissionOpen(false)}
                 aria-labelledby="child-modal-title"
                 aria-describedby="child-modal-description"
                 sx={{display:{xs:"flex",md:"none"},justifyContent:'center',alignItems:'center' }}
             >
-              <AddPermission 
-                setPermission={setNewPermission} 
-                setAddPermission={setAddPermission}/>
+              <AddPermission setIsNewPermissionAdded={setIsNewPermissionAdded}  setAddPermissionOpen={setAddPermissionOpen}/>
             </Modal>
             {
               deletePermission&&<SelectedItems 
                     heading ={"Permissions to delete" }
                     SelectedItems={selectedPermissions}
-                    setSelectedItems={deteletePermissions}
+                    setSelectedItems={deletePermissions}
                     openListSelectedItems={deletePermission}
                     setOpenListSelectedItems={setDeletePermission}
                    
