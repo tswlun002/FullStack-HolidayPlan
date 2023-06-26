@@ -26,8 +26,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@TestPropertySource(properties = {"role.default.names=USER,ADMIN"})
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class RoleServiceTest {
    @Mock

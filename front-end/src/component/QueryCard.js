@@ -43,9 +43,8 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
          response:"",
          queryStatus:queryStatus,
          isResponseError:false,
-         errorMessage:"",
          isResponseSuccess:false,
-         querySentStatus:""
+         requestResponse:""
      })
     
 
@@ -61,28 +60,36 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
 
     },[queryState.isResponseSuccess])
 
-    const onSubmit =(e)=>{
+
+    /**
+     Summit query response
+    */
+    const onSubmit =async(e)=>{
 
         e.preventDefault();
+        let editResponse = {isResponseError : false,requestResponse:"",isResponseSuccess:false}
+
         if(userLoginState.roles.find(role=>role.name==="ADMIN")){
             if(queryState.response.trim() ==="" || queryState.queryStatus.trim() ===""){
-               dispatchQuery({isResponseError:true, errorMessage:"All fields are required"})
+               dispatchQuery({isResponseError:true, requestResponse:"All fields are required"})
             }else{
 
-                SendQueryResponse(data.user.username, data.id,useAxiosPrivate, queryState, dispatchQuery)
-                if(queryState.isResponseSuccess){
-                   updateQueryCard(index);
-                }
+               editResponse= await SendQueryResponse({username:data.user.username, queryId:data.id,useAxiosPrivate,
+               response:queryState.response, queryStatus:queryState.queryStatus});
+               console.log(editResponse);
+               dispatchQuery(editResponse);
+               if(editResponse.isResponseSuccess){
+
+                   dispatchQuery({response:"", queryStatus:"ACTIVE"})
+               }
             }
-        }else if(userLoginState.roles.find(role=>role.name==="USER")){
+        }
+        else if(userLoginState.roles.find(role=>role.name==="USER")){
             DeleteQuery(useAxiosPrivate,data.id, dispatchQuery)
         }
     }
 
-
-
     return (
-
   
     <Card key={data.id} sx={{ maxWidth: 400,  margin:"1%",
        paddingBottom:"1rem" ,display:"block", minWidth:"20rem"}}>
@@ -128,16 +135,9 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
                   <CustomerTextArea
                         disabled={userLoginState.roles.find(role=>role.name==="USER") || (
                         userLoginState.roles.find(role=>role.name==="ADMIN")&& queryState.queryStatus==="SOLVED") }
-                        width ="100%"
-                        required
-                        multiline={true}
-                        maxRows="10"
-                        focused
-                        minRows="2"
-                        helpertext=""
-                        id="demo-helper-text-aligned"
-                        label="Response"
-                        variant="outlined"
+                        width ="100%" focused  minRows="2"  helpertext=""
+                        required multiline={true}   maxRows="10"   variant="outlined"
+                        id="demo-helper-text-aligned"    label="Response"
                         color="secondary" type="text" className=" Response-input" placeholder="Enter full  Response"
                         autoComplete='new-Response' value={queryState.response}
                         onChange={(e)=>dispatchQuery({ response:e.target.value,isResponseError:false})}/>
@@ -171,11 +171,11 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
           {
                queryState.isResponseError ?
                <CustomerTypography sx={{color:"red"}}>
-                    {queryState.errorMessage}
+                    {queryState.requestResponse}
                </CustomerTypography>
                :
-               queryState.isResponseSuccess&&<CustomerTypography sx={{color:"red"}}>
-                    {queryState.querySentStatus}
+               queryState.isResponseSuccess&&<CustomerTypography sx={{color:"green"}}>
+                    {queryState.requestResponse}
                </CustomerTypography>
 
           }

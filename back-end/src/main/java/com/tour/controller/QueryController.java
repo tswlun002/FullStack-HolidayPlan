@@ -1,5 +1,6 @@
 package com.tour.controller;
 
+import com.tour.dto.QueryEditDTO;
 import com.tour.dto.QueryRequest;
 import com.tour.exception.CatchException;
 import com.tour.exception.NotFoundException;
@@ -44,9 +45,8 @@ public class QueryController {
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
     @PatchMapping(value = "query/update/")
-    public ResponseEntity<Boolean> updateQuery(@RequestParam String username,@RequestParam long queryId,
-                                                 @RequestParam String response,@RequestParam QueryStatus status){
-        var updated = queryService.updateQuery(username,queryId,response,status);
+    public ResponseEntity<Boolean> updateQuery(@RequestBody @Validated  QueryEditDTO queryDTO){
+        var updated = queryService.updateQuery(queryDTO.username(),queryDTO.queryId(),queryDTO.response(),queryDTO.queryStatus());
         return updated?new ResponseEntity<>(true, HttpStatus.OK):
                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }

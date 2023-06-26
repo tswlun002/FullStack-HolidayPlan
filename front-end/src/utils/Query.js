@@ -46,9 +46,6 @@ export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=
      }
    )
 }
-
-
-
 export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=>{
    const OK_RESPONSES =[200,302, 201]
   const API = roles.find(role=>role.name==="ADMIN")? "/holiday-plan/api/user-query/query/status/?queryStatus=ACTIVE":
@@ -91,66 +88,56 @@ export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=
             dispatchQuery({errorMessage:errorMessage,isDataAvailable:false})
 
        }
-       else dispatchQuery({errorMessage:"Internal server error",isDataAvailable:false})
-
-
-
-
+       else dispatchQuery({errorMessage:"Internal server error",isDataAvailable:false});
     }
   )
 
 }
 
 
-export const SendQueryResponse = (username, queryId,useAxiosPrivate,{response, queryStatus}, dispatchQuery)=>{
+export const SendQueryResponse = ({username, response,queryStatus, queryId, useAxiosPrivate})=>{
+    const API ='/holiday-plan/api/user-query/query/update/';
+    const editResponse = {isResponseError : false,requestResponse:"",isResponseSuccess:false}
 
-  const API =
-  `/holiday-plan/api/user-query/query/update/?
-  username=${username}&queryId=${queryId}&response={response}&queryStatus={queryStatus}`;
-
-  useAxiosPrivate.patch(API)
-  .then(response =>
+return useAxiosPrivate.patch(API,{username,queryId,response, queryStatus})
+    .then(response =>
       {
         if(response.ok || response.status===200){
           console.log("Ok");
           console.log(response.data)
-
-          dispatchQuery({
-                isResponseError : false,
-                response:"Updated successfully",
-                isResponseSuccess:true
-           });
+          editResponse.isResponseError=false;
+          editResponse.isResponseSuccess =true;
+          editResponse.requestResponse="Updated successfully";
 
         }
+        return editResponse;
       }
-  ).catch(err =>
+    ).catch(err =>
     {
-       console.log(err);
-      console.log("Not ok");
+        console.log(err);
+        console.log("Not ok");
+        editResponse.isResponseError=true;
+        editResponse.isResponseSuccess =false;
        if(!err?.response.ok){
             let errorMessage =null;
             if(err.response.status===404){
               console.log("Not ok ,********");
-              errorMessage  ="Invalid credentials";
+              editResponse.requestResponse="Invalid credentials";
             }
             else if(err.response.status===401){
-                 errorMessage  ="Denied access";
+                 editResponse.requestResponse="Denied access";
             }
             else{
                   console.log("Not ok");
-                  errorMessage  = err.response?.statusText;
+                  editResponse.requestResponse=err.response?.statusText;
             }
-             dispatchQuery({errorMessage:errorMessage,  isResponseError:true})
+       }
+       else editResponse.requestResponse="Internal server error";
 
-            }
-            else dispatchQuery({errorMessage:"Internal server error",isResponseError:true})
+       return editResponse;
 
+    })
     }
-  )
-}
-
-
-
 export const DeleteQuery= (useAxiosPrivate,queryId, dispatchQuery)=>{
 
   const API = `/holiday-plan/api/user-query/query/delete/${queryId}`;
