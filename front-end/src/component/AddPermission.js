@@ -81,7 +81,7 @@ export default function AddPermission({ setAddPermissionOpen,setIsNewPermissionA
                 borderBottom:'1px solid black',
               },
             },
-        }.
+        }
     return (
         <Box 
            display="flex" 
@@ -105,8 +105,8 @@ export default function AddPermission({ setAddPermissionOpen,setIsNewPermissionA
 		            </Typography>
                    }
                     <form autoComplete='off' >
-                        <TextField
-
+                        <TextField  
+                       
                             onChange={()=>{setError(''); setResponse({isRequestError:false, isRequestSuccessful:false,message:""}); setIsNewPermissionAdded(false)}}
                             required
                             helpertext="field permission"
@@ -117,9 +117,9 @@ export default function AddPermission({ setAddPermissionOpen,setIsNewPermissionA
                             placeholder="Enter permission name"
                             inputRef={permissionRef}
                            sx={{...customerStyle}}
-
+                            
                         />
-
+                     
                         <ColorButton 
                         onClick={(e)=>submit(e)}
                         variant="contained" 

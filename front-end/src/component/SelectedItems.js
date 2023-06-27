@@ -5,11 +5,13 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { useState ,useReducer} from 'react';
 
 export default function SelectedItems({heading, SelectedItems,setSelectedItems,openListSelectedItems, setOpenListSelectedItems}){
+
     const removeItem = (itemTORemove, items)=>{
         return items.filter(item=> item.name !==itemTORemove);
     }
     const [itemsLocally, setItemsLocally] = useState(SelectedItems);
-
+   /* console.log(SelectedItems);
+    console.log(itemsLocally);*/
    const [reuqestResponse , setResponse] = useReducer((state, action)=>{return {...state,...action}},{isRequestError:false,message:"",isRequestSuccessful:false});
     return (
          <Modal
@@ -29,7 +31,7 @@ export default function SelectedItems({heading, SelectedItems,setSelectedItems,o
                 }}
             >
                  <CardHeader subheader={heading}
-                    action={<IconButton onClick={()=>{setOpenListSelectedItems(false);setItemsLocally([]);}}><CancelIcon/></IconButton>}
+                    action={<IconButton onClick={()=>setOpenListSelectedItems(false)}><CancelIcon/></IconButton>}
                 />
                 <List >
                  
