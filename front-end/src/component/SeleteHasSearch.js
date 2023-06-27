@@ -15,27 +15,30 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const containsText = (element, searchText) => element.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
 
-export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
+export default function SelectHasSearch({allOptions,setSelectedPermissions,requestResponse}) {
+
         const [selected, setSelected] = useState([]);
         const handleClick = (event, element) => {
-            console.log(element);
-            const selectedIndex = selected.indexOf(element);
-            let newSelected = [];
 
-            if (selectedIndex === -1) {
-                newSelected = newSelected.concat(selected, element);
-            } else if (selectedIndex === 0) {
-                newSelected = newSelected.concat(selected.slice(1));
-            } else if (selectedIndex === selected.length - 1) {
-                newSelected = newSelected.concat(selected.slice(0, -1));
-            } else if (selectedIndex > 0) {
-                newSelected = newSelected.concat(
-                    selected.slice(0, selectedIndex),
-                    selected.slice(selectedIndex + 1),
-               );
-            }
-            setSelected(newSelected);
-            setSelectedPermissions(newSelected);
+                const selectedIndex = selected.indexOf(element);
+                let newSelected = [];
+
+                if (selectedIndex === -1) {
+                    newSelected = newSelected.concat(selected, element);
+                } else if (selectedIndex === 0) {
+                    newSelected = newSelected.concat(selected.slice(1));
+                } else if (selectedIndex === selected.length - 1) {
+                    newSelected = newSelected.concat(selected.slice(0, -1));
+                } else if (selectedIndex > 0) {
+                    newSelected = newSelected.concat(
+                        selected.slice(0, selectedIndex),
+                        selected.slice(selectedIndex + 1),
+                   );
+                }
+
+                 newSelected = newSelected.filter((item)=>{return allOptions.some((item1)=>{return (item1.id===item.id); });});
+                setSelected(newSelected);
+                setSelectedPermissions(newSelected);
         }
         const isSelected = (element) => selected.indexOf(element) !== -1;
         const [searchText, setSearchText] = useState("");
@@ -59,7 +62,9 @@ export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
             }}
           >
 
-          <ListSubheader fullWidth sx={{boxShadow:"inherit !important;"}}>
+          <ListSubheader
+                fullWidth sx={{boxShadow:"inherit !important;"}}
+           >
 
             <TextField
               size="small"
