@@ -1,22 +1,53 @@
-import { useRef, useState } from "react";
+import { useRef, useState ,useReducer} from "react";
 import CssTextField from  './CssTextField';
 import ColorButton from "./ColorButton";
 import { Box, Card, CardContent, CardHeader, TextField, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@material-ui/core";
 import CancelIcon from '@mui/icons-material/Cancel';
 import {IconButton} from "@mui/material";
+import UsePrivateAxios from '../utils/UseAxiosPrivate'
+import {getErrorMessage} from '../utils/Error';
 
-export default function AddRole({setAddRole, setRole}){
+
+export default function AddRole({setAddRoleOpen, setIsRoleAdded}){
     const roleRef = useRef(null);
     const [error , setError] = useState("");
+    const usePrivateAxios =UsePrivateAxios();
+    const [requestResponse , setResponse] = useReducer(
+        (state, action)=>{return {...state,...action}},{isRequestError:false,message:"",submitting:false,isRequestSuccessful:false}
+    );
     const submit = (e)=>{
+
           e.preventDefault();
+
           console.log(roleRef.current.value)
           if(roleRef.current===null || roleRef.current.value.trim()===''){
-            setError("Role name is required");
+                setResponse({isRequestError:true,submitting:false,message:"Role name is require",isRequestSuccessful:false});
+          }else{
+              setResponse({submitting:true});
+             //else setIsRoleAdded(roleRef.current);
+             const API='/holiday-plan/api/admin/role/save/';
+             usePrivateAxios.post(API,{name:roleRef.current.value})
+             .then(response=>{
+                   if(response.ok || response.status===200){
+                           console.log(response.data);
+                           setResponse({isRequestError:false,submitting:false,message:"Role added successful",isRequestSuccessful:true});
+                           setIsRoleAdded(true);
+                   }
+             })
+             .catch(err=>{
+                    if(!err?.response.ok){
+                           const errorMessage  = getErrorMessage(err);
+                           setResponse({isRequestError:true,submitting:false,message:errorMessage,isRequestSuccessful:false});
+                    }
+                    else{
+                           setResponse({isRequestError:true,submitting:false,message:"Server error",isRequestSuccessful:false});
+                    }
+             });
           }
-          else setRole(roleRef.current);
     }
+
+
     const theme = useTheme();
     const small =useMediaQuery(theme.breakpoints.down('sm'));
     const customerStyle = {
@@ -59,18 +90,24 @@ export default function AddRole({setAddRole, setRole}){
             margin="0rem 0rem 0rem 0.5rem" 
             minHeight="50vh"           
         >
-            <Card  sx={{ maxWidth: 400,padding:"2rem 0rem" ,display:"block"}}>
+            <Card  sx={{ maxWidth: 400, midWidth:350,padding:"2rem 0rem" ,display:"block"}}>
                 
                 <CardHeader
-                action={ <IconButton onClick={()=>setAddRole(false)}>{<CancelIcon/>}</IconButton>}
+                action={ <IconButton onClick={()=>setAddRoleOpen(false)}>{<CancelIcon/>}</IconButton>}
 
-                 title="Add Role"/>
+                 title="Add Role"
+                 subheader={requestResponse.message||""}
+                 subheaderTypographyProps={{align:"start" ,color:requestResponse.isRequestError?"red":"green"}}
+
+                 />
                 <CardContent>
-                    {Boolean(error)&&<Typography fontSize ="1rem" align="start" color="red" variant="h4">{error}</Typography>}
-                    <form autoComplete='off' >
                         <TextField  
                        
-                            onChange={()=>setError('')} 
+                            onChange={()=>{
+                                setError(''); setIsRoleAdded(false);
+                                setResponse({isRequestError:false,message:"",submitting:false,isRequestSuccessful:false});
+                              }
+                            }
                             required
                             helpertext="field role"
                             id="demo-helper-text-aligned"
@@ -87,9 +124,9 @@ export default function AddRole({setAddRole, setRole}){
                         onClick={(e)=>submit(e)}
                         variant="contained" 
                         style={{color:"white", marginTop:10}}>
-                            Submit
+                            {requestResponse.submitting?"Submitting...":"Submit"}
                         </ColorButton>
-                    </form>
+
                    
                 </CardContent>
             </Card>

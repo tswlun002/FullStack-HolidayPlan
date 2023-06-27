@@ -203,7 +203,7 @@ public class RoleService implements  OnRole{
      */
     @Override
     public Set<Role> getRoles() {
-        return rolesRepository.findAllRoles();
+        return rolesRepository.getRoles();
     }
 
     /**

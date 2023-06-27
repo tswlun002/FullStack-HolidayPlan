@@ -225,14 +225,12 @@ class RoleServiceTest {
     void getRoles() {
         var roles=Set.of(Role.builder().name("USER").build(),
                 Role.builder().name("IT").build());
-        when(rolesRepository.findAllRoles()).thenReturn(roles);
+        when(rolesRepository.getRoles()).thenReturn(roles);
         var actual  = service.getRoles();
         verify(rolesRepository, atMostOnce()).getRoles();
         assertArrayEquals(roles.toArray(),actual.toArray());
     }
 
 
-    @Test
-    void deleteRole() {
-    }
+
 }
