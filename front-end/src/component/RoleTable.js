@@ -197,6 +197,7 @@ export default function EnhancedTable() {
        const [isRoleAdded, setIsRoleAdded] = React.useState(false);
        const [deleterole , setDeleteRole] = React.useState(false);
        const [error, setError] = React.useState(false);
+       const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
         /////////////////////////////////////////////////////////////////
         //           FETCH ROLES
         ///////////////////////////////////////////////////////////////
@@ -233,7 +234,7 @@ export default function EnhancedTable() {
             });
             return ()=>{isMounted=false; controller.abort();}
 
-        },[isRoleAdded]);
+        },[isRoleAdded,newPermissionAddedToRole]);
 
 
         const handleRequestSort = (event, property) => {
@@ -251,6 +252,8 @@ export default function EnhancedTable() {
             }
             setSelected([]);
             setAddPermission(false);
+             setNewPermissionAddedToRole(false);
+             setIsRoleAdded(false);
 
         };
 
@@ -275,6 +278,8 @@ export default function EnhancedTable() {
                 if(newSelected.length===0){
                   setAddPermission(false);
                 }
+                setNewPermissionAddedToRole(false);
+                setIsRoleAdded(false);
         };
 
         const handleChangePage = (event, newPage) => {
@@ -362,6 +367,7 @@ export default function EnhancedTable() {
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
+
                         onClick={(event) => handleClick(event, row)}
                         color="primary"
                         checked={isItemSelected}
@@ -406,7 +412,7 @@ export default function EnhancedTable() {
       </Paper>
       
       <Collapse in={isAddPermission} timeout="auto" unmountOnExit  sx={{display:{xs:"none",md:"block"}}}>
-          <AddPermissionToRole setAddPermission={setAddPermission}/>  
+          <AddPermissionToRole setNewPermissionAddedToRole={setNewPermissionAddedToRole} roles={selected} setAddPermission={setAddPermission}/>
       </Collapse>
       <Modal
          open ={isAddPermission}
@@ -415,7 +421,7 @@ export default function EnhancedTable() {
           aria-describedby="child-modal-description"
           sx={{display:{xs:"flex",md:"none"},justifyContent:'center',alignItems:'center' }}
       >
-        <AddPermissionToRole  setAddPermission={setAddPermission}/>
+        <AddPermissionToRole setNewPermissionAddedToRole={setNewPermissionAddedToRole} roles={selected} setAddPermission={setAddPermission}/>
       </Modal>
       <Collapse in={isAddRoleOpen} timeout="auto" unmountOnExit  sx={{display:{xs:"none",md:"block"}}}>
           <AddRole  setIsRoleAdded={setIsRoleAdded} setAddRoleOpen={setAddRoleOpen}/>

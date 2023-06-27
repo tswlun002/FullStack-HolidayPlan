@@ -8,6 +8,7 @@ import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -28,8 +29,10 @@ export default function PermissionsOfRole({permissions}) {
     <div>
       <FormControl sx={{ m: 1, width: 300 ,justifyContent:"center",
             alignItems:"center"}}>
-        <InputLabel id="demo-multiple-checkbox-label">Permissions</InputLabel>
+        <InputLabel id="demo-multiple-checkbox-label">{permissions.length===0?"No-permission":"Permissions"}</InputLabel>
+
         <Select
+           disabled={permissions.length===0}
           labelId="demo-multiple-checkbox-label"
           id="demo-multiple-checkbox"
           multiple
@@ -38,13 +41,15 @@ export default function PermissionsOfRole({permissions}) {
           renderValue={(selected) => selected.join(', ')}
           MenuProps={MenuProps}
         >
-         {permissions.map((permission) => (
-           
-            <MenuItem key={permission.name} value={permission.name} >
-              <ListItemText primary={permission.name} />
-              <IconButton sx={{width:"1rem"}}><DeleteIcon/></IconButton>
-            </MenuItem>
-          ))}
+         {
+             permissions.map((permission) => (
+
+                <MenuItem key={permission.name} value={permission.name} >
+                  <ListItemText primary={permission.name} />
+                  <IconButton sx={{width:"1rem"}}><DeleteIcon/></IconButton>
+                </MenuItem>
+              ))
+         }
       
         </Select>
        
