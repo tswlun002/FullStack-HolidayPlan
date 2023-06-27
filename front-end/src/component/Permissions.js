@@ -11,33 +11,24 @@ import { RolePermissionContext } from '../context/RolePermissionContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
 
-
 export default function Permissions(){
-    const {permissions,setPermissions} =  useContext(RolePermissionContext);
-    const [rolePermissions, setRolePermission] = useReducer(
-        (state, action)=>{
-           return {...state, ...action}
-        },
-        {
-            permissionToadd:[]
+
+        const {permissions,setPermissions} =  useContext(RolePermissionContext);
+        const theme = useTheme();
+        const small =useMediaQuery(theme.breakpoints.down('sm'));
+        const [isAddPermissionOpen, setAddPermissionOpen] =  useState(false);
+        const [isNewPermissionAdded, setIsNewPermissionAdded] =  useState(false);
+        const [selectedPermissions, SetSelectedPermissions] = useState([]);
+        const [isDeletePermissionOpen, setDeletePermissionOpen] =  useState(false);
+        const [requestResponse , setResponse] = useReducer(
+            (state, action)=>{return {...state,...action}},
+            {isRequestError:false,message:"",isRequestSuccessful:false}
+        );
+        const useAxiosPrivate = UsePrivateAxios();
+        const setSelectedPermissions =(permission)=>{
+                SetSelectedPermissions(permission);
+                setResponse({isRequestError:false,message:"",isRequestSuccessful:false});
         }
-    );
-    const theme = useTheme();
-    const small =useMediaQuery(theme.breakpoints.down('sm'));
-    const [isAddPermissionOpen, setAddPermissionOpen] =  useState(false);
-    const [isNewPermissionAdded, setIsNewPermissionAdded] =  useState(false);
-    const [isPermissionDelete, setIsPermissionDelete] =  useState(false);
-
-    const [deletePermission, setDeletePermission] =  useState(false)
-    const [selectedPermissions, setSelectedPermissions] = useState([])
-
-    const [requestResponse , setResponse] = useReducer(
-        (state, action)=>{return {...state,...action}},
-        {isRequestError:false,message:"",isRequestSuccessful:false}
-    );
-
-    const useAxiosPrivate = UsePrivateAxios();
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //                                  Fetch all permissions from server
@@ -75,20 +66,29 @@ export default function Permissions(){
 
         let  results =null
         let lastPermission=null;
+        let deletedPerm=[];
         for(let permissionToDelete of permissionList){
             results= await deletePermissionApi(permissionToDelete.name);
             lastPermission = permissionToDelete;
             if(results.isRequestError){
                 break;
-            }
+            }else deletedPerm.push(permissionToDelete);
         }
         if(results.isRequestError){
             results.message=`Failed to delete permission: ${lastPermission.name}`;
         }
         if(results.isRequestSuccessful){
+            //remove deleted permissions from list
+            const newPermList =(list)=> list.filter((permItem)=>{
+                  return deletedPerm.some((permItem1)=>{
+                      return  !(permItem.id===permItem1.id);
+                  });
+            });
 
+            setPermissions({
+                listPermissions: newPermList(permissions.listPermissions)
+            });
         }
-        alert(JSON.stringify(results));
         setResponse(results);
    }
 
@@ -136,22 +136,20 @@ export default function Permissions(){
             margin="0rem 0rem 0rem 0.5rem" 
             minHeight="50vh"           
         >    
-            {
-                (requestResponse.isRequestError || requestResponse.isRequestSuccessful)&&
-                <Typography 
-                align="center" variant="h4" color={requestResponse.isRequestError?"red":"green"} 
-                font-size="1rem"
-                >
-                {requestResponse.message}
-                </Typography>
-            }
+
             <Card sx={{ maxWidth: 400,padding:"0.1rem 0rem" ,display:"block"}}>
                 <CardHeader
-                    title="Permissions"
+                    title={"Permissions"}
                     sx={{boxShadow:"inherit"}}
+                    subheader={requestResponse.message||""}
+                    subheaderTypographyProps={{align:"start" ,color:requestResponse.isRequestError?"red":"green"}}
                 />
                 <CardContent sx={{padding:"0rem 0.5rem"}}>
-                    <SelectHasSearch allOptions={permissions.listPermissions} setSelectedPermissions={setSelectedPermissions} />
+                    <SelectHasSearch
+                        allOptions={permissions.listPermissions}
+                        setSelectedPermissions={setSelectedPermissions}
+                        requestResponse={requestResponse}
+                    />
                 </CardContent>
                 
                 <CardActions> 
@@ -162,7 +160,7 @@ export default function Permissions(){
                             Add
                     </ColorButton>
                     <ColorButton 
-                            onClick={()=>setDeletePermission(true)}
+                            onClick={()=>{setDeletePermissionOpen(true);}}
                             sx={{padding:"0rem 0.5rem"}} variant="contained"
                             >
                                 Delete
@@ -173,7 +171,7 @@ export default function Permissions(){
             </Card>
             <Collapse in={isAddPermissionOpen} timeout="auto" unmountOnExit  sx={{display:{xs:"none",md:"block"}}}>
                 <AddPermission
-                     setAddPermission={setAddPermissionOpen}
+                     setAddPermissionOpen={setAddPermissionOpen}
                     setIsNewPermissionAdded={setIsNewPermissionAdded}
                 />
             </Collapse>
@@ -187,14 +185,14 @@ export default function Permissions(){
               <AddPermission setIsNewPermissionAdded={setIsNewPermissionAdded}  setAddPermissionOpen={setAddPermissionOpen}/>
             </Modal>
             {
-              deletePermission&&<SelectedItems 
+
+              isDeletePermissionOpen&&
+              <SelectedItems
                     heading ={"Permissions to delete" }
+                    openListSelectedItems={isDeletePermissionOpen}
                     SelectedItems={selectedPermissions}
+                    setOpenListSelectedItems={setDeletePermissionOpen}
                     setSelectedItems={deletePermissions}
-                    openListSelectedItems={deletePermission}
-                    setOpenListSelectedItems={setDeletePermission}
-                   
-                
                 />
             }
         </Box>
