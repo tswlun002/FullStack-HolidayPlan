@@ -82,9 +82,7 @@ export default function Permissions(){
             const newPermList =(list)=> list.filter((permItem)=>{
                   return !deletedPerm.find((permItem1)=>permItem.id===permItem1.id && permItem.name==permItem1.name);
             });
-            console.log(permissions.listPermissions);
             const temp =newPermList(permissions.listPermissions);
-           console.log(temp);
             setPermissions({ listPermissions: temp});
         }
         setResponse(results);
