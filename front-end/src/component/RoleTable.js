@@ -26,7 +26,7 @@ import { getAllPermissions } from '../utils/PermissionApi';
 import  {getAllRoles} from '../utils/RoleApi';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
-const header_background  ="linear-gradient(to right,rgba(145, 111, 179, 0.5),rgba(102, 51, 153, 0.85),rgba(77,26,127  , 0.90),rgba(155, 104, 207, 0.6))!important";
+const header_background  ="linear-gradient(to right,rgba(243, 156, 18, 0.5),rgba(243, 156, 18, 0.85),rgba(243, 156, 18,0.90),rgba(243, 156, 18, 0.6))!important";
 
 function descendingComparator(a, b, orderBy) {
         if (b[orderBy] < a[orderBy]) {
@@ -120,6 +120,7 @@ function EnhancedTableHead(props) {
               </TableCell>
             ))}
           </TableRow>
+
         </TableHead>
       );
 }
@@ -161,7 +162,7 @@ function EnhancedTableToolbar(props) {
                           key={index}
                           style={({isPending, isActive})=>{
                             return {
-                              color:isActive?"orange":
+                              color:isActive?"white":
                               isPending?"green":"black",
                               textDecoration:"none",  padding:"2rem 1rem"}
                           }}
@@ -183,7 +184,7 @@ EnhancedTableToolbar.propTypes = {
 export default function EnhancedTable() {
         const [order, setOrder] = React.useState('asc');
         const [orderBy, setOrderBy] = React.useState('name');
-        const [selected, setSelected] = React.useState([]);
+        const [selected, SetSelected] = React.useState([]);
         const [page, setPage] = React.useState(0);
         const [dense, setDense] = React.useState(false);
         const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -194,35 +195,37 @@ export default function EnhancedTable() {
         const currentPath = "/home-admin/roles-permissions";
         const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
-        const [deleterole , setDeleteRole] = React.useState(false);
+        const [isDeleteRoleOpen , setIsDeleteRoleOpen] = React.useState(false);
+        const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
         const [error, setError] = React.useState(false);
         const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
+        const [requestResponse , setResponse] = React.useReducer(
+                (state, action)=>{return {...state,...action}},
+                {isRequestError:false,message:"",isRequestSuccessful:false}
+        );
+
+        const setSelected =(role)=>{
+            SetSelected(role);
+            setResponse( {isRequestError:false,message:"",isRequestSuccessful:false});
+            setIsRoleDeleted(false);
+        }
         /////////////////////////////////////////////////////////////////
         //           FETCH ROLES
         ///////////////////////////////////////////////////////////////
         React.useEffect(()=>{
-
             let isMounted = true;
             const controller = new AbortController();
-
             const API = '/holiday-plan/api/admin/role/roles/';
             isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
             .then(response => {
                     if(response.ok || response.status===200){
                       console.log(response.data);
-                      setRoles(
-                        {
-                          listRoles:response.data,
-                          exceptionMessage:"Successfully get roles"
-                        }
-                      );
+                      setRoles({listRoles:response.data,exceptionMessage:"Successfully get roles"});
 
                     }
             })
             .catch(err => {
-
                     console.log(err);
-
                     if(!err?.response.ok){
                       const errorMessage  = getErrorMessage(err);
                       setRoles({exceptionMessage:errorMessage});
@@ -233,15 +236,81 @@ export default function EnhancedTable() {
             });
             return ()=>{isMounted=false; controller.abort();}
 
-        },[isRoleAdded,newPermissionAddedToRole]);
+        },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
 
+        //////////////////////////////////////////////////////////////////////////////
+        //                      DELETE ROLE(s)
+        ///////////////////////////////////////////////////////////////////////////////
+        const deleteRoles = async(rolesToDelete)=>{
+                if(rolesToDelete===null || rolesToDelete===undefined || rolesToDelete.length===0){
+                    setResponse({isRequestError:true,message:"No roles selected.",isRequestSuccessful:false});
+                }else{
+                   let  results ={isRequestSuccessful:false};
+                   let lastRole=null;
+                   let  successfulDeletedRoles=[];
+                   for(let roleToDelete of rolesToDelete){
+                        lastRole = roleToDelete;
+                        results= await deleteRoleApi(roleToDelete.name);
+                       if(results.isRequestError){
+                           break;
+                       }else successfulDeletedRoles.push(roleToDelete);
+                   }
+                    if(results.isRequestError){
+                       results.message= `${results.message}. role:${lastRole.name}`;
+                    }
+                   if(results.isRequestSuccessful){
 
+                        //remove deleted permissions from list
+                        const newRoleList =(list)=> list.filter((roleItem)=>{
+                              return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name==roleItem1.name);
+                        });
+                        const temp =newRoleList(selected);
+                        console.log(temp);
+                        setSelected(temp);
+                        setIsRoleDeleted(true);
+                   }
+                   setResponse(results);
+                }
+        }
+         // Delete role by name
+       const deleteRoleApi  = (roleName)=>{
+
+            const API = `/holiday-plan/api/admin/role/delete/?roleName=${roleName}`;
+            const newRequestResponse ={isRequestSuccessful:false,isRequestError:false,message:""};
+
+            return useAxiosPrivate.delete(API)
+            .then(response => {
+                if(response.ok || response.status===200){
+                    newRequestResponse.isRequestSuccessful=true;
+                    newRequestResponse.isRequestError=false;
+                    newRequestResponse.message="Successfully deleted role."
+               }
+              return newRequestResponse;
+            })
+            .catch(err => {
+                if(!err?.response.ok){
+                    const errorMessage  = getErrorMessage(err);
+                    newRequestResponse.isRequestSuccessful=false;
+                    newRequestResponse.isRequestError=true;
+                    newRequestResponse.message=errorMessage;
+                }
+                else{
+                    newRequestResponse.isRequestSuccessful=false;
+                    newRequestResponse.isRequestError=true;
+                    newRequestResponse.message="Server Error";
+               }
+               return newRequestResponse;
+            });
+
+       }
+
+         //Sort Request
         const handleRequestSort = (event, property) => {
             const isAsc = orderBy === property && order === 'asc';
             setOrder(isAsc ? 'desc' : 'asc');
             setOrderBy(property);
         };
-
+        //Handle select all roles
         const handleSelectAllClick = (event) => {
 
             if (event.target.checked) {
@@ -255,7 +324,7 @@ export default function EnhancedTable() {
             setIsRoleAdded(false);
 
         };
-
+         // Handle click on permission checkbox
         const handleClick = (event, element) => {
                 const selectedIndex = selected.map(element1=>element1.name).indexOf(element.name);
                 let newSelected = [];
@@ -310,10 +379,6 @@ export default function EnhancedTable() {
         );
 
         const [anchorElUser, setAnchorElUser] = React.useState(null);
-   
-
-
-  
 
   return (
   roles.listRoles.length===0?
@@ -324,7 +389,7 @@ export default function EnhancedTable() {
         <EnhancedTableToolbar 
           BarItems={[
           {name:"Add Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
-          {name:"Delete Role",link:`${currentPath}/delete-role`, fun:setDeleteRole},
+          {name:"Delete Role",link:`${currentPath}/delete-role`, fun:setIsDeleteRoleOpen},
           {name:"Add Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
         ]}
           setAnchorElUser ={setAnchorElUser}
@@ -340,6 +405,7 @@ export default function EnhancedTable() {
             size={dense ? 'small' : 'medium'}
           >
             <EnhancedTableHead
+
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -348,48 +414,59 @@ export default function EnhancedTable() {
               rowCount={roles.listRoles.length}
             />
             <TableBody>
-              
               {
-               
+
+                (requestResponse.isRequestError || requestResponse.isRequestSuccessful)&&
+                 <TableRow>
+                   <TableCell  variant="body" align="left"
+                       sx={{width:"100%",height:"1rem",color:requestResponse.isRequestError?"red":"green"}}
+                   >
+                       {requestResponse.message}
+                   </TableCell>
+                 </TableRow>
+              }
+
+               {
                visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row);
+                    const isItemSelected = isSelected(row);
 
-                const labelId = `enhanced-table-checkbox-${index}`;
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.name}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
+                    return (
+                      <TableRow
+                        hover
 
-                        onClick={(event) => handleClick(event, row)}
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          'aria-labelledby': labelId,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                    >
-                      {row.name}
-                    </TableCell>
-                    <TableCell align="right"><PermissionsOfRole permissions={row.permissions}/></TableCell>
-                  </TableRow>
-                );
-              })}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.name}
+                        selected={isItemSelected}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox
+
+                            onClick={(event) => handleClick(event, row)}
+                            color="primary"
+                            checked={isItemSelected}
+                            inputProps={{
+                              'aria-labelledby': labelId,
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="none"
+                        >
+                          {row.name}
+                        </TableCell>
+                        <TableCell align="right"><PermissionsOfRole permissions={row.permissions}/></TableCell>
+                      </TableRow>
+                    );
+                  })
+              }
               {emptyRows > 0 && (
                 <TableRow
                   style={{
@@ -398,7 +475,8 @@ export default function EnhancedTable() {
                 >
                   <TableCell colSpan={6} />
                 </TableRow>
-              )}
+              )
+               }
             </TableBody>
           </Table>
         </TableContainer>
@@ -437,12 +515,12 @@ export default function EnhancedTable() {
       >
         <AddRole setIsRoleAdded={setIsRoleAdded} setAddRoleOpen={setAddRoleOpen}/>
       </Modal>
-      {deleterole&&<SelectedItems 
-                    heading ={"Delete Role" }
+      {isDeleteRoleOpen&&<SelectedItems
+                    heading ={"Roles to delete" }
                     SelectedItems={selected}
-                    setSelectedItems={setSelected}
-                    openListSelectedItems={deleterole}
-                    setOpenListSelectedItems={setDeleteRole}
+                    setSelectedItems={deleteRoles}
+                    openListSelectedItems={isDeleteRoleOpen}
+                    setOpenListSelectedItems={setIsDeleteRoleOpen}
                 
       />}
     </Box>

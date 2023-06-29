@@ -57,7 +57,34 @@ export default function RoleAndPermission() {
   React.useReducer((state, action)=>{return{...state,...action}},{listPermissions:[],exceptionMessage:""});
   const theme =  useTheme();
   const small = useMediaQuery(theme.breakpoints.down('sm'));
+  const usePrivateAxios = UsePrivateAxios();
+  //Get all permissions
+    React.useEffect(()=>{
+          let isMounted = true;
+          const controller = new AbortController();
+          const API = '/holiday-plan/api/admin/permission/permissions/';
+          isMounted && usePrivateAxios.get(API, {signal:controller.signal})
+          .then(response => {
+              if(response.ok || response.status===200){
+                  setPermissions({
+                      listPermissions:response.data,
+                      exceptionMessage:"Successfully fetched permissions"
+                  });
+              }
+          })
+          .catch(err => {
 
+              if(!err?.response.ok){
+                  const errorMessage  = getErrorMessage(err);
+                  setPermissions({exceptionMessage:errorMessage});
+              }
+              else{
+                  setPermissions({exceptionMessage:"Server Error"});
+              }
+          });
+  	    return ()=>{isMounted=false; controller.abort();}
+
+    },[]);
   return (
     <RolePermissionContext.Provider value={{roles, setRoles, permissions ,setPermissions}}>
      
