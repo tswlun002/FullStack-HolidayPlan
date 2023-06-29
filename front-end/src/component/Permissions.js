@@ -80,14 +80,10 @@ export default function Permissions(){
         if(results.isRequestSuccessful){
             //remove deleted permissions from list
             const newPermList =(list)=> list.filter((permItem)=>{
-                  return deletedPerm.some((permItem1)=>{
-                      return  !(permItem.id===permItem1.id);
-                  });
+                  return !deletedPerm.find((permItem1)=>permItem.id===permItem1.id && permItem.name==permItem1.name);
             });
-
-            setPermissions({
-                listPermissions: newPermList(permissions.listPermissions)
-            });
+            const temp =newPermList(permissions.listPermissions);
+            setPermissions({ listPermissions: temp});
         }
         setResponse(results);
    }

@@ -32,5 +32,5 @@ public interface RolesRepository  extends JpaRepository<Role, Integer> {
             nativeQuery = true)
     int deletePermissionFromRole(long roleId, long permissionId);
      @Query("select r from Role r join fetch r.permissions")
-    Set<Role> findAllRoles();
+    Set<Role> findAllRolesHasPermissions();
 }
