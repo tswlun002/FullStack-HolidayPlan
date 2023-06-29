@@ -212,6 +212,7 @@ public class RoleService implements  OnRole{
      * @return true if the role is deleted else false
      */
     @Override
+    @Transactional
     public boolean deleteRole(String roleName) {
         var role = getRole(roleName);
         if(role==null) throw  new NullPointerException("Role is invalid");
