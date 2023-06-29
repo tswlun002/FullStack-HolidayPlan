@@ -49,7 +49,7 @@ function getComparator(order, orderBy) {
 // only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
 // with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
-        console.log(array);
+
         const stabilizedThis = array.map((el, index) => [el, index]);
         stabilizedThis.sort((a, b) => {
             const order = comparator(a[0], b[0]);
@@ -58,15 +58,16 @@ function stableSort(array, comparator) {
             }
             return a[1] - b[1];
         });
+        console.log(stabilizedThis.map((el)=>el[0]));
         return stabilizedThis.map((el) => el[0]);
 }
 
 const headCells = [
       {
-            id: 'Roles',
+            id: 'name',
             numeric: false,
             disablePadding: true,
-            label: 'Roles',
+            label: 'name',
       },
       {
             id: 'Permissions',
@@ -134,8 +135,6 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
         const { numSelected, setAddPermission} = props;
- 
-   
         return (
         <Toolbar disableGutters sx={{background:header_background,}} >
           <Typography
@@ -183,7 +182,7 @@ EnhancedTableToolbar.propTypes = {
 
 export default function EnhancedTable() {
         const [order, setOrder] = React.useState('asc');
-        const [orderBy, setOrderBy] = React.useState('Roles');
+        const [orderBy, setOrderBy] = React.useState('name');
         const [selected, setSelected] = React.useState([]);
         const [page, setPage] = React.useState(0);
         const [dense, setDense] = React.useState(false);
@@ -192,12 +191,12 @@ export default function EnhancedTable() {
         const {barRoleActions} = useParams();
         const [isAddPermission, setAddPermission] = React.useState(false);
         const useAxiosPrivate = UsePrivateAxios();
-       const currentPath = "/home-admin/roles-permissions";
-       const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
-       const [isRoleAdded, setIsRoleAdded] = React.useState(false);
-       const [deleterole , setDeleteRole] = React.useState(false);
-       const [error, setError] = React.useState(false);
-       const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
+        const currentPath = "/home-admin/roles-permissions";
+        const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
+        const [isRoleAdded, setIsRoleAdded] = React.useState(false);
+        const [deleterole , setDeleteRole] = React.useState(false);
+        const [error, setError] = React.useState(false);
+        const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
         /////////////////////////////////////////////////////////////////
         //           FETCH ROLES
         ///////////////////////////////////////////////////////////////
@@ -244,21 +243,21 @@ export default function EnhancedTable() {
         };
 
         const handleSelectAllClick = (event) => {
-            if (event.target.checked) {
-              const newSelected = roles.listRoles.map((element) => element.name);
-              setSelected(newSelected);
 
+            if (event.target.checked) {
+              const newSelected = roles.listRoles;
+              setSelected(newSelected);
               return;
             }
             setSelected([]);
             setAddPermission(false);
-             setNewPermissionAddedToRole(false);
-             setIsRoleAdded(false);
+            setNewPermissionAddedToRole(false);
+            setIsRoleAdded(false);
 
         };
 
         const handleClick = (event, element) => {
-                const selectedIndex = selected.indexOf(element);
+                const selectedIndex = selected.map(element1=>element1.name).indexOf(element.name);
                 let newSelected = [];
 
                 if (selectedIndex === -1) {
@@ -295,7 +294,9 @@ export default function EnhancedTable() {
             setDense(event.target.checked);
         };
 
-        const isSelected = (element) => selected.indexOf(element) !== -1;
+        const isSelected = (element) => {
+            return selected.map(element1=>element1.name).indexOf(element.name) !==-1;
+        }
 
         // Avoid a layout jump when reaching the last page with empty rows.
         const emptyRows =page > 0 ? Math.max(0, (1 + page) * rowsPerPage - roles.listRoles.length) : 0;
@@ -352,6 +353,7 @@ export default function EnhancedTable() {
                
                visibleRows.map((row, index) => {
                 const isItemSelected = isSelected(row);
+
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
