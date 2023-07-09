@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin( origins = "*")
-@RequestMapping("/holiday-plan/api/admin/")
+@RequestMapping("/holiday-plan/api/admin/user/")
 @AllArgsConstructor
 public class AdminController {
 
     private final UserService userService;
-    @PostMapping(value="user/save/",consumes = {"application/json"})
+    @PostMapping(value="save/",consumes = {"application/json"})
     public ResponseEntity<Boolean> saveAdmin(@RequestBody @Validated @NonNull RegisterUserRequest request){
 
             var user  = User.builder().firstname(request.firstname()).lastname(request.lastname())
@@ -47,7 +47,7 @@ public class AdminController {
     }
 
 
-    @GetMapping(path = "user/details/")
+    @GetMapping(path = "details/")
     public ResponseEntity<User> getMyDetails()  {
 
         User user =  userService.getLoginedUser();
@@ -56,30 +56,42 @@ public class AdminController {
         return  new ResponseEntity<>(user, HttpStatus.FOUND);
 
     }
-    @GetMapping(path = "username/{userName}")
+    @GetMapping(path = "{userName}")
     public ResponseEntity<User> get(@PathVariable("userName") String userName) throws NotFoundException {
         User user =  userService.getUser(userName);
         if(user ==null)throw  new NotFoundException("User is not found");
         return  new ResponseEntity<>(user, HttpStatus.FOUND);
 
     }
-    @PatchMapping(value = "add/role/")
-    public ResponseEntity<Boolean> addNewRoleToUser(
-            @RequestParam String roleName, @RequestParam  String username){
-        return  userService.addNewRoleToUser(username, roleName)?
+      @PatchMapping(value = "add/role/")
+    public ResponseEntity<Boolean> addRoleToUser( @RequestParam  String username, @RequestParam String roleName){
+        return  userService.addNewRoleToUser(username,roleName)?
                 new ResponseEntity<>(true, HttpStatus.OK):
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @DeleteMapping(value = "/delete/user/")
-    public ResponseEntity<Boolean>   deleteRoleFromUser(@RequestParam String userName, @RequestParam String userRole){
-
-        return  userService.deleteRoleFromUser(userName,userRole)?
+    @DeleteMapping(value = "delete/role/")
+    public ResponseEntity<Boolean>   deleteRoleFromUser(@RequestParam String username, @RequestParam String roleName){
+        return  userService.deleteRoleFromUser(username,roleName)?
                 new ResponseEntity<>(true, HttpStatus.OK):
                 new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }
-    @DeleteMapping("delete/user/{userName}" )
-    public  ResponseEntity<Boolean> delete(@PathVariable String userName){
+    @PatchMapping(value = "add/permission/")
+    public ResponseEntity<Boolean> addPermissionToUser( @RequestParam  String username, @RequestParam String permissionName){
+        return  userService.addPermissionToUser(username,permissionName)?
+                new ResponseEntity<>(true, HttpStatus.OK):
+                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @DeleteMapping(value = "delete/permission/")
+    public ResponseEntity<Boolean>   deletePermissionFromUser(@RequestParam String username, @RequestParam String permissionName){
+        return  userService.deletePermissionFromUser(username,permissionName)?
+                new ResponseEntity<>(true, HttpStatus.OK):
+                new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @DeleteMapping("delete/" )
+    public  ResponseEntity<Boolean> delete(@RequestParam String userName){
         boolean deleted= userService.deleteUser(userName);
         if(deleted)return  new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);

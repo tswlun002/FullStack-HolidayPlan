@@ -13,15 +13,6 @@ import {getErrorMessage} from '../utils/Error';
 export default function AddPermissionToRole({setAddPermission, roles, setNewPermissionAddedToRole}){
     const {permissions} =  useContext(RolePermissionContext);
     const useAxiosPrivate = UsePrivateAxios();
-    const [rolePermissions, setRolePermission] = useReducer(
-        (state, action)=>{
-           return {...state, ...action}
-        },{
-            permissionToadd:[],
-    
-        }
-        )
-
     const [requestResponse , setResponse] = useReducer(
         (state, action)=>{return {...state,...action}},
         {isRequestError:false,message:"",isRequestSuccessful:false}
@@ -125,16 +116,20 @@ export default function AddPermissionToRole({setAddPermission, roles, setNewPerm
                 <CardContent sx={{padding:"0rem 0.5rem"}}>
                     <SelectHasSearch
                          allOptions = {permissions.listPermissions}
-                         setSelectedPermissions={setSelectedPermissions} />
+                         setSeletedOptions={setSelectedPermissions} 
+                        fieldName="name"
+                    />
                 </CardContent>
                 
                 <CardActions> <ColorButton onClick={()=> setOpen(true)}  sx={{padding:"0rem 0.5rem"}} variant="contained">Add</ColorButton></CardActions>
             
             </Card>
             {open&&<SelectedItems 
+                    fieldName="name"
                     heading ={"Add Permissions to Role" }
                     SelectedItems={selectedPermissions}
                     setSelectedItems={addPermissionsToRole}
+                    
                     openListSelectedItems={open}
                     setOpenListSelectedItems={setOpen}
                 

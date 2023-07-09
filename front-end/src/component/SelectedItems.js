@@ -4,10 +4,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useState ,useReducer} from 'react';
 
-export default function SelectedItems({heading, SelectedItems,setSelectedItems,openListSelectedItems, setOpenListSelectedItems}){
-    const removeItem = (itemTORemove, items)=>{
-        return items.filter(item=> item.name !==itemTORemove);
+export default function SelectedItems({heading, SelectedItems,fieldName="name",setSelectedItems,openListSelectedItems, setOpenListSelectedItems}){
+    const itemName =(item)=>{
+        return fieldName.split(',').map(field=>item[field.trim()]).join(' ');
     }
+
+    const removeItem = (itemTORemove, items)=>{
+        return items.filter(item=> itemName(item) !==itemTORemove);
+    }
+
     const [itemsLocally, setItemsLocally] = useState(SelectedItems);
 
    const [reuqestResponse , setResponse] = useReducer((state, action)=>{return {...state,...action}},{isRequestError:false,message:"",isRequestSuccessful:false});
@@ -37,14 +42,15 @@ export default function SelectedItems({heading, SelectedItems,setSelectedItems,o
                         
                     itemsLocally.map(
                     (item)=>{
+                        
                         return (
                         <ListItem sx={{width:"100%"}}>
-                            <ListItemText key={item.name} primary={item.name}/>
+                            <ListItemText key={itemName(item)} primary={itemName(item)}/>
                             <IconButton 
                                 key={item.id} 
                                 sx={{width:"1rem"}}
                                 onClick={()=> setItemsLocally(()=>{
-                                    return removeItem(item.name, itemsLocally);
+                                    return removeItem(itemName(item), itemsLocally);
                                 })}
                             >
                                 <DeleteIcon/>

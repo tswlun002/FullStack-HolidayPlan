@@ -14,25 +14,33 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
-import PermissionsOfRole from './PermissionsOfRole'
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
-import AddPermissionToRole from '../component/AddPermissionToRole';
-import { NavLink, useParams } from 'react-router-dom';
-import AddRole from './AddRole';
+import { NavLink } from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
+import RolesPermissionsOfUser from './RolesPermissionsOfUser';
+import AddRoleToUser from './AddRoleToUser';
+import AddPermissionToRole from './AddPermissionToRole';
 const header_background  ="linear-gradient(to right,rgba(243, 156, 18, 0.5),rgba(243, 156, 18, 0.85),rgba(243, 156, 18,0.90),rgba(243, 156, 18, 0.6))!important";
 
 function descendingComparator(a, b, orderBy) {
+         a.fullname= `${a.firstname} ${a.lastname}`;
+         b.fullname= `${b.firstname} ${b.lastname}`;
         if (b[orderBy] < a[orderBy]) {
+             delete  a.fullname;
+             delete  b.fullname;
             return -1;
         }
         if (b[orderBy] > a[orderBy]) {
+            delete  a.fullname;
+            delete  b.fullname;
             return 1;
         }
+        delete  a.fullname;
+        delete  b.fullname;
         return 0;
 }
 
@@ -61,18 +69,37 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-      {
-            id: 'name',
-            numeric: false,
-            disablePadding: true,
-            label: 'name',
-      },
-      {
-            id: 'Permissions',
-            numeric: true,
-            disablePadding: false,
-            label: 'Permissions of Role',
-      }
+    {
+        id: 'fullname',
+        numeric: false,
+        disablePadding: true,
+        label: 'Fullname',
+    },
+    
+    {
+        id: 'username',
+        numeric: false,
+        disablePadding: true,
+        label: 'Email',
+    },
+    {
+      id: 'age',
+      numeric: false,
+      disablePadding: true,
+      label: 'Date of birth',
+    },
+    {
+        id: 'roles',
+        numeric: false,
+        disablePadding: true,
+        label: 'Roles',
+    },
+    {
+        id: 'Permissions',
+        numeric: false,
+        disablePadding: false,
+        label: 'Permissions',
+    }
 ];
 
 function EnhancedTableHead(props) {
@@ -98,8 +125,8 @@ function EnhancedTableHead(props) {
             {headCells.map((headCell) => (
               <TableCell
                 key={headCell.id}
-                align={headCell.numeric ? 'right' : 'left'}
-                padding={headCell.disablePadding ? 'none' : 'normal'}
+                align={'center'}
+                padding={'checkbox'}
                 sortDirection={orderBy === headCell.id ? order : false}
               >
                 <TableSortLabel
@@ -133,7 +160,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-        const { numSelected} = props;
+        const { numSelected, setAddPermission} = props;
         return (
         <Toolbar disableGutters sx={{background:header_background,}} >
           <Typography
@@ -179,68 +206,86 @@ EnhancedTableToolbar.propTypes = {
          numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+export default function ListUsers() {
         const [order, setOrder] = React.useState('asc');
-        const [orderBy, setOrderBy] = React.useState('name');
+        const [orderBy, setOrderBy] = React.useState('f');
         const [selected, SetSelected] = React.useState([]);
         const [page, setPage] = React.useState(0);
         const [dense, setDense] = React.useState(false);
         const [rowsPerPage, setRowsPerPage] = React.useState(5);
         const {roles, setRoles} =  React.useContext(RolePermissionContext);
         const [isAddPermission, setAddPermission] = React.useState(false);
+        const [isDeletePermission, setDeletermission] = React.useState(false);
         const useAxiosPrivate = UsePrivateAxios();
-
-        const currentPath = "/home-admin/roles-permissions";
+        const currentPath = "/home-admin/users";
         const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
         const [isDeleteRoleOpen , setIsDeleteRoleOpen] = React.useState(false);
         const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
         const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
-        const [requestResponse , setResponse] = React.useReducer(
+        const [users , dispatchUsers] = React.useReducer(
                 (state, action)=>{return {...state,...action}},
-                {isRequestError:false,message:"",isRequestSuccessful:false}
+                {data:[],isRequestError:false,message:"",isRequestSuccessful:false}
         );
+        //const[users, dispatchUsers] = React.useState([]);
 
         const setSelected =(role)=>{
             SetSelected(role);
-            setResponse( {isRequestError:false,message:"",isRequestSuccessful:false});
+            dispatchUsers( {isRequestError:false,message:"",isRequestSuccessful:false});
             setIsRoleDeleted(false);
         }
         /////////////////////////////////////////////////////////////////
-        //           FETCH ROLES
-        ///////////////////////////////////////////////////////////////
+        // FETCH USERS 
+        ////////////////////////////////////////////////////////////////
+
         React.useEffect(()=>{
-            let isMounted = true;
-            const controller = new AbortController();
-            const API = '/holiday-plan/api/admin/role/roles/';
-            isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
-            .then(response => {
+              let isMounted = true;
+              const controller = new AbortController();
+              const API = '/holiday-plan/api/admin/user/users/';
+              useAxiosPrivate.get(API, {signal:controller.signal})
+              .then(response =>
+                  {
                     if(response.ok || response.status===200){
-                      console.log(response.data);
-                      setRoles({listRoles:response.data,exceptionMessage:"Successfully get roles"});
+                      console.log("Ok");
+                      console.log(response.data)
+                      dispatchUsers({data:response.data})
 
-                    }
-            })
-            .catch(err => {
+                  }
+
+
+                }
+              ).catch(err =>
+                {
                     console.log(err);
-                    if(!err?.response.ok){
-                      const errorMessage  = getErrorMessage(err);
-                      setRoles({exceptionMessage:errorMessage});
-                    }
-                    else{
-                      setRoles({exceptionMessage:"Server Error"});
-                    }
-            });
-            return ()=>{isMounted=false; controller.abort();}
+                    console.log("Not ok");
+                    if(!err?.response.ok && err.name!=="AbortErr"){
+                        let errorMessage =null;
+                        if(err.response.status===404){
+                          console.log("Not ok ,********");
+                          errorMessage  ="Invalid credentials";
+                        }
+                        else if(err.response.status===401){
+                              errorMessage  ="Denied access";
+                        }
+                        else{
+                              console.log(err.response.statusText);
+                              errorMessage  = getErrorMessage(err);
+                        }
+                        dispatchUsers({message:errorMessage,isRequestSuccessful : false,isRequestError:true})
+                    }else dispatchUsers({message:"Server Error",isRequestSuccessful : false,isRequestError:true})
 
-        },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
+                }
+              );
+
+              return ()=>{isMounted=false; controller.abort();}
+      },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
 
         //////////////////////////////////////////////////////////////////////////////
         //                      DELETE ROLE(s)
         ///////////////////////////////////////////////////////////////////////////////
         const deleteRoles = async(rolesToDelete)=>{
                 if(rolesToDelete===null || rolesToDelete===undefined || rolesToDelete.length===0){
-                    setResponse({isRequestError:true,message:"No roles selected.",isRequestSuccessful:false});
+                    dispatchUsers({isRequestError:true,message:"No roles selected.",isRequestSuccessful:false});
                 }else{
                    let  results ={isRequestSuccessful:false};
                    let lastRole=null;
@@ -266,7 +311,7 @@ export default function EnhancedTable() {
                         setSelected(temp);
                         setIsRoleDeleted(true);
                    }
-                   setResponse(results);
+                   dispatchUsers(results);
                 }
         }
          // Delete role by name
@@ -311,8 +356,7 @@ export default function EnhancedTable() {
         const handleSelectAllClick = (event) => {
 
             if (event.target.checked) {
-              const newSelected = roles.listRoles;
-              setSelected(newSelected);
+              setSelected(users.data);
               return;
             }
             setSelected([]);
@@ -322,12 +366,12 @@ export default function EnhancedTable() {
 
         };
          // Handle click on permission checkbox
-        const handleClick = (event, element) => {
-                const selectedIndex = selected.map(element1=>element1.name).indexOf(element.name);
+        const handleClick = (event, user) => {
+                const selectedIndex = selected.map(user1=>user1.username).indexOf(user.username);
                 let newSelected = [];
 
                 if (selectedIndex === -1) {
-                  newSelected = newSelected.concat(selected, element);
+                  newSelected = newSelected.concat(selected, user);
                 } else if (selectedIndex === 0) {
                   newSelected = newSelected.concat(selected.slice(1));
                 } else if (selectedIndex === selected.length - 1) {
@@ -360,34 +404,35 @@ export default function EnhancedTable() {
             setDense(event.target.checked);
         };
 
-        const isSelected = (element) => {
-            return selected.map(element1=>element1.name).indexOf(element.name) !==-1;
+        const isSelected = (user) => {
+            return selected.map(user1=>user1.username).indexOf(user.username) !==-1;
         }
 
         // Avoid a layout jump when reaching the last page with empty rows.
         const emptyRows =page > 0 ? Math.max(0, (1 + page) * rowsPerPage - roles.listRoles.length) : 0;
 
         const visibleRows = React.useMemo(() =>
-              stableSort(roles.listRoles, getComparator(order, orderBy)).slice(
+              stableSort(users.data, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
               ),
-            [roles.listRoles,order, orderBy, page, rowsPerPage],
+            [users.data,order, orderBy, page, rowsPerPage],
         );
 
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   return (
-  roles.listRoles.length===0?
+  users.data.length===0?
       <Typography align="center" variant="h4" color="red" font-size="1rem">{roles.exceptionMessage}</Typography>
    :
     <Box sx={{ width: '100%', display:{xs:"block",md:"flex"}}}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
           BarItems={[
-          {name:"Add Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
-          {name:"Delete Role",link:`${currentPath}/delete-role`, fun:setIsDeleteRoleOpen},
-          {name:"Add Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
+            {name:"Edit-user",link:`${currentPath}/edit-user`, fun:setIsDeleteRoleOpen},
+            {name:"Delete-user",link:`${currentPath}/delete-user`, fun:setIsDeleteRoleOpen},
+            {name:"Add-Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
+            {name:"Add-Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
         ]}
           setAnchorElUser ={setAnchorElUser}
           anchorElUser={anchorElUser}
@@ -408,42 +453,40 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={roles.listRoles.length}
+              rowCount={users.data.length}
             />
             <TableBody>
               {
 
-                (requestResponse.isRequestError || requestResponse.isRequestSuccessful)&&
+                (users.isRequestError || users.isRequestSuccessful)&&
                  <TableRow>
                    <TableCell  variant="body" align="left"
-                       sx={{width:"100%",height:"1rem",color:requestResponse.isRequestError?"red":"green"}}
+                       sx={{width:"100%",height:"1rem",color:users.isRequestError?"red":"green"}}
                    >
-                       {requestResponse.message}
+                       {users.message}
                    </TableCell>
                  </TableRow>
               }
 
                {
-               visibleRows.map((row, index) => {
-                    const isItemSelected = isSelected(row);
+               visibleRows.map((user, index) => {
+                    const isItemSelected = isSelected(user);
 
                     const labelId = `enhanced-table-checkbox-${index}`;
 
                     return (
                       <TableRow
                         hover
-
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.name}
+                        key={user.id}
                         selected={isItemSelected}
                         sx={{ cursor: 'pointer' }}
                       >
                         <TableCell padding="checkbox">
                           <Checkbox
-
-                            onClick={(event) => handleClick(event, row)}
+                            onClick={(event) => handleClick(event, user)}
                             color="primary"
                             checked={isItemSelected}
                             inputProps={{
@@ -452,14 +495,43 @@ export default function EnhancedTable() {
                           />
                         </TableCell>
                         <TableCell
+                            padding="checkbox"
                           component="th"
                           id={labelId}
                           scope="row"
-                          padding="none"
+                          variant="body"
+                          sx={{color:"black",fontFamily:"bold"}}
+                          align="center"
                         >
-                          {row.name}
+                          {`${user.firstname} ${user.lastname}`}
                         </TableCell>
-                        <TableCell align="right"><PermissionsOfRole permissions={row.permissions}/></TableCell>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="checkbox"
+                          align="center"
+                          variant="body"
+                          sx={{color:"black",fontFamily:"bold"}}
+                        >
+                          {user.username}
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="checkbox"
+                          align="center"
+                          variant="body"
+                          sx={{color:"black",fontFamily:"bold"}}
+                        >
+                          {
+                           user.age&&JSON.stringify(user.age).substring(1,11)
+                          }
+                        </TableCell>
+                        <TableCell align="center"><RolesPermissionsOfUser permissions={user.roles}/></TableCell>
+
+                        <TableCell align="center"><RolesPermissionsOfUser permissions={user.permissions}/></TableCell>
                       </TableRow>
                     );
                   })
@@ -509,29 +581,34 @@ export default function EnhancedTable() {
             roles={selected} setAddPermission={setAddPermission}
           />
       </Modal>
+
       <Collapse 
           in={isAddRoleOpen} 
-          timeout="auto" 
-          unmountOnExit  
+          timeout="auto" unmountOnExit  
           sx={{display:{xs:"none",md:"block"}}}>
-          <AddRole  
-            setIsRoleAdded={setIsRoleAdded} 
-            setAddRoleOpen={setAddRoleOpen}
+          <AddRoleToUser 
+             setNewRoleAddedToUser={setIsRoleAdded} 
+             users={selected} 
+             setAddRole={setAddRoleOpen}
           />
       </Collapse>
       <Modal
-         open ={isAddRoleOpen}
-         onClose={()=>setAddPermission(false)}
+          open ={isAddRoleOpen}
+          onClose={()=>setAddPermission(false)}
           aria-labelledby="child-modal-title"
           aria-describedby="child-modal-description"
           sx={{display:{xs:"flex",md:"none"},justifyContent:'center',alignItems:'center' }}
       >
-        <AddRole setIsRoleAdded={setIsRoleAdded} setAddRoleOpen={setAddRoleOpen}/>
+        <AddRoleToUser 
+            setAddRole={setAddRoleOpen} 
+            setNewRoleAddedToUser={setIsRoleAdded}
+            users={selected}
+        />
       </Modal>
       {isDeleteRoleOpen&&<SelectedItems
                     heading ={"Roles to delete" }
                     SelectedItems={selected}
-                    fieldName={"name"}
+                    fieldName={"firstname,lastname"}
                     setSelectedItems={deleteRoles}
                     openListSelectedItems={isDeleteRoleOpen}
                     setOpenListSelectedItems={setIsDeleteRoleOpen}

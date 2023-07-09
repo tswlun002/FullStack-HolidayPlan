@@ -59,34 +59,9 @@ public class UserController {
         if(user ==null)throw  new NotFoundException("User is not found");
         return  new ResponseEntity<>(user, HttpStatus.FOUND);
     }
-    @PatchMapping(value = "add/role/")
-    public ResponseEntity<Boolean> addRoleToUser( @RequestParam  String username, @RequestParam String roleName){
-        return  userService.addNewRoleToUser(username,roleName)?
-                new ResponseEntity<>(true, HttpStatus.OK):
-                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    @DeleteMapping(value = "delete/role/")
-    public ResponseEntity<Boolean>   deleteRoleFromUser(@RequestParam String username, @RequestParam String roleName){
-        return  userService.deleteRoleFromUser(username,roleName)?
-                new ResponseEntity<>(true, HttpStatus.OK):
-                new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
-    }
-    @PatchMapping(value = "add/permission/")
-    public ResponseEntity<Boolean> addPermissionToUser( @RequestParam  String username, @RequestParam String permissionName){
-        return  userService.addPermissionToUser(username,permissionName)?
-                new ResponseEntity<>(true, HttpStatus.OK):
-                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    @DeleteMapping(value = "delete/permission/")
-    public ResponseEntity<Boolean>   deletePermissionFromUser(@RequestParam String username, @RequestParam String permissionName){
-        return  userService.deletePermissionFromUser(username,permissionName)?
-                new ResponseEntity<>(true, HttpStatus.OK):
-                new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
-    }
+  
     @DeleteMapping("delete/{username}" )
-    public  ResponseEntity<Boolean> delete(@PathVariable("username") String username){
+    public  ResponseEntity<Boolean> delete(@RequestParam String username){
         boolean deleted=false;
         try {
             deleted= userService.deleteUser(username);

@@ -126,6 +126,7 @@ const App=()=>{
             <Route path="roles-permissions/:barRoleActions" element={<RoleAndPermission/>}/>
             <Route path="profile" element={<Profile/>}/>
             <Route path="users" element={<Users/>}/>
+            <Route path="users/:userActions" element={<Users/>}/>
           </Route>
           <Route path="*" element={<MissingPage/>}/>
 

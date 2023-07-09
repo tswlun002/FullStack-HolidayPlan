@@ -67,7 +67,7 @@ const RegisterAdminForm =()=>{
             backgroundColor="#dfe0e6"
 
               >
-              <Card sx={{ maxWidth: 400, margin:"7rem 0rem",display:"block"}}>
+              <Card sx={{ maxWidth: 400, margin:"1rem 0rem",display:"block"}}>
                     <CardContent>
                      <h2 className="heading">Employee</h2>
                     <form className="register-inputs" autoComplete="off">
