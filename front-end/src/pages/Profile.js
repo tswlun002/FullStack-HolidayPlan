@@ -37,20 +37,27 @@ const Profile = ()=> {
 
           },
           {
-            firstname:"",lastname:"",email:"",newPassword:"",currentPassword:"", edited:false,
-            isEditError:false, errorMessage: "",isRequestSucceeded:false, requestResponseMessage:""
+            firstname:"",lastname:"",email:"",newPassword:"",currentPassword:"",confirmNewPassword:"", edited:false,
+            isEditError:false, age:"",errorMessage: "",isRequestSucceeded:false, requestResponseMessage:""
           }
       );
 
       const [expanded, setExpanded] = React.useState({showInfo:true,showEdit:false});
+      const [dateType, setDateType]= React.useState("text");
 
        const handleExpandClick = () => {
           setExpanded({showInfo:!expanded.showInfo,showEdit:!expanded.showEdit});
        }
        const OnSubmit =(e)=>{
            e.preventDefault();
-           if(profile.email.trim() === ""&& profile.newPassword.trim() === "" &&  profile.firstname.trim() === ""&&
-             profile.lastname.trim() === "" &&profile.currentPassword.trim() === ""){
+           if(!(profile.confirmNewPassword.trim()===profile.newPassword.trim())){
+              dispatchProfile({isEditError:true, errorMessage:"new password a and confim password must be equal"});
+
+           }
+           else if(profile.email.trim() === ""&& profile.newPassword.trim() === "" &&  profile.firstname.trim() === ""&&
+             profile.lastname.trim() === "" &&profile.currentPassword.trim() === ""&&profile.age.trim() === "" 
+             ){
+
                dispatchProfile({isEditError:true, errorMessage:"At least one field  is required"});
            }else{
 
@@ -82,8 +89,9 @@ const Profile = ()=> {
         }
         const ClearForm= ()=>{
           setTimeout(()=>{
-              dispatchProfile({firstname:"",lastname:"",email:"",newPassword:"",currentPassword:"", edited:false,
-                                                           isEditError:false, errorMessage: null})
+              dispatchProfile({firstname:"",lastname:"",email:"",newPassword:"",
+              currentPassword:"",confirmNewPassword:"", edited:false,
+              isEditError:false, errorMessage: null})
           },200)
         }
 
@@ -183,8 +191,24 @@ const Profile = ()=> {
                 helpertext=""
                 id="demo-helper-text-aligned"
                 label="Email"
-            type="email" className="email-input" placeholder="enter email" value={profile.email}
-             onChange={(e)=>dispatchProfile({email:e.target.value,isEditError:false })}></CssTextField>
+                 type="email" className="email-input" placeholder="enter email" value={profile.email}
+                onChange={(e)=>dispatchProfile({email:e.target.value,isEditError:false })}
+             />
+
+            <CssTextField
+                variant="outlined"
+                helpertext=""
+                id="demo-helper-text-aligned"
+                label="Date of Birth"
+                onClick={()=>setDateType("date")}
+                onBlur={()=>{setDateType("text")}}
+                type={dateType} className="age-input" placeholder="enter date of birth" value={profile.age}
+                onChange={(e)=>{
+                  console.log(e.target.value);
+                  dispatchProfile({age:e.target.value,isEditError:false });
+                }
+                }
+              />
 
             <CssTextField
 
@@ -193,19 +217,35 @@ const Profile = ()=> {
                 id="demo-helper-text-aligned"
                 label="New-password"
                 color="secondary"
-            type="password" autoComplete='new-password' className="new-password-input" placeholder="Enter new password" value={profile.newPassword}
-            onChange={(e)=>dispatchProfile({newPassword:e.target.value, isEditError:false})}></CssTextField>
+                type="password" autoComplete='new-password' className="new-password-input"
+                placeholder="Enter new password" value={profile.newPassword}
+                onChange={(e)=>dispatchProfile({newPassword:e.target.value, isEditError:false})}
+            />
+            <CssTextField
+                
+                variant="outlined"
+                id="demo-helper-text-aligned"
+                label="Confirm-new-password"
+                color="secondary"
+                type="password" autoComplete='confirm-new-password' className="confirm-new-password-input" 
+                placeholder="Confirm new password" value={profile.confirmNewPassword}
+                onChange={(e)=>dispatchProfile({confirmNewPassword:e.target.value, isEditError:false})}
+            />
 
              <CssTextField
+                
                 required
                 variant="outlined"
                 helpertext=""
                 id="demo-helper-text-aligned"
-                label="Confirm-password"
+                label="Current-password"
                 color="secondary"
-                type="password" autoComplete='new-password' className="current-password-input" placeholder="Enter current password"
+                type="password" autoComplete='new-password' className="current-password-input" 
+                placeholder="Enter current password"
                 value={profile.currentPassword}
-              onChange={(e)=>dispatchProfile({currentPassword:e.target.value, isEditError:false})}></CssTextField>
+                onChange={(e)=>dispatchProfile({currentPassword:e.target.value, isEditError:false})}
+              
+            />
 
               <Button color="secondary" variant="outlined" style={{marginTop:"15px"}}
                                     onClick={(e)=>OnSubmit(e)}>Update</Button>
