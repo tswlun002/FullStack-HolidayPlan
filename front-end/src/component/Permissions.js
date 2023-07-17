@@ -143,8 +143,9 @@ export default function Permissions(){
                 <CardContent sx={{padding:"0rem 0.5rem"}}>
                     <SelectHasSearch
                         allOptions={permissions.listPermissions}
-                        setSelectedPermissions={setSelectedPermissions}
+                        setSeletedOptions={setSelectedPermissions}
                         requestResponse={requestResponse}
+                        fieldName="name"
                     />
                 </CardContent>
                 
@@ -189,6 +190,7 @@ export default function Permissions(){
                     SelectedItems={selectedPermissions}
                     setOpenListSelectedItems={setDeletePermissionOpen}
                     setSelectedItems={deletePermissions}
+                    fieldName="name"
                 />
             }
         </Box>

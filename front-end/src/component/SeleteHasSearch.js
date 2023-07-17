@@ -15,8 +15,13 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const containsText = (element, searchText) => element.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
 
-export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
+export default function SelectHasSearch({allOptions=[],fieldName="name",setSeletedOptions}) {
+        
         const [selected, setSelected] = useState([]);
+
+        const itemName =(item)=>{
+          return fieldName.split(',').map(field=>item[field.trim()]).join(' ');
+        }
         const handleClick = (event, element) => {
 
                 const selectedIndex = selected.indexOf(element);
@@ -37,7 +42,7 @@ export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
 
                  newSelected = newSelected.filter((item)=>{return allOptions.some((item1)=>{return (item1.id===item.id); });});
                 setSelected(newSelected);
-                setSelectedPermissions(newSelected);
+                setSeletedOptions(newSelected);
         }
         const isSelected = (element) => selected.indexOf(element) !== -1;
         const [searchText, setSearchText] = useState("");
@@ -92,9 +97,9 @@ export default function SelectHasSearch({allOptions,setSelectedPermissions}) {
                 
                   <ListItemText 
                     fullWidth 
-                    key={option.name} 
-                    value={option.name} 
-                    primary={option.name}
+                    key={itemName(option)} 
+                    value={itemName(option)} 
+                    primary={itemName(option)}
                   />
                   <Checkbox 
                       key={option.id}

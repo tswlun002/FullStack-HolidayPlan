@@ -16,9 +16,9 @@ import UserQuery from './pages/UserQuery';
 import QueryTicket from './pages/QueryTicket';
 import AdminLayout from './layouts/AdminLayout';
 import UserLayout from './layouts/UserLayout';
-import ListUser from './pages/ListUsers';
 import {LogoutUser} from './utils/User';
 import RoleAndPermission from './pages/RoleAndPermission';
+import Users from './pages/Users';
 
 const initialState = {
   isAuthenticated: false,
@@ -122,11 +122,11 @@ const App=()=>{
 
           <Route path="home-admin" element={<AdminLayout/>}>
             <Route index element={<UserQuery/>}/>
-            <Route path="register-employee" element={<RegisterAdminForm/>}/>
             <Route path="roles-permissions" element={<RoleAndPermission/>}/>
             <Route path="roles-permissions/:barRoleActions" element={<RoleAndPermission/>}/>
             <Route path="profile" element={<Profile/>}/>
-            <Route path="users" element={<ListUser/>}/>
+            <Route path="users" element={<Users/>}/>
+            <Route path="users/:userActions" element={<Users/>}/>
           </Route>
           <Route path="*" element={<MissingPage/>}/>
 

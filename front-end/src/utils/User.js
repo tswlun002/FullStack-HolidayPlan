@@ -57,7 +57,7 @@ export const RegisterUser = ({firstname,lastname,email,password,age, registered,
 export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
 
 
-   const API = '/holiday-plan/api/admin/users/';
+   const API = '/holiday-plan/api/admin/user/users/';
    useAxiosPrivate.get(API, {signal:controller.signal})
    .then(response =>
        {
@@ -106,14 +106,14 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
 
 
 
-export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword,currentPassword, edited},dispatchRegister) => {
+export const UpdateUser = (useAxiosPrivate,{firstname,lastname,email,newPassword,age,currentPassword, edited},dispatchRegister) => {
 
    //dispatchRegister({registered:true})
    let isMounted = true;
    const controller = new AbortController();
   const username=email.replace('/','-');
    const API = '/holiday-plan/api/user/update/';
-   useAxiosPrivate.patch(API,{firstname,lastname,username,newPassword,currentPassword,signal:controller.signal})
+   useAxiosPrivate.patch(API,{firstname,lastname,username,age,newPassword,currentPassword,signal:controller.signal})
    .then(response =>
        {
          if(response.ok || response.status===200){

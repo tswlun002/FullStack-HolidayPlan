@@ -64,14 +64,13 @@ function Header() {
 
         setPages(()=>[
                         {name:'Home',link:path,isNested:false},
-                        {name:'Employee',link:`${path}/register-employee`,isNested:false},
+                      
                         {name:'Roles-Permissions',link:`${path}/roles-permissions`,isNested:false},
                         {name:"Users",link:`${path}/users` ,isNested:false}
         ]);
          setSettingAndPages(()=>[
           initialSettingsState[0],
           {name:'Home',link:path, isNested:false},
-          {name:'Employee',link:`${path}/register-employee`,isNested:false} ,
           {
           name:'Roles-Permissions', link:`${path}/roles-permissions`,isNested:true,
           },
