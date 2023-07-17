@@ -11,4 +11,3 @@ run-db:
 clean:
 	docker compose down
 	rm -f *.txt
-

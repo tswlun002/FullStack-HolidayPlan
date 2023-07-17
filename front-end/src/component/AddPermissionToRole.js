@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActionArea, CardActions, CardContent, CardHeader, List, ListItem, ListItemText, Modal, useMediaQuery } from "@mui/material";
+import { Box, Card, CardActions, CardContent, CardHeader, useMediaQuery } from "@mui/material";
 import SelectHasSearch from "./SeleteHasSearch";
 import { useReducer, useState,useContext } from "react";
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -17,8 +17,6 @@ export default function AddPermissionToRole({setAddPermission, roles, setNewPerm
         (state, action)=>{return {...state,...action}},
         {isRequestError:false,message:"",isRequestSuccessful:false}
     );
-    const theme = useTheme();
-    const small =useMediaQuery(theme.breakpoints.down('sm'));
     const [selectedPermissions, SetSelectedPermissions] = useState([]);
 
     const setSelectedPermissions =(permission)=>{
