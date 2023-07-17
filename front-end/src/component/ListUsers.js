@@ -23,7 +23,9 @@ import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
 import RolesPermissionsOfUser from './RolesPermissionsOfUser';
 import AddRoleToUser from './AddRoleToUser';
-import AddPermissionToRole from './AddPermissionToRole';
+import AddPermissionToUser from './AddPermissionToUser';
+import {FaUserEdit} from 'react-icons/fa';
+import Avatar from '@mui/material/Avatar';
 const header_background  ="linear-gradient(to right,rgba(243, 156, 18, 0.5),rgba(243, 156, 18, 0.85),rgba(243, 156, 18,0.90),rgba(243, 156, 18, 0.6))!important";
 
 function descendingComparator(a, b, orderBy) {
@@ -99,6 +101,12 @@ const headCells = [
         numeric: false,
         disablePadding: false,
         label: 'Permissions',
+    },
+    {
+        id: 'edit-user',
+        numeric: false,
+        disablePadding: false,
+        label: 'Edit',
     }
 ];
 
@@ -222,7 +230,7 @@ export default function ListUsers() {
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
         const [isDeleteRoleOpen , setIsDeleteRoleOpen] = React.useState(false);
         const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
-        const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
+        const [newPermissionAddedToUser,setNewPermissionAddedToUser]=React.useState(false);
         const [users , dispatchUsers] = React.useReducer(
                 (state, action)=>{return {...state,...action}},
                 {data:[],isRequestError:false,message:"",isRequestSuccessful:false}
@@ -278,7 +286,7 @@ export default function ListUsers() {
               );
 
               return ()=>{isMounted=false; controller.abort();}
-      },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
+      },[isRoleAdded,newPermissionAddedToUser,isRoleDeleted]);
 
         //////////////////////////////////////////////////////////////////////////////
         //                      DELETE ROLE(s)
@@ -361,7 +369,7 @@ export default function ListUsers() {
             }
             setSelected([]);
             setAddPermission(false);
-            setNewPermissionAddedToRole(false);
+            setNewPermissionAddedToUser(false);
             setIsRoleAdded(false);
 
         };
@@ -387,7 +395,7 @@ export default function ListUsers() {
                 if(newSelected.length===0){
                   setAddPermission(false);
                 }
-                setNewPermissionAddedToRole(false);
+                setNewPermissionAddedToUser(false);
                 setIsRoleAdded(false);
         };
 
@@ -429,7 +437,6 @@ export default function ListUsers() {
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
           BarItems={[
-            {name:"Edit-user",link:`${currentPath}/edit-user`, fun:setIsDeleteRoleOpen},
             {name:"Delete-user",link:`${currentPath}/delete-user`, fun:setIsDeleteRoleOpen},
             {name:"Add-Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
             {name:"Add-Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
@@ -532,6 +539,13 @@ export default function ListUsers() {
                         <TableCell align="center"><RolesPermissionsOfUser permissions={user.roles}/></TableCell>
 
                         <TableCell align="center"><RolesPermissionsOfUser permissions={user.permissions}/></TableCell>
+                        <TableCell padding="checkbox">
+                            <Avatar
+                                sx={{ bgcolor:'#4169e1'}}
+                                >
+                                <FaUserEdit/>
+                            </Avatar>
+                        </TableCell>
                       </TableRow>
                     );
                   })
@@ -564,9 +578,9 @@ export default function ListUsers() {
           in={isAddPermission} 
           timeout="auto" unmountOnExit 
            sx={{display:{xs:"none",md:"block"}}}>
-          <AddPermissionToRole 
-            setNewPermissionAddedToRole={setNewPermissionAddedToRole} 
-            roles={selected} setAddPermission={setAddPermission}
+          <AddPermissionToUser
+            setNewPermissionAddedToUser={setNewPermissionAddedToUser} 
+            users={selected} setAddPermission={setAddPermission}
           />
       </Collapse>
       <Modal
@@ -576,9 +590,9 @@ export default function ListUsers() {
           aria-describedby="child-modal-description"
           sx={{display:{xs:"flex",md:"none"},justifyContent:'center',alignItems:'center' }}
       >
-          <AddPermissionToRole 
-            setNewPermissionAddedToRole={setNewPermissionAddedToRole}
-            roles={selected} setAddPermission={setAddPermission}
+          <AddPermissionToUser
+            setNewPermissionAddedToUser={setNewPermissionAddedToUser}
+            users={selected} setAddPermission={setAddPermission}
           />
       </Modal>
 
