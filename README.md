@@ -16,7 +16,13 @@ Generate jar file using Maven, [more info, click here](https://www.jetbrains.com
 
 ### After generating the jar file, run the commands below start the app:
 ```
-$ docker compose config && docker compose up -d   # run container/service
+$ make config    # config docker compose
+$ make run       # run the docker compose
+
+$ make run-client # run only the front-end docker compose part
+$ make run-server  # run only the back-end docker compose part
+$ make run-db       # run only the mysql database docker compose part
+$ make clean     #clean container and txt file
 ```
 ### OPEN following the link on your browser after running the above command successfully
 [Holiday-Plan-App](http://localhost:3000)
