@@ -90,8 +90,8 @@ public class AdminController {
     }
 
     @DeleteMapping("delete/" )
-    public  ResponseEntity<Boolean> delete(@RequestParam String userName){
-        boolean deleted= userService.deleteUser(userName);
+    public  ResponseEntity<Boolean> delete(@RequestParam String username){
+        boolean deleted= userService.deleteUser(username);
         if(deleted)return  new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }

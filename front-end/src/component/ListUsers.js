@@ -228,8 +228,8 @@ export default function ListUsers() {
         const currentPath = "/home-admin/users";
         const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
-        const [isDeleteRoleOpen , setIsDeleteRoleOpen] = React.useState(false);
-        const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
+        const [isDeleteUserOpen , setIsDeleteUserOpen] = React.useState(false);
+        const [isUserDeleted, setIsUserDeleted] = React.useState(false);
         const [newPermissionAddedToUser,setNewPermissionAddedToUser]=React.useState(false);
         const [users , dispatchUsers] = React.useReducer(
                 (state, action)=>{return {...state,...action}},
@@ -237,10 +237,10 @@ export default function ListUsers() {
         );
         //const[users, dispatchUsers] = React.useState([]);
 
-        const setSelected =(role)=>{
-            SetSelected(role);
+        const setSelected =(user)=>{
+            SetSelected(user);
             dispatchUsers( {isRequestError:false,message:"",isRequestSuccessful:false});
-            setIsRoleDeleted(false);
+            setIsUserDeleted(false);
         }
         /////////////////////////////////////////////////////////////////
         // FETCH USERS 
@@ -286,27 +286,27 @@ export default function ListUsers() {
               );
 
               return ()=>{isMounted=false; controller.abort();}
-      },[isRoleAdded,newPermissionAddedToUser,isRoleDeleted]);
+      },[isRoleAdded,newPermissionAddedToUser,isUserDeleted]);
 
         //////////////////////////////////////////////////////////////////////////////
-        //                      DELETE ROLE(s)
+        //                      DELETE USER(s)
         ///////////////////////////////////////////////////////////////////////////////
-        const deleteRoles = async(rolesToDelete)=>{
-                if(rolesToDelete===null || rolesToDelete===undefined || rolesToDelete.length===0){
-                    dispatchUsers({isRequestError:true,message:"No roles selected.",isRequestSuccessful:false});
+        const deleteUsers = async(usersToDelete)=>{
+                if(usersToDelete===null || usersToDelete===undefined || usersToDelete.length===0){
+                    dispatchUsers({isRequestError:true,message:"No user selected.",isRequestSuccessful:false});
                 }else{
                    let  results ={isRequestSuccessful:false};
-                   let lastRole=null;
+                   let lastUser=null;
                    let  successfulDeletedRoles=[];
-                   for(let roleToDelete of rolesToDelete){
-                        lastRole = roleToDelete;
-                        results= await deleteRoleApi(roleToDelete.name);
+                   for(let userToDelete of usersToDelete){
+                        lastUser = userToDelete;
+                        results= await deleteUserApi(userToDelete.username);
                        if(results.isRequestError){
                            break;
-                       }else successfulDeletedRoles.push(roleToDelete);
+                       }else successfulDeletedRoles.push(userToDelete);
                    }
                     if(results.isRequestError){
-                       results.message= `${results.message}. role:${lastRole.name}`;
+                       results.message= `${results.message}. user:${lastUser.username}`;
                     }
                    if(results.isRequestSuccessful){
 
@@ -317,15 +317,15 @@ export default function ListUsers() {
                         const temp =newRoleList(selected);
                         console.log(temp);
                         setSelected(temp);
-                        setIsRoleDeleted(true);
+                        setIsUserDeleted(true);
                    }
                    dispatchUsers(results);
                 }
         }
-         // Delete role by name
-       const deleteRoleApi  = (roleName)=>{
+         // Delete user by username
+       const deleteUserApi  = (username)=>{
 
-            const API = `/holiday-plan/api/admin/role/delete/?roleName=${roleName}`;
+            const API = `/holiday-plan/api/admin/user/delete/?username=${username}`;
             const newRequestResponse ={isRequestSuccessful:false,isRequestError:false,message:""};
 
             return useAxiosPrivate.delete(API)
@@ -333,7 +333,7 @@ export default function ListUsers() {
                 if(response.ok || response.status===200){
                     newRequestResponse.isRequestSuccessful=true;
                     newRequestResponse.isRequestError=false;
-                    newRequestResponse.message="Successfully deleted role."
+                    newRequestResponse.message="Successfully deleted user."
                }
               return newRequestResponse;
             })
@@ -437,7 +437,7 @@ export default function ListUsers() {
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
           BarItems={[
-            {name:"Delete-user",link:`${currentPath}/delete-user`, fun:setIsDeleteRoleOpen},
+            {name:"Delete-user",link:`${currentPath}/delete-user`, fun:setIsDeleteUserOpen},
             {name:"Add-Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
             {name:"Add-Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
         ]}
@@ -619,13 +619,13 @@ export default function ListUsers() {
             users={selected}
         />
       </Modal>
-      {isDeleteRoleOpen&&<SelectedItems
-                    heading ={"Roles to delete" }
+      {isDeleteUserOpen&&<SelectedItems
+                    heading ={"Users to delete" }
                     SelectedItems={selected}
                     fieldName={"firstname,lastname"}
-                    setSelectedItems={deleteRoles}
-                    openListSelectedItems={isDeleteRoleOpen}
-                    setOpenListSelectedItems={setIsDeleteRoleOpen}
+                    setSelectedItems={deleteUsers}
+                    openListSelectedItems={isDeleteUserOpen}
+                    setOpenListSelectedItems={setIsDeleteUserOpen}
                 
       />}
     </Box>

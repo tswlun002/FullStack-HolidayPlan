@@ -330,8 +330,13 @@ class UserServiceTest {
         user.getPermissions().add(permission);
         user.getRoles().add(role);
         when(repository.getUser(user.getUsername())).thenReturn(user);
+        when(repository.deleteRoleFromUser(role.getId(),user.getId())).thenReturn(1);
+        when(repository.deletePermissionFromUser(permission.getId(),user.getId())).thenReturn(1);
         var actual  = service.deleteUser(user.getUsername());
+        verify(repository,times(1)).deleteRoleFromUser(role.getId(),user.getId());
+        verify(repository,times(1)).deletePermissionFromUser(permission.getId(),user.getId());
         verify(publisher, times(1)).publishEvent(new UserEvent(user));
+
         assertThat(actual).isEqualTo(true);
     }
 
