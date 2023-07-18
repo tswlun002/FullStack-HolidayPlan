@@ -11,7 +11,7 @@ import { useTheme } from '@material-ui/core';
 import Permissions from '../component/Permissions';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
-import RegisterAdminForm from './RegisterAdmin';
+import RegisterAdminForm from '../component/RegisterAdmin';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -55,7 +55,7 @@ export default function Users() {
   const[permissions, setPermissions] = 
   React.useReducer((state, action)=>{return{...state,...action}},{listPermissions:[],exceptionMessage:""});
   const theme =  useTheme();
-  const small = useMediaQuery(theme.breakpoints.down('sm'));
+  const small = useMediaQuery(theme.breakpoints.down('md'));
   const usePrivateAxios = UsePrivateAxios();
   //Get all permissions
     React.useEffect(()=>{
@@ -89,7 +89,7 @@ export default function Users() {
      
         <Box
           display={small?'block':'flex'}
-          padding="8rem 0.5rem"
+          padding="6rem 0.5rem"
           sx={{ flexGrow: 1, bgcolor: '#dfe0e6', 
           minHeight: "100vh", width:{sm:"100%",md:"auto"} }}
         >
@@ -108,7 +108,7 @@ export default function Users() {
           <TabPanel value={value} index={0}>
             <ListUsers/>
           </TabPanel>
-          <TabPanel value={value} index={1}>
+          <TabPanel  sx={{display:"flex",justifyContent:"center",alignItems:"center",minHeight:"100vh"}} value={value} index={1}>
              <RegisterAdminForm/>
           </TabPanel>
         </Box>

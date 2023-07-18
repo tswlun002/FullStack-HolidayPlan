@@ -1,10 +1,9 @@
 package com.tour.controller;
 
 import com.tour.dto.RegisterUserRequest;
-import com.tour.exception.CatchException;
+import com.tour.dto.UserResponseToAdmin;
 import com.tour.exception.NotFoundException;
 import com.tour.model.User;
-import com.tour.dto.UserResponseToAdmin;
 import com.tour.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -91,13 +90,9 @@ public class AdminController {
     }
 
     @DeleteMapping("delete/" )
-    public  ResponseEntity<Boolean> delete(@RequestParam String userName){
-        boolean deleted= userService.deleteUser(userName);
+    public  ResponseEntity<Boolean> delete(@RequestParam String username){
+        boolean deleted= userService.deleteUser(username);
         if(deleted)return  new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    private  void catchException(Exception e){
-        CatchException.catchException(e);
     }
 }

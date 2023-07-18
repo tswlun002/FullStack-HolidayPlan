@@ -181,8 +181,10 @@ public class UserService implements OnUser {
         AtomicInteger numberDeleted  = new AtomicInteger();
         user.getRoles().forEach(role->
         {
-            deleteRoleFromUser(user.getUsername(), role.getName());
-            numberDeleted.incrementAndGet();
+            numberDeleted.addAndGet(
+                    userRepository.deleteRoleFromUser(role.getId(), user.getId())
+            );
+
         });
         return  numberDeleted.get();
     }
@@ -196,8 +198,10 @@ public class UserService implements OnUser {
         AtomicInteger numberDeleted  = new AtomicInteger();
         user.getPermissions().forEach(permission->
         {
-            deletePermissionFromUser(user.getUsername(), permission.getName());
-            numberDeleted.incrementAndGet();
+            numberDeleted.addAndGet(
+                    userRepository.deletePermissionFromUser(permission.getId(), user.getId())
+            );
+
         });
         return  numberDeleted.get();
     }
@@ -340,7 +344,6 @@ public class UserService implements OnUser {
     @Override
     public User getLoginedUser() {
         String userName= SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        System.out.println("username :" + userName);
         return getUser(userName);
 
     }

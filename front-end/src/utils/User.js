@@ -221,7 +221,7 @@ export const RegisterAdmin = ({firstname,lastname,email,password, age,registered
   ///dispatchRegister({registered:true})
 
    const API = '/holiday-plan/api/admin/user/save/';
-   useAxiosPrivate.post(API,{firstname,lastname,username,password, usertype:userType})
+   useAxiosPrivate.post(API,{firstname,lastname,username,password, age,usertype:userType})
    .then(response =>
        {
          if(response.ok || response.status===200){

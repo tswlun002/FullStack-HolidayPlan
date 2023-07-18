@@ -30,7 +30,7 @@ const ExpandMore = styled((props) => {
 const Profile = ()=> {
       const useAxiosPrivate = UseAxiosPrivate();
 
-      const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)
+      const{userLoginState} = React.useContext(CreateAuthContext)
 
       const[profile, dispatchProfile] = React.useReducer((state, action)=>{
               return {...state,...action}

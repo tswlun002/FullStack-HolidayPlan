@@ -1,16 +1,15 @@
-import { Box, Card, CardActions, CardContent, CardHeader, useMediaQuery } from "@mui/material";
+import { Box, Card, CardActions, CardContent, CardHeader} from "@mui/material";
 import SelectHasSearch from "./SeleteHasSearch";
 import { useReducer, useState,useContext } from "react";
 import CancelIcon from '@mui/icons-material/Cancel';
 import {IconButton} from "@mui/material";
 import ColorButton from '../component/ColorButton';
-import { useTheme } from "@material-ui/core";
 import SelectedItems from "./SelectedItems";
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
 
-export default function AddPermissionToRole({setAddPermission, roles, setNewPermissionAddedToRole}){
+export default function AddPermissionToUser({setAddPermission,  users, setNewPermissionAddedToUser}){
     const {permissions} =  useContext(RolePermissionContext);
     const useAxiosPrivate = UsePrivateAxios();
     const [requestResponse , setResponse] = useReducer(
@@ -27,28 +26,28 @@ export default function AddPermissionToRole({setAddPermission, roles, setNewPerm
 
   // add permissions to role
 
-   const addPermissionsToRole = async (permissionList)=>{
+   const addPermissionsToUser = async (permissionList)=>{
         let  results ={isRequestSuccessful:false};
-        if(roles.length===0 || permissionList.length===0){
-            results.message="No role or permissions are selected.";
+        if(users.length===0 || permissionList.length===0){
+            results.message="No user or permissions are selected.";
             results.isRequestError=true;
 
 
         }else{
 
-            for(let role of roles){
+            for(let user of users){
 
                 let lastPermission=null;
                 let PermToAdd=[];
                 for(let permissionToAdd of permissionList){
-                    results= await addPermissionToRoleApi(role.name, permissionToAdd.name);
+                    results= await addPermissionToUserApi(user.username, permissionToAdd.name);
                     lastPermission = permissionToAdd;
                     if(results.isRequestError){
                         break;
                     }else PermToAdd.push(permissionToAdd);
                 }
                 if(results.isRequestError){
-                    results.message= `${results.message}. permission:${lastPermission.name} to role:${role.name}`;
+                    results.message= `${results.message}. permission:${lastPermission.name} to user:${user.username}`;
                     break;
                 }
 
@@ -56,15 +55,15 @@ export default function AddPermissionToRole({setAddPermission, roles, setNewPerm
            }
         }
         if(results.isRequestSuccessful){
-              setNewPermissionAddedToRole(true) ;
+              setNewPermissionAddedToUser(true) ;
        }
        setResponse(results);
    }
 
   // Delete permission by name
-   const addPermissionToRoleApi  = (roleName, permissionName)=>{
+   const addPermissionToUserApi  = (username, permissionName)=>{
 
-        const API = `/holiday-plan/api/admin/role/add/permission/role/?roleName=${roleName}&permissionName=${permissionName}`;
+        const API = `/holiday-plan/api/admin/user/add/permission/?username=${username}&permissionName=${permissionName}`;
         const newRequestResponse ={isRequestSuccessful:false,isRequestError:false,message:""};
 
         return useAxiosPrivate.patch(API)
@@ -73,7 +72,7 @@ export default function AddPermissionToRole({setAddPermission, roles, setNewPerm
             if(response.ok || response.status===200){
                 newRequestResponse.isRequestSuccessful=true;
                 newRequestResponse.isRequestError=false;
-                newRequestResponse.message="Successfully added permission to role"
+                newRequestResponse.message="Successfully added permission to user"
            }
           return newRequestResponse;
         })
@@ -119,15 +118,16 @@ export default function AddPermissionToRole({setAddPermission, roles, setNewPerm
                     />
                 </CardContent>
                 
-                <CardActions> <ColorButton onClick={()=> setOpen(true)}  sx={{padding:"0rem 0.5rem"}} variant="contained">Add</ColorButton></CardActions>
+                <CardActions> 
+                    <ColorButton onClick={()=> setOpen(true)}  sx={{padding:"0rem 0.5rem"}} variant="contained">Add</ColorButton>
+                </CardActions>
             
             </Card>
             {open&&<SelectedItems 
                     fieldName="name"
-                    heading ={"Add Permissions to Role" }
+                    heading ={"Add permissions to user" }
                     SelectedItems={selectedPermissions}
-                    setSelectedItems={addPermissionsToRole}
-                    
+                    setSelectedItems={addPermissionsToUser}
                     openListSelectedItems={open}
                     setOpenListSelectedItems={setOpen}
                 
