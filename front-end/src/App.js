@@ -4,10 +4,9 @@ import MainLayout from './layouts/MainLayout.js';
 import {  useReducer,useState} from "react"
 import HolidayPlanForm from './pages/HolidayPlanForm';
 import  React,{ useEffect} from 'react';
-import {Route, Routes,useNavigate,useRoutes,useLocation} from 'react-router-dom';
+import {Route, Routes,useNavigate} from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import RegisterAdminForm from './pages/RegisterAdmin';
 import {CreateAuthContext} from './context/CreateAuthContext';
 import Profile from './pages/Profile';
 import jwtDecode from 'jwt-decode';
