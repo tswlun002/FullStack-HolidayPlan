@@ -17,6 +17,7 @@ import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
+import { styled } from '@mui/material/styles';
 import { NavLink , useNavigate} from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
@@ -26,7 +27,8 @@ import AddRoleToUser from './AddRoleToUser';
 import AddPermissionToUser from './AddPermissionToUser';
 import {FaUserEdit} from 'react-icons/fa';
 import Avatar from '@mui/material/Avatar';
-const header_background  ="linear-gradient(to right,rgba(243, 156, 18, 0.5),rgba(243, 156, 18, 0.85),rgba(243, 156, 18,0.90),rgba(243, 156, 18, 0.6))!important";
+import { PRIMAR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
+const header_background  =SECONDARY_HEADER_COLOR
 
 function descendingComparator(a, b, orderBy) {
          a.fullname= `${a.firstname} ${a.lastname}`;
@@ -214,6 +216,14 @@ EnhancedTableToolbar.propTypes = {
          numSelected: PropTypes.number.isRequired,
 };
 
+const StyleAvatar =styled(Avatar)(({ theme }) => ({
+  '&:hover': {
+    border:`2px solid ${PRIMAR_COLOR}`,
+    },
+    '&.Mui-focused': {
+    border:`2px solid ${PRIMAR_COLOR}`    },
+  border: `2px solid ${theme.palette.background.paper}`,
+}));
 export default function ListUsers() {
         const [order, setOrder] = React.useState('asc');
         const [orderBy, setOrderBy] = React.useState('f');
@@ -541,12 +551,12 @@ export default function ListUsers() {
 
                         <TableCell align="center"><RolesPermissionsOfUser permissions={user.permissions}/></TableCell>
                         <TableCell padding="checkbox">
-                            <Avatar
-                                sx={{ bgcolor:'#4169e1'}}
+                            <StyleAvatar
+                                sx={{ bgcolor:SECONDARY_COLOR}}
                                 onClick={()=>navigate(`/home-admin/users/account/${user.username}`)}
                                 >
                                 <FaUserEdit/>
-                            </Avatar>
+                            </StyleAvatar>
                         </TableCell>
                       </TableRow>
                     );
