@@ -18,6 +18,7 @@ import UserLayout from './layouts/UserLayout';
 import {LogoutUser} from './utils/User';
 import RoleAndPermission from './pages/RoleAndPermission';
 import Users from './pages/Users';
+import EditUserForm from './component/EditUserForm';
 
 const initialState = {
   isAuthenticated: false,
@@ -126,6 +127,7 @@ const App=()=>{
             <Route path="profile" element={<Profile/>}/>
             <Route path="users" element={<Users/>}/>
             <Route path="users/:userActions" element={<Users/>}/>
+            <Route path="users/account/:username" element={<EditUserForm/>}/>
           </Route>
           <Route path="*" element={<MissingPage/>}/>
 

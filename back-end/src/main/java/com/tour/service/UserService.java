@@ -237,7 +237,7 @@ public class UserService implements OnUser {
      */
     public Optional<User> updateUserDetails(EditUserRequest user) {
         if (user == null) throw new NullPointerException("User is invalid");
-        var user1 = getLoginedUser();
+        var user1 = getUser(user.currentUsername());
         if (user1 == null) throw new NotFoundException("User is not found");
 
         StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));

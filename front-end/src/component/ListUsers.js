@@ -17,7 +17,7 @@ import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
-import { NavLink } from 'react-router-dom';
+import { NavLink , useNavigate} from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
@@ -235,6 +235,7 @@ export default function ListUsers() {
                 (state, action)=>{return {...state,...action}},
                 {data:[],isRequestError:false,message:"",isRequestSuccessful:false}
         );
+        const navigate = useNavigate();
         //const[users, dispatchUsers] = React.useState([]);
 
         const setSelected =(user)=>{
@@ -542,6 +543,7 @@ export default function ListUsers() {
                         <TableCell padding="checkbox">
                             <Avatar
                                 sx={{ bgcolor:'#4169e1'}}
+                                onClick={()=>navigate(`/home-admin/users/account/${user.username}`)}
                                 >
                                 <FaUserEdit/>
                             </Avatar>
