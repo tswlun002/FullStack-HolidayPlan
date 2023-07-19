@@ -11,9 +11,8 @@ public record EditUserRequest (
 
     @NotBlank(message = "userName is required")
     @NotEmpty(message = "userName is required")
-    @Size(min = 4, max = 50, message = "userName must contain 3 to 50 characters.")
+    @Size(min = 3, max = 50, message = "userName must contain 3 to 50 characters.")
     String firstname,
-
     @NotBlank(message = "firstName is required")
     @NotEmpty(message = "firstName is required")
     @Size(min = 3, max = 50, message = "firstName must contain 3 to 50 characters.")
@@ -31,7 +30,13 @@ public record EditUserRequest (
     @NotEmpty(message = "password is required")
     @Size(min = 5, max = 1000, message = "password must contain 3 to 50 characters.")
     String currentPassword,
-    @JsonFormat(pattern="yyyy-MM-dd") Date age
- ){}
+    @JsonFormat(pattern="yyyy-MM-dd") Date age,
+    @NotBlank(message = "lastName is required")
+    @NotEmpty(message = "lastName is required")
+    @Size(min = 3, max = 50, message = "lastName must contain 3 to 50 characters.")
+    String currentUsername
+ ){
+
+}
 
 
