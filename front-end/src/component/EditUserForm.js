@@ -89,7 +89,7 @@ const EditUserForm=()=>{
         e.preventDefault(); 
          console.log(register)
          if(register.currentPassword.trim()===""){
-            dispatchRegister({errorMessage:"password is required", isLoginError:true});
+            dispatchRegister({errorMessage:"password is required", isEditError:true});
          }
         else if(isValid()){
             UpdateUser(useAxiosPrivate,register,dispatchRegister);
@@ -98,7 +98,7 @@ const EditUserForm=()=>{
             }
         
         }else {
-            dispatchRegister({errorMessage:"No field was updated, need update atleast one field", isLoginError:true});
+            dispatchRegister({errorMessage:"No field was updated, need update atleast one field", isEditError:true});
 
         }
     }
@@ -117,7 +117,7 @@ const EditUserForm=()=>{
                      <CardHeader
                         title={<h2>Account</h2>}
                         titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)",align:"center"}}
-                        subheader={(register.isLoginError ||register.isEditError)?register.errorMessage:
+                        subheader={(register.isEditError ||register.isEditError)?register.errorMessage:
                                     register.isRequestSucceeded?register.requestResponseMessage:""
                         }
                         subheaderTypographyProps={{align:"start" ,color:register.isEditError?"red":"green"}}
@@ -131,7 +131,9 @@ const EditUserForm=()=>{
                             field={"openFirstname"}
                             setIsEditFieldOpen={dispatchRegister}
                             editIconProps={{color:'#4169e1',}}
-                            componentLabel={user.firstname}
+                            componentValue={user.firstname}
+                            componentLabel={"Firstname"}
+                            
                                     
                             focus
                             variant="outlined"
@@ -141,20 +143,21 @@ const EditUserForm=()=>{
                             className="firstname-input" 
                             placeholder="enter firstname"
                             value={register.firstname}
-                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isLoginError:false,isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isEditError:false,isRequestSucceeded:false})}
                         />
                         <EditUserItem
                             IsEditFieldOpen={register.openLastname}
                             field={"openLastname"}
                             setIsEditFieldOpen={dispatchRegister}
                             editIconProps={{color:'#4169e1',}}
-                            componentLabel={user.lastname}
+                            componentLabel={"Lastname"}
+                            componentValue={user.lastname}
                                     
                             focus
                             variant="outlined"
                             helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
                             type="text" className="lastname-input" placeholder="enter lastname" value={register.lastname}
-                            onChange={(e)=>dispatchRegister({lastname:e.target.value ,isLoginError:false,isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({lastname:e.target.value ,isEditError:false,isRequestSucceeded:false})}
                         />
 
                         <EditUserItem
@@ -162,7 +165,8 @@ const EditUserForm=()=>{
                             field={"opeUsername"}
                             setIsEditFieldOpen={dispatchRegister}
                             editIconProps={{color:'#4169e1',}}
-                            componentLabel={user.username}
+                           componentValue={user.username}
+                           componentLabel={"Email"}
                                     
                             focus
                             variant="outlined"
@@ -170,14 +174,15 @@ const EditUserForm=()=>{
                             id="demo-helper-text-aligned"
                             label="Email"
                             type="text" className="email-input" placeholder="enter email" value={register.email}
-                            onChange={(e)=>dispatchRegister({email:e.target.value,isLoginError:false,isRequestSucceeded:false })}
+                            onChange={(e)=>dispatchRegister({email:e.target.value,isEditError:false,isRequestSucceeded:false })}
                          />
                        <EditUserItem
                             IsEditFieldOpen={register.openAge}
                             field={"openAge"}
                             setIsEditFieldOpen={dispatchRegister}
                             editIconProps={{color:'#4169e1',}}
-                            componentLabel={user.age}
+                            componentValue={user.age}
+                            componentLabel={"Date of birth"}
                                     
                             focus
                             variant="outlined"
@@ -187,7 +192,7 @@ const EditUserForm=()=>{
                             onClick={()=>setDateType("date")}
                             onBlur={()=>{setDateType("text");}}
                             type={dateType} className="age-input" placeholder="enter date of birth" value={register.age}
-                            onChange={(e)=>dispatchRegister({age:e.target.value,isLoginError:false,isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({age:e.target.value,isEditError:false,isRequestSucceeded:false})}
                        />
                        <CssTextField
                             required
@@ -201,13 +206,13 @@ const EditUserForm=()=>{
                             className="currentPassword-input" 
                             placeholder="current password" 
                             value={register.currentPassword}
-                            onChange={(e)=>dispatchRegister({currentPassword:e.target.value, isLoginError:false, isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({currentPassword:e.target.value, isEditError:false, isRequestSucceeded:false})}
                         />
 
                             <Button 
                                 color="secondary" 
                                 variant="outlined" 
-                                style={{marginTop:"15px"}}
+                                style={{marginTop:"15px",color:"black"}}
                                 onClick={(e)=>OnSubmit(e)}>
                                     Update
                             </Button>
