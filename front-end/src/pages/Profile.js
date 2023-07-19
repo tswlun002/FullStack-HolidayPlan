@@ -7,10 +7,9 @@ import { deepOrange } from '@mui/material/colors';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CssTextField from '../component/CssTextField'
-import CustomerTypography from '../component/CustomerTypography'
+import CustomerTypography from '../component/CustomerTypography';
 import {UpdateUser,DeleteUser} from '../utils/User';
-import AccountButton from '../component/AccountButton';
-import EditUserItem from '../component/EditUserItem'
+import EditUserItem from '../component/EditUserItem';
 import { styled } from '@mui/material/styles';
 import { SECONDARY_COLOR ,PRIMAR_COLOR} from '../utils/Constant';
 const DeleteButton= styled(Button)({

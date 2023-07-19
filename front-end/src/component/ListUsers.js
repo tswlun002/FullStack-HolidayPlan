@@ -17,6 +17,7 @@ import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
+import { styled } from '@mui/material/styles';
 import { NavLink , useNavigate} from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
@@ -215,7 +216,7 @@ EnhancedTableToolbar.propTypes = {
          numSelected: PropTypes.number.isRequired,
 };
 
-const StyleAvatar  = styled(Avatar)(({ theme }) => ({
+const StyleAvatar =styled(Avatar)(({ theme }) => ({
   '&:hover': {
     border:`2px solid ${PRIMAR_COLOR}`,
     },
