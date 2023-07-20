@@ -4,10 +4,11 @@ import { useNavigate, useLocation ,Outlet} from "react-router-dom";
 
 const UserLayout =({children})=>{
      const location = useLocation();
+     console.log(location)
      const{userLoginState} = useContext(CreateAuthContext)
           return (userLoginState.roles.find(role=>role.name==="USER"))?
             <Outlet/>:
-            <useNavigate to="/" state={{from:location}} replace="true"/>;
+            <useNavigate to="." state={{from:location}} replace="true"/>;
           
 }
 export default UserLayout;
