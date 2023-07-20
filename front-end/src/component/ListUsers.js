@@ -17,7 +17,8 @@ import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
-import { NavLink , useNavigate} from 'react-router-dom';
+import { styled } from '@mui/material/styles';
+import { NavLink } from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
@@ -26,7 +27,8 @@ import AddRoleToUser from './AddRoleToUser';
 import AddPermissionToUser from './AddPermissionToUser';
 import {FaUserEdit} from 'react-icons/fa';
 import Avatar from '@mui/material/Avatar';
-const header_background  ="linear-gradient(to right,rgba(243, 156, 18, 0.5),rgba(243, 156, 18, 0.85),rgba(243, 156, 18,0.90),rgba(243, 156, 18, 0.6))!important";
+import { PRIMAR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
+const header_background  =SECONDARY_HEADER_COLOR
 
 function descendingComparator(a, b, orderBy) {
          a.fullname= `${a.firstname} ${a.lastname}`;
@@ -188,16 +190,14 @@ function EnhancedTableToolbar(props) {
 
               return  <NavLink
                           onClick={()=>{
-                           item.fun(true);
+                           item.fun(()=>!item.flag);
                           }}
-                          to={item.link}
+                          
                           end ={item.name=="Add Role"}
                           key={index}
-                          style={({isPending, isActive})=>{
-                            return {
-                              color:isActive?"white":
-                              isPending?"green":"black",
-                              textDecoration:"none",  padding:"2rem 1rem"}
+                          style={{
+                              color:item.flag?"white":"black",
+                              textDecoration:"none",  padding:"2rem 1rem"
                           }}
                         >
                           {item.name}
@@ -214,6 +214,14 @@ EnhancedTableToolbar.propTypes = {
          numSelected: PropTypes.number.isRequired,
 };
 
+const StyleAvatar =styled(Avatar)(({ theme }) => ({
+  '&:hover': {
+    border:`2px solid ${PRIMAR_COLOR}`,
+    },
+    '&.Mui-focused': {
+    border:`2px solid ${PRIMAR_COLOR}`    },
+  border: `2px solid ${theme.palette.background.paper}`,
+}));
 export default function ListUsers() {
         const [order, setOrder] = React.useState('asc');
         const [orderBy, setOrderBy] = React.useState('f');
@@ -225,7 +233,6 @@ export default function ListUsers() {
         const [isAddPermission, setAddPermission] = React.useState(false);
         const [isDeletePermission, setDeletermission] = React.useState(false);
         const useAxiosPrivate = UsePrivateAxios();
-        const currentPath = "/home-admin/users";
         const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
         const [isDeleteUserOpen , setIsDeleteUserOpen] = React.useState(false);
@@ -235,7 +242,7 @@ export default function ListUsers() {
                 (state, action)=>{return {...state,...action}},
                 {data:[],isRequestError:false,message:"",isRequestSuccessful:false}
         );
-        const navigate = useNavigate();
+        
         //const[users, dispatchUsers] = React.useState([]);
 
         const setSelected =(user)=>{
@@ -431,16 +438,16 @@ export default function ListUsers() {
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   return (
-  users.data.length===0?
-      <Typography align="center" variant="h4" color="red" font-size="1rem">{roles.exceptionMessage}</Typography>
+  ( users.isRequestError||(users.data.length===0))?
+      <Typography align="center" variant="h4" color="red" font-size="1rem">{users.message}</Typography>
    :
     <Box sx={{ width: '100%', display:{xs:"block",md:"flex"}}}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
           BarItems={[
-            {name:"Delete-user",link:`${currentPath}/delete-user`, fun:setIsDeleteUserOpen},
-            {name:"Add-Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
-            {name:"Add-Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
+            {name:"Delete-user", fun:setIsDeleteUserOpen,flag:isDeleteUserOpen},
+            {name:"Add-Role",fun:setAddRoleOpen,flag:isAddRoleOpen},
+            {name:"Add-Permission",fun:setAddPermission,flag:isAddPermission},
         ]}
           setAnchorElUser ={setAnchorElUser}
           anchorElUser={anchorElUser}
@@ -541,12 +548,19 @@ export default function ListUsers() {
 
                         <TableCell align="center"><RolesPermissionsOfUser permissions={user.permissions}/></TableCell>
                         <TableCell padding="checkbox">
-                            <Avatar
-                                sx={{ bgcolor:'#4169e1'}}
-                                onClick={()=>navigate(`/home-admin/users/account/${user.username}`)}
+                            <StyleAvatar
+                                sx={{ bgcolor:SECONDARY_COLOR}}
+                                
                                 >
-                                <FaUserEdit/>
-                            </Avatar>
+                                  <NavLink
+                                    to={user.username}
+                                    key={user.id}
+                                  >
+                                    <FaUserEdit  style={{color:"white"}}/>
+                                    </NavLink>
+                              
+                                    
+                            </StyleAvatar>
                         </TableCell>
                       </TableRow>
                     );

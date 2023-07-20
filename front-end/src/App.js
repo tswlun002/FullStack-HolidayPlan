@@ -4,7 +4,7 @@ import MainLayout from './layouts/MainLayout.js';
 import {  useReducer,useState} from "react"
 import HolidayPlanForm from './pages/HolidayPlanForm';
 import  React,{ useEffect} from 'react';
-import {Route, Routes,useNavigate} from 'react-router-dom';
+import {Route, Routes,useNavigate, useLocation} from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import {CreateAuthContext} from './context/CreateAuthContext';
@@ -79,31 +79,26 @@ const reducer = (state, action) => {
 const App=()=>{
     const navigate = useNavigate();
 
-    const [cookies, setCookie] = useState("")
     //Login registered user
-    const[userLoginState, dispatchLogin] = useReducer(reducer, initialState)
+    const[userLoginState, dispatchLogin] = useReducer(reducer,JSON.parse(window.localStorage.getItem("loginState"))||initialState)
 
-  
 
+    const currentLocation  =useLocation();
+    let Path = window.localStorage.setItem("currentPath", currentLocation.pathname||"/");
     useEffect(()=>{
 
-      if(userLoginState.isAuthenticated && userLoginState.access_token){
-
-        window.localStorage.setItem("access_token",userLoginState.access_token);
+      if(userLoginState.isAuthenticated){
+        //const ACCESS = userLoginState.access_token;
+        //delete userLoginState.access_token;
+        window.localStorage.setItem("loginState",JSON.stringify(userLoginState));
+        //userLoginState.access_token=ACCESS;
       }
-
-      const Path = userLoginState.roles.find(role=>role.name==="USER")?
+      Path = window.localStorage.getItem("currentPath");
+      if(Path==='/' && userLoginState.isAuthenticated)Path = userLoginState.roles.find(role=>role.name==="USER")?
                 "/home-user":userLoginState.roles.find(role=>role.name==="ADMIN")&&"/home-admin"
+      
       navigate(Path);
     }, [userLoginState])
-
-    useEffect(()=>{
-
-      const myCookie = window.localStorage.getItem("access_token");
-      if(myCookie !==null)  setCookie(myCookie);
-      dispatchLogin({type:"LOGIN", payload:{access_token:myCookie}})
-           
-    }, [])
 
     return (
     <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>
@@ -126,8 +121,7 @@ const App=()=>{
             <Route path="roles-permissions/:barRoleActions" element={<RoleAndPermission/>}/>
             <Route path="profile" element={<Profile/>}/>
             <Route path="users" element={<Users/>}/>
-            <Route path="users/:userActions" element={<Users/>}/>
-            <Route path="users/account/:username" element={<EditUserForm/>}/>
+            <Route path="users/:username" element={<EditUserForm/>}/>
           </Route>
           <Route path="*" element={<MissingPage/>}/>
 

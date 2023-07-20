@@ -3,8 +3,10 @@ import CssTextField from './CssTextField';
 import EditIcon from '@mui/icons-material/Edit';
 import CustomerTypography from '../component/CustomerTypography'
 import {Stack} from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+
 const EditUserItem =(props)=>{
-    const{componentLabel,field,IsEditFieldOpen,setIsEditFieldOpen,editIconProps} = props;
+    const{componentLabel,field,IsEditFieldOpen,setIsEditFieldOpen,editIconProps,componentValue} = props;
     return (
      <>
         <Stack
@@ -13,16 +15,18 @@ const EditUserItem =(props)=>{
             alignItems="center"
             justifyContent="flex-start"
         >
-            <CustomerTypography  align="center"> <h2>{componentLabel}</h2></CustomerTypography>
+            <CustomerTypography  fontSize={"1rem"}align="center"> <h4>{`${componentLabel}:  ${componentValue}`}</h4></CustomerTypography>
             {IsEditFieldOpen?< VisibilityOffIcon sx={editIconProps} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>:
                 <EditIcon sx={editIconProps} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>
             }
         </Stack>
        {
-        IsEditFieldOpen&&
-        <CssTextField
-            {...props}
-        />
+        <Collapse in={IsEditFieldOpen} timeout="auto" unmountOnExit>
+            <CssTextField
+                {...props}
+                sx={{marginTop:"4px"}}
+            />
+        </Collapse>
        }
        
      </>

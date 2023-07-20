@@ -7,10 +7,27 @@ import { deepOrange } from '@mui/material/colors';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CssTextField from '../component/CssTextField'
-import CustomerTypography from '../component/CustomerTypography'
+import CustomerTypography from '../component/CustomerTypography';
 import {UpdateUser,DeleteUser} from '../utils/User';
-import AccountButton from '../component/AccountButton';
-import EditUserItem from '../component/EditUserItem'
+import EditUserItem from '../component/EditUserItem';
+import { styled } from '@mui/material/styles';
+import { SECONDARY_COLOR ,PRIMAR_COLOR} from '../utils/Constant';
+const DeleteButton= styled(Button)({
+  '&:hover': {
+  border:"1px solid red",
+  },
+  '&.Mui-focused': {
+  border:"1px solid red",
+  },
+});
+const EditButton= styled(Button)({
+  '&:hover': {
+  border:`1px solid ${SECONDARY_COLOR}`,
+  },
+  '&.Mui-focused': {
+  border:`1px solid ${SECONDARY_COLOR}`,
+  },
+});
 const Profile = ()=> {
       const useAxiosPrivate = UseAxiosPrivate();
 
@@ -90,7 +107,7 @@ const Profile = ()=> {
         alignItems="center"
         minHeight="100vh"
       >
-        <Card sx={{ maxWidth: 400,padding:"2rem 0rem" ,display:"block"}}>
+        <Card sx={{ maxWidth: 400,display:"block"}}>
         <CardHeader
               title={<Stack
                         direction="row"
@@ -109,7 +126,7 @@ const Profile = ()=> {
                             </Avatar>
                     </Stack>
                     }
-              titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)",align:"center"}}
+              titleTypographyProps={{align:"center",color:PRIMAR_COLOR,align:"center"}}
               subheader={(profile.isLoginError ||profile.isEditError)?profile.errorMessage:
                           profile.isRequestSucceeded?profile.requestResponseMessage:""
               }
@@ -122,9 +139,9 @@ const Profile = ()=> {
                             IsEditFieldOpen={profile.openFirstname}
                             field={"openFirstname"}
                             setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:'#4169e1',}}
-                            componentLabel={userLoginState.firstname}
-                                    
+                            editIconProps={{color:SECONDARY_COLOR,}}
+                            componentLabel={"Firstname"}
+                            componentValue={userLoginState.firstname}
                             focus
                             variant="outlined"
                             helpertext=""id="demo-helper-text-aligned"
@@ -139,9 +156,9 @@ const Profile = ()=> {
                             IsEditFieldOpen={profile.openLastname}
                             field={"openLastname"}
                             setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:'#4169e1',}}
-                            componentLabel={userLoginState.lastname}
-                                    
+                            editIconProps={{color:SECONDARY_COLOR,}}
+                            componentLabel={"Lastname"}                                   
+                            componentValue={userLoginState.lastname}
                             focus
                             variant="outlined"
                             helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
@@ -153,9 +170,10 @@ const Profile = ()=> {
                             IsEditFieldOpen={profile.opeUsername}
                             field={"opeUsername"}
                             setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:'#4169e1',}}
-                            componentLabel={userLoginState.username}
+                            editIconProps={{color:SECONDARY_COLOR,}}
+                            componentLabel={"Email"}
                                     
+                            componentValue={userLoginState.username}
                             focus
                             variant="outlined"
                             helpertext=""
@@ -168,10 +186,10 @@ const Profile = ()=> {
                             IsEditFieldOpen={profile.openAge}
                             field={"openAge"}
                             setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:'#4169e1',}}
-                            componentLabel={userLoginState.age&&(new Date(parseInt(userLoginState.age))).
+                            editIconProps={{color:SECONDARY_COLOR,}}
+                            componentLabel={"Date of Birth"}                
+                            componentValue={userLoginState.age&&(new Date(parseInt(userLoginState.age))).
                               toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'})}
-                                    
                             focus
                             variant="outlined"
                             helpertext=""
@@ -186,9 +204,9 @@ const Profile = ()=> {
                             IsEditFieldOpen={profile.openNewPassword}
                             field={"openNewPassword"}
                             setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:'#4169e1',}}
-                            componentLabel={"Current password"}
-
+                            editIconProps={{color:SECONDARY_COLOR,}}
+                            componentLabel={"Password"}
+                            componentValue={"******"}
                             variant="outlined"
                             helpertext=""
                             id="demo-helper-text-aligned"
@@ -213,25 +231,25 @@ const Profile = ()=> {
                             variant="outlined"
                             helpertext=""
                             id="demo-helper-text-aligned"
-                            label="Admin-currentPassword"
+                            label="Current password"
                             color="secondary"
                             type="password" 
                             autoComplete='new-password' 
                             className="currentPassword-input" 
-                            placeholder="Enter your currentPassword" 
+                            placeholder="current password" 
                             value={profile.currentPassword}
                             onChange={(e)=> dispatchProfile({currentPassword:e.target.value, isLoginError:false, isRequestSucceeded:false})}
                         />
 
-                <Button color="secondary" variant="outlined" style={{marginTop:"15px"}}
-                                      onClick={(e)=>OnSubmit(e)}>Update</Button>
-              <AccountButton 
-                   sx={{ marginTop:"10px"}}
+                <EditButton  color="secondary" variant="outlined" style={{marginTop:"15px"}}
+                                      onClick={(e)=>OnSubmit(e)}>Update</EditButton>
+              <DeleteButton
+                   sx={{ marginTop:"10px", color:"black", borderColor:"white"}}
                    variant="outlined" size="small"
                    onClick={(e)=>deleteAccount(e)}
               >
                                     delete  account
-              </AccountButton>
+              </DeleteButton>
         </form>
         </CardContent>
         </Card>
