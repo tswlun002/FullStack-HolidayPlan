@@ -1,12 +1,16 @@
 
 import {  useReducer, useState,useEffect} from "react"
-import {  Box,Card,CardContent,CardHeader,Button} from '@mui/material';
+import {  Box,Card,CardContent,CardHeader,Button,styled} from '@mui/material';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import EditUserItem from './EditUserItem'
 import {useParams} from "react-router-dom";
 import {getErrorMessage} from '../utils/Error';
 import CssTextField from './CssTextField';
 import {UpdateUser} from '../utils/User';
+import Stack from '@mui/material/Stack';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {NavLink} from 'react-router-dom'
+import CustomerTypography from "./CustomerTypography";
 
 const EditUserForm=()=>{
     const{username} = useParams();
@@ -102,7 +106,16 @@ const EditUserForm=()=>{
 
         }
     }
-
+    const StyledCardHeader = styled(CardHeader)({
+        '.MuiCardHeader-action':{
+            '&:hover': {
+                 color:"blue",
+                },
+                '&.Mui-focused': {
+                  color:"blue",
+                },
+        }
+    }) ;
 
     return (
 
@@ -114,9 +127,20 @@ const EditUserForm=()=>{
 
               >
               <Card sx={{ maxWidth: 400,display:"block"}}>
-                     <CardHeader
-                        title={<h2>Account</h2>}
-                        titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)",align:"center"}}
+                     <StyledCardHeader
+                        title={<Stack direction="row" spacing='10%'alignItems="center" justifyContent="flex-start">
+                            <NavLink
+                                to=".."
+                                relative="path"
+                                
+                            >
+                                <ArrowBackIcon/>  
+                            </NavLink> 
+                            <CustomerTypography align="center" color="rgb(143, 88, 175)"><h2>Account</h2></CustomerTypography>
+                        </Stack>
+                        }
+                        
+                        
                         subheader={(register.isEditError ||register.isEditError)?register.errorMessage:
                                     register.isRequestSucceeded?register.requestResponseMessage:""
                         }

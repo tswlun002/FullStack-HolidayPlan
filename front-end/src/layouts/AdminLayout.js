@@ -4,11 +4,13 @@ import {useContext} from 'react'
 
 const AdminLayout =({children})=>{
      const location = useLocation();
+     console.log(location)
 
      const{userLoginState} = useContext(CreateAuthContext)
+     console.log(userLoginState)
     return (userLoginState.roles.find(role=>role.name==='ADMIN'))?
       <Outlet/>:
-      <useNavigate to="/" state={{from:location}} replace="true"/>;
+      <useNavigate to={location} state={{from:location}} replace="true"/>;
 
 
 

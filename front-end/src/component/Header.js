@@ -37,8 +37,11 @@ function Header() {
           LogoutUser(useAxiosPrivate, dispatchLogin, navigate)
           window.localStorage.removeItem('access_token');
           dispatchLogin({type:"LOGOUT"})
+          window.localStorage.clear()
 
-        }
+    }
+        
+
 
     }
     if(item !=="Roles-Permissions")setAnchorElUser(null);

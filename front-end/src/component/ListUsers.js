@@ -18,7 +18,7 @@ import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
 import { styled } from '@mui/material/styles';
-import { NavLink , useNavigate} from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
@@ -190,16 +190,14 @@ function EnhancedTableToolbar(props) {
 
               return  <NavLink
                           onClick={()=>{
-                           item.fun(true);
+                           item.fun(()=>!item.flag);
                           }}
-                          to={item.link}
+                          
                           end ={item.name=="Add Role"}
                           key={index}
-                          style={({isPending, isActive})=>{
-                            return {
-                              color:isActive?"white":
-                              isPending?"green":"black",
-                              textDecoration:"none",  padding:"2rem 1rem"}
+                          style={{
+                              color:item.flag?"white":"black",
+                              textDecoration:"none",  padding:"2rem 1rem"
                           }}
                         >
                           {item.name}
@@ -235,7 +233,6 @@ export default function ListUsers() {
         const [isAddPermission, setAddPermission] = React.useState(false);
         const [isDeletePermission, setDeletermission] = React.useState(false);
         const useAxiosPrivate = UsePrivateAxios();
-        const currentPath = "/home-admin/users";
         const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
         const [isDeleteUserOpen , setIsDeleteUserOpen] = React.useState(false);
@@ -245,7 +242,7 @@ export default function ListUsers() {
                 (state, action)=>{return {...state,...action}},
                 {data:[],isRequestError:false,message:"",isRequestSuccessful:false}
         );
-        const navigate = useNavigate();
+        
         //const[users, dispatchUsers] = React.useState([]);
 
         const setSelected =(user)=>{
@@ -448,9 +445,9 @@ export default function ListUsers() {
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
           BarItems={[
-            {name:"Delete-user",link:`${currentPath}/delete-user`, fun:setIsDeleteUserOpen},
-            {name:"Add-Role", link:`${currentPath}/add-role`,fun:setAddRoleOpen},
-            {name:"Add-Permission",link:`${currentPath}/add-permission`,fun:setAddPermission},
+            {name:"Delete-user", fun:setIsDeleteUserOpen,flag:isDeleteUserOpen},
+            {name:"Add-Role",fun:setAddRoleOpen,flag:isAddRoleOpen},
+            {name:"Add-Permission",fun:setAddPermission,flag:isAddPermission},
         ]}
           setAnchorElUser ={setAnchorElUser}
           anchorElUser={anchorElUser}
@@ -553,9 +550,16 @@ export default function ListUsers() {
                         <TableCell padding="checkbox">
                             <StyleAvatar
                                 sx={{ bgcolor:SECONDARY_COLOR}}
-                                onClick={()=>navigate(`/home-admin/users/account/${user.username}`)}
+                                
                                 >
-                                <FaUserEdit/>
+                                  <NavLink
+                                    to={user.username}
+                                    key={user.id}
+                                  >
+                                    <FaUserEdit  style={{color:"white"}}/>
+                                    </NavLink>
+                              
+                                    
                             </StyleAvatar>
                         </TableCell>
                       </TableRow>
