@@ -245,7 +245,7 @@ public class UserService implements OnUser {
         if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
         if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
         if(isValid.isValid(user.username()) ) user1.setUsername(user.username());
-        if(isValid.isValid(user.age().toString()))user1.setAge(user.age());
+        if(user.age()!=null &&isValid.isValid(user.age().toString()))user1.setAge(user.age());
         if(isValid.isValid(user.newPassword()) ) user1.setPassword(new BCryptPasswordEncoder().encode(user.newPassword()));
         User updatedUser =null;
         try {
