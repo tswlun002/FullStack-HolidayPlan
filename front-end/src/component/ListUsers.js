@@ -22,12 +22,12 @@ import { NavLink } from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
-import RolesPermissionsOfUser from './RolesPermissionsOfUser';
+import SearchableSelect from './SearchableSelect';
 import AddRoleToUser from './AddRoleToUser';
 import AddPermissionToUser from './AddPermissionToUser';
 import {FaUserEdit} from 'react-icons/fa';
 import Avatar from '@mui/material/Avatar';
-import { PRIMAR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
+import { ERROR_COLOR, LOADING_COLOR, PRIMAR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 const header_background  =SECONDARY_HEADER_COLOR
 
 function descendingComparator(a, b, orderBy) {
@@ -240,14 +240,14 @@ export default function ListUsers() {
         const [newPermissionAddedToUser,setNewPermissionAddedToUser]=React.useState(false);
         const [users , dispatchUsers] = React.useReducer(
                 (state, action)=>{return {...state,...action}},
-                {data:[],isRequestError:false,message:"",isRequestSuccessful:false}
+                {data:[],isLoading:false,isRequestError:false,message:"",isRequestSuccessful:false}
         );
         
         //const[users, dispatchUsers] = React.useState([]);
 
         const setSelected =(user)=>{
             SetSelected(user);
-            dispatchUsers( {isRequestError:false,message:"",isRequestSuccessful:false});
+            dispatchUsers( {isRequestError:false,isLoading:false,message:"",isRequestSuccessful:false});
             setIsUserDeleted(false);
         }
         /////////////////////////////////////////////////////////////////
@@ -255,10 +255,12 @@ export default function ListUsers() {
         ////////////////////////////////////////////////////////////////
 
         React.useEffect(()=>{
+              
               let isMounted = true;
               const controller = new AbortController();
               const API = '/holiday-plan/api/admin/user/users/';
-              useAxiosPrivate.get(API, {signal:controller.signal})
+              setTimeout(()=>{(!(users.isRequestError&&users.isRequestSuccessful))&&dispatchUsers({message:"Loading ...", isLoading:true});},3000)
+              isMounted&&useAxiosPrivate.get(API, {signal:controller.signal})
               .then(response =>
                   {
                     if(response.ok || response.status===200){
@@ -287,8 +289,8 @@ export default function ListUsers() {
                               console.log(err.response.statusText);
                               errorMessage  = getErrorMessage(err);
                         }
-                        dispatchUsers({message:errorMessage,isRequestSuccessful : false,isRequestError:true})
-                    }else dispatchUsers({message:"Server Error",isRequestSuccessful : false,isRequestError:true})
+                        dispatchUsers({message:errorMessage,isRequestSuccessful : false,isRequestError:true, isLoading:false})
+                    }else dispatchUsers({message:"Server Error",isRequestSuccessful : false,isRequestError:true,isLoading:false})
 
                 }
               );
@@ -360,6 +362,22 @@ export default function ListUsers() {
                return newRequestResponse;
             });
 
+       }
+       /**
+        * delete permission from user
+        * @param {*} username   of the user to remove permission from
+        * @param {*} permissionName of the permission to remove from user
+        */
+       const  deletePermissionfromUser = async(username, permissionName)=>{
+         
+       }
+       /**
+        * delete role from user
+        * @param {*} username  of user to remove role from
+        * @param {*} permissionName of the role to remove from user
+        */
+       const  deleteRolefromUser = async(username,roleName)=>{
+         
        }
 
          //Sort Request
@@ -438,9 +456,14 @@ export default function ListUsers() {
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   return (
-  ( users.isRequestError||(users.data.length===0))?
-      <Typography align="center" variant="h4" color="red" font-size="1rem">{users.message}</Typography>
-   :
+  <>
+    {(users.isRequestError||users.isLoading||users.isRequestSuccessful)&&
+      <Typography align="center" variant="h5" 
+         color={users.isRequestError?ERROR_COLOR:users.isLoading?LOADING_COLOR:SUCCESS_COLOR}
+         font-size="0.8rem">{users.message}
+      </Typography>
+    }
+   
     <Box sx={{ width: '100%', display:{xs:"block",md:"flex"}}}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
@@ -471,17 +494,7 @@ export default function ListUsers() {
               rowCount={users.data.length}
             />
             <TableBody>
-              {
-
-                (users.isRequestError || users.isRequestSuccessful)&&
-                 <TableRow>
-                   <TableCell  variant="body" align="left"
-                       sx={{width:"100%",height:"1rem",color:users.isRequestError?"red":"green"}}
-                   >
-                       {users.message}
-                   </TableCell>
-                 </TableRow>
-              }
+              
 
                {
                visibleRows.map((user, index) => {
@@ -544,9 +557,9 @@ export default function ListUsers() {
                            user.age&&JSON.stringify(user.age).substring(1,11)
                           }
                         </TableCell>
-                        <TableCell align="center"><RolesPermissionsOfUser permissions={user.roles}/></TableCell>
+                        <TableCell align="center"><SearchableSelect deleteOption={deleteRolefromUser}  Options={user.roles}/></TableCell>
 
-                        <TableCell align="center"><RolesPermissionsOfUser permissions={user.permissions}/></TableCell>
+                        <TableCell align="center"><SearchableSelect deleteOption={deletePermissionfromUser}Options={user.permissions}/></TableCell>
                         <TableCell padding="checkbox">
                             <StyleAvatar
                                 sx={{ bgcolor:SECONDARY_COLOR}}
@@ -644,6 +657,6 @@ export default function ListUsers() {
                     setOpenListSelectedItems={setIsDeleteUserOpen}
                 
       />}
-    </Box>
+    </Box></>
   );
 }

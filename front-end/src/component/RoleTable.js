@@ -14,17 +14,18 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
-import PermissionsOfRole from './PermissionsOfRole'
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
 import AddPermissionToRole from '../component/AddPermissionToRole';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink} from 'react-router-dom';
 import AddRole from './AddRole';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
-const header_background  ="linear-gradient(to right,rgba(243, 156, 18, 0.5),rgba(243, 156, 18, 0.85),rgba(243, 156, 18,0.90),rgba(243, 156, 18, 0.6))!important";
+import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
+import SearchableSelect from './SearchableSelect';
+
 
 function descendingComparator(a, b, orderBy) {
         if (b[orderBy] < a[orderBy]) {
@@ -82,7 +83,7 @@ function EnhancedTableHead(props) {
         };
 
       return (
-        <TableHead sx={{background:header_background}}>
+        <TableHead sx={{background:SECONDARY_HEADER_COLOR}}>
           <TableRow>
             <TableCell padding="checkbox">
               <Checkbox
@@ -135,7 +136,7 @@ EnhancedTableHead.propTypes = {
 function EnhancedTableToolbar(props) {
         const { numSelected} = props;
         return (
-        <Toolbar disableGutters sx={{background:header_background,}} >
+        <Toolbar disableGutters sx={{background:SECONDARY_HEADER_COLOR,}} >
           <Typography
               sx={{ flex: '1 1 10%' , padding:"0rem 1rem"}}
               color={numSelected > 0 ?"red":"black"}
@@ -198,28 +199,33 @@ export default function EnhancedTable() {
         const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
         const [requestResponse , setResponse] = React.useReducer(
                 (state, action)=>{return {...state,...action}},
-                {isRequestError:false,message:"",isRequestSuccessful:false}
+                {isLoading:false,isRequestError:false,message:"",isRequestSuccessful:false}
         );
 
         const setSelected =(role)=>{
             SetSelected(role);
-            setResponse( {isRequestError:false,message:"",isRequestSuccessful:false});
+            setResponse( {isRequestError:false, isLoading:false,message:"",isRequestSuccessful:false});
             setIsRoleDeleted(false);
         }
         /////////////////////////////////////////////////////////////////
         //           FETCH ROLES
         ///////////////////////////////////////////////////////////////
         React.useEffect(()=>{
+           
             let isMounted = true;
             const controller = new AbortController();
             const API = '/holiday-plan/api/admin/role/roles/';
+            setTimeout(()=>{!(requestResponse.isRequestError&&requestResponse.isRequestSuccessful)
+            && setResponse({message:"Loading ...",isLoading:true});},3000);
             isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
             .then(response => {
+                    
                     if(response.ok || response.status===200){
                       console.log(response.data);
                       setRoles({listRoles:response.data,exceptionMessage:"Successfully get roles"});
-
+                      
                     }
+                    
             })
             .catch(err => {
                     console.log(err);
@@ -231,6 +237,7 @@ export default function EnhancedTable() {
                       setRoles({exceptionMessage:"Server Error"});
                     }
             });
+            
             return ()=>{isMounted=false; controller.abort();}
 
         },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
@@ -299,6 +306,16 @@ export default function EnhancedTable() {
                return newRequestResponse;
             });
 
+       }
+      
+      
+       /**
+        * delete permission from role
+        * @param {*} roleName   of the role to remove permission from
+        * @param {*} permissionName of the permission to remove from role
+        */
+       const  deletePermissionfromRole = async(roleName, permissionName)=>{
+         
        }
 
          //Sort Request
@@ -378,10 +395,18 @@ export default function EnhancedTable() {
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   return (
-  roles.listRoles.length===0?
-      <Typography align="center" variant="h4" color="red" font-size="1rem">{roles.exceptionMessage}</Typography>
-   :
+    <>
+    {requestResponse.isLoading || requestResponse.isRequestError || requestResponse.isRequestSuccessful&&
+      <Typography align="center" variant="h5" fontSize={"0.8rem"} 
+          color={requestResponse.isRequestError?ERROR_COLOR:requestResponse.isLoading?LOADING_COLOR:SUCCESS_COLOR}
+        >
+            {requestResponse.message||roles.exceptionMessage}
+      </Typography>
+      }
+   
+      
     <Box sx={{ width: '100%', display:{xs:"block",md:"flex"}}}>
+      
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar 
           BarItems={[
@@ -411,17 +436,7 @@ export default function EnhancedTable() {
               rowCount={roles.listRoles.length}
             />
             <TableBody>
-              {
-
-                (requestResponse.isRequestError || requestResponse.isRequestSuccessful)&&
-                 <TableRow>
-                   <TableCell  variant="body" align="left"
-                       sx={{width:"100%",height:"1rem",color:requestResponse.isRequestError?"red":"green"}}
-                   >
-                       {requestResponse.message}
-                   </TableCell>
-                 </TableRow>
-              }
+              
 
                {
                visibleRows.map((row, index) => {
@@ -459,7 +474,7 @@ export default function EnhancedTable() {
                         >
                           {row.name}
                         </TableCell>
-                        <TableCell align="right"><PermissionsOfRole permissions={row.permissions}/></TableCell>
+                        <TableCell align="right"><SearchableSelect Options={row.permissions} deleteOption={deletePermissionfromRole}/></TableCell>
                       </TableRow>
                     );
                   })
@@ -537,6 +552,6 @@ export default function EnhancedTable() {
                     setOpenListSelectedItems={setIsDeleteRoleOpen}
                 
       />}
-    </Box>
+    </Box></>
   );
 }

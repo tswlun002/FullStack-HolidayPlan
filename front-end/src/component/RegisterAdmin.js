@@ -70,7 +70,7 @@ const RegisterAdminForm =()=>{
               <Card sx={{ maxWidth: 400,display:"block"}}>
                      <CardHeader
                         title={<h2>Add user</h2>}
-                        titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)",align:"center"}}
+                        titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)"}}
                         subheader={register.isLoginError?register.errorMessage:register.registered?register.requestResponseMessage:""}
                         subheaderTypographyProps={{align:"start" ,color:register.isLoginError?"red":"green"}}
                     />
