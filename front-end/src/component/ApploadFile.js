@@ -31,7 +31,7 @@ import { Typography} from '@mui/material';
       {/* 👇 Our custom button to select and upload a file */}
       <Button  color="secondary" variant="outlined"  sx={{borderColor:"black", maxWidth:maxWidth, margin:margin}} onClick={handleUploadClick}>
        <Typography sx={{color:'black'}} fontSize="0.7rem">
-        {file.length>0 ?'Loaded': 'Or Upload'}
+        {file.length>0 ?'Loaded': 'Upload location images'}
        </Typography>
 
       </Button>
