@@ -104,7 +104,7 @@ const Profile = ()=> {
       <Box
         display="flex"
         justifyContent="center"
-        alignItems="center"
+        alignItems="start"
         minHeight="100vh"
       >
         <Card sx={{ maxWidth: 400,display:"block"}}>

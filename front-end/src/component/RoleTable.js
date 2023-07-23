@@ -197,14 +197,11 @@ export default function EnhancedTable() {
         const [isDeleteRoleOpen , setIsDeleteRoleOpen] = React.useState(false);
         const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
         const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
-        const [requestResponse , setResponse] = React.useReducer(
-                (state, action)=>{return {...state,...action}},
-                {isLoading:false,isRequestError:false,message:"",isRequestSuccessful:false}
-        );
+        
 
         const setSelected =(role)=>{
             SetSelected(role);
-            setResponse( {isRequestError:false, isLoading:false,message:"",isRequestSuccessful:false});
+            setRoles( {isRequestError:false, isLoading:false,message:"",isRequestSuccessful:false});
             setIsRoleDeleted(false);
         }
         /////////////////////////////////////////////////////////////////
@@ -215,14 +212,13 @@ export default function EnhancedTable() {
             let isMounted = true;
             const controller = new AbortController();
             const API = '/holiday-plan/api/admin/role/roles/';
-            setTimeout(()=>{!(requestResponse.isRequestError&&requestResponse.isRequestSuccessful)
-            && setResponse({message:"Loading ...",isLoading:true});},3000);
+            
             isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
             .then(response => {
                     
                     if(response.ok || response.status===200){
                       console.log(response.data);
-                      setRoles({listRoles:response.data,exceptionMessage:"Successfully get roles"});
+                      setRoles({data:response.data});
                       
                     }
                     
@@ -231,14 +227,16 @@ export default function EnhancedTable() {
                     console.log(err);
                     if(!err?.response.ok){
                       const errorMessage  = getErrorMessage(err);
-                      setRoles({exceptionMessage:errorMessage});
+                      setRoles({message:errorMessage, isRequestError:true,isRequestSuccessful:false});
                     }
                     else{
-                      setRoles({exceptionMessage:"Server Error"});
+                      setRoles({message:"Server Error", isRequestError:true,isRequestSuccessful:false});
                     }
             });
             
-            return ()=>{isMounted=false; controller.abort();}
+            return ()=>{isMounted=false; controller.abort();
+              setTimeout(()=>{setRoles({isLoading:false,isRequestError:false,message:"",isRequestSuccessful:false});},5000);
+            }
 
         },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
 
@@ -247,7 +245,7 @@ export default function EnhancedTable() {
         ///////////////////////////////////////////////////////////////////////////////
         const deleteRoles = async(rolesToDelete)=>{
                 if(rolesToDelete===null || rolesToDelete===undefined || rolesToDelete.length===0){
-                    setResponse({isRequestError:true,message:"No roles selected.",isRequestSuccessful:false});
+                    setRoles({isRequestError:true,message:"No roles selected.",isRequestSuccessful:false});
                 }else{
                    let  results ={isRequestSuccessful:false};
                    let lastRole=null;
@@ -273,7 +271,7 @@ export default function EnhancedTable() {
                         setSelected(temp);
                         setIsRoleDeleted(true);
                    }
-                   setResponse(results);
+                   setRoles(results);
                 }
         }
          // Delete role by name
@@ -328,7 +326,7 @@ export default function EnhancedTable() {
         const handleSelectAllClick = (event) => {
 
             if (event.target.checked) {
-              const newSelected = roles.listRoles;
+              const newSelected = roles.data;
               setSelected(newSelected);
               return;
             }
@@ -382,26 +380,35 @@ export default function EnhancedTable() {
         }
 
         // Avoid a layout jump when reaching the last page with empty rows.
-        const emptyRows =page > 0 ? Math.max(0, (1 + page) * rowsPerPage - roles.listRoles.length) : 0;
+        const emptyRows =page > 0 ? Math.max(0, (1 + page) * rowsPerPage - roles.data.length) : 0;
 
         const visibleRows = React.useMemo(() =>
-              stableSort(roles.listRoles, getComparator(order, orderBy)).slice(
+              stableSort(roles.data, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
               ),
-            [roles.listRoles,order, orderBy, page, rowsPerPage],
+            [roles.data,order, orderBy, page, rowsPerPage],
         );
 
         const [anchorElUser, setAnchorElUser] = React.useState(null);
-
+    
+    console.log((roles.data.length===0))
+    console.log(!(roles.isRequestError||roles.isRequestSuccessful))
+    console.log(((roles.data.length===0)&&!(roles.isRequestError||roles.isRequestSuccessful)))
   return (
     <>
-    {requestResponse.isLoading || requestResponse.isRequestError || requestResponse.isRequestSuccessful&&
+      {
+      ((roles.data.length===0)|| roles.isRequestError || roles.isRequestSuccessful)&&
       <Typography align="center" variant="h5" fontSize={"0.8rem"} 
-          color={requestResponse.isRequestError?ERROR_COLOR:requestResponse.isLoading?LOADING_COLOR:SUCCESS_COLOR}
-        >
-            {requestResponse.message||roles.exceptionMessage}
-      </Typography>
+            color={
+              roles.isRequestError?ERROR_COLOR:
+              (roles.data.length===0)?LOADING_COLOR
+              :SUCCESS_COLOR}
+          >
+              { 
+                ((roles.data.length===0)&&!(roles.isRequestError||roles.isRequestSuccessful))?"Loading...":roles.message
+              }
+        </Typography>
       }
    
       
@@ -433,7 +440,7 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={roles.listRoles.length}
+              rowCount={roles.data.length}
             />
             <TableBody>
               
@@ -495,7 +502,7 @@ export default function EnhancedTable() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={roles.listRoles.length}
+          count={roles.data.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

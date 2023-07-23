@@ -34,11 +34,17 @@ const UserQuery =  ()=>{
 
 
     useEffect(()=>{
-        dispatchQuery({type:"loading",message:"Loading ..."})
+       
         let isMounted=true;
         const controller=new AbortController();
         isMounted && FetchQueries(useAxiosPrivate, userLoginState.roles, dispatchQuery, controller);
-        return  ()=>{isMounted=false; controller.abort();}
+        return  ()=>{
+            isMounted=false; controller.abort(); 
+            setTimeout(()=>{dispatchQuery({type:"loading",message:"",
+                            isRequestError:false,
+                            isRequestSuccessful:false
+            })},5000);
+        }
     },[])
    const deleteQueryCard =(index)=>{
         const isRequestError = query.data?.length>0?true:false;
@@ -60,22 +66,26 @@ const UserQuery =  ()=>{
     return (
         <Box   sx={{display:"flex",
                     justifyContent:(query.data.length===0)||query.isRequestError?"center":"start",
-                    alignItems:(query.data.length===0)||query.isRequestError?"center":"start",
+                    alignItems:"start",
                     minHeight:"100vh",
                     flexFlow:"row wrap",
                     padding:"5% 0%"
                     }}
                 >
             {
-                ((query.data.length===0)||query.isRequestError||query.isRequestSuccessful)?
-                <Typography 
-                    variant="h5" 
-                    align="center"
-                    sx={{color:query.isRequestError?ERROR_COLOR:(query.data.length==0)?LOADING_COLOR:SUCCESS_COLOR}}
-                >
-                    {query.message}
-                </Typography>
-                :Cards
+                
+                ((query.data.length===0)||query.isRequestError||query.isRequestSuccessful)&&
+                    <Typography 
+                        variant="h5" 
+                        align="center"
+                        sx={{color:query.isRequestError?ERROR_COLOR:(query.data.length==0)?LOADING_COLOR:SUCCESS_COLOR}}
+                    >
+                        {(query.data.length===0)&&!(query.isRequestError||query.isRequestSuccessful)?"Loading ...":query.message}
+                    </Typography>
+            }
+            {
+                Cards
+                
             }
 
         </Box>

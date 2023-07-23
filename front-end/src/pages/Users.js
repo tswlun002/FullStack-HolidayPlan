@@ -89,7 +89,6 @@ export default function Users() {
      
         <Box
           display={small?'block':'flex'}
-          padding="6rem 0.5rem"
           sx={{ flexGrow: 1, bgcolor: '#dfe0e6', 
           minHeight: "100vh", width:{sm:"100%",md:"auto"} }}
         >

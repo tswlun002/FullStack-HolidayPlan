@@ -47,7 +47,7 @@ function ImageSlider(images) {
 }
 
 export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayCard}) {
-  const{userLoginState} = useContext(CreateAuthContext);
+  
   const priorityLevelRate = [1, 2, 3];
   const priorityLevelColor = ["green", "yellow", "orange","bisque"];
 

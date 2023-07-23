@@ -18,7 +18,7 @@ import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 
 
 
-function Header() {
+function Header(props) {
 
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -125,7 +125,7 @@ function Header() {
   }
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" {...props}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography sx={{padding:"2rem 0rem"}}>{`${userHeader} ${userLoginState.isAuthenticated?"'s":""} Holiday Plans`}</Typography>

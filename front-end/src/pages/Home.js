@@ -9,6 +9,7 @@ import {CreateAuthContext} from '../context/CreateAuthContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import Typography from '@mui/material/Typography';
 import ColorButton from '../component/ColorButton';
+import { ERROR_COLOR, LOADING_COLOR } from '../utils/Constant';
 
 const useStyles = makeStyles({
   containerBox0:{
@@ -26,8 +27,9 @@ function HomeContent({isDataAvailable,Cards, errorMessage}) {
   const classes = useStyles(); // ✅ This is safe because it is called inside ThemeProvider
 
 
-  return <div>{!isDataAvailable?
-                     <Typography align="center"><h2 style={{color:"red"}}>{`${errorMessage}, use the button below  to add HolidayPlan`}</h2></Typography>
+  return <div>{!isDataAvailable||(Cards.length===0)?
+                     <Typography align="center" sx={{color:(!(isDataAvailable||errorMessage)&&(Cards.length===0))?LOADING_COLOR:ERROR_COLOR}} 
+                          variant="h5" fontSize="0.8rem">{(!(isDataAvailable||errorMessage)&&(Cards.length===0))?"Loading ...":`${errorMessage}, use the button below  to add HolidayPlan`}</Typography>
                      :<Box className={classes.containerBox0}>
                            {isDataAvailable && Cards}
                        </Box>

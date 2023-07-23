@@ -9,8 +9,6 @@ import {RolePermissionContext} from '../context/RolePermissionContext';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@material-ui/core';
 import Permissions from '../component/Permissions';
-import { getAllPermissions } from '../utils/PermissionApi';
-import  {getAllRoles} from '../utils/RoleApi';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
 
@@ -52,7 +50,9 @@ export default function RoleAndPermission() {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  const[roles, setRoles] = React.useReducer((state, action)=>{return{...state,...action}},{listRoles:[],exceptionMessage:""});
+  const[roles, setRoles] = React.useReducer((state, action)=>{return{...state,...action}},
+      {data:[],isRequestError:false, isLoading:false,message:"",isRequestSuccessful:false}
+  );
   const[permissions, setPermissions] = 
   React.useReducer((state, action)=>{return{...state,...action}},{listPermissions:[],exceptionMessage:""});
   const theme =  useTheme();
@@ -90,7 +90,6 @@ export default function RoleAndPermission() {
      
         <Box
           display={small?'block':'flex'}
-          padding="8rem 0.5rem"
           sx={{ flexGrow: 1, bgcolor: '#dfe0e6', 
           minHeight: "100vh", width:{sm:"100%",md:"auto"} }}
         >

@@ -15,7 +15,9 @@ const EditUserItem =(props)=>{
             alignItems="center"
             justifyContent="flex-start"
         >
-            <CustomerTypography  fontSize={"1rem"}align="center"> <h4>{`${componentLabel}:  ${componentValue}`}</h4></CustomerTypography>
+            <CustomerTypography  fontSize={"1rem"}align="center"> <h4>
+                {`${componentLabel}:  ${componentValue||"loading ..."}`}
+            </h4></CustomerTypography>
             {IsEditFieldOpen?< VisibilityOffIcon sx={editIconProps} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>:
                 <EditIcon sx={editIconProps} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>
             }
