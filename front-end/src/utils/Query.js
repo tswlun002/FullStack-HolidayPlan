@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./Error";
 
 export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=>{
 
@@ -59,36 +60,32 @@ export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=
           console.log(response.data)
 
          dispatchQuery({
-             type:"replace",
+            type:"replace",
             payload:response.data,
-            isDataAvailable:true,
-            isResponseSuccess:true
-
-           });
+          });
 
         }
       }
   ).catch(err =>
     {
-       console.log(err);
-      console.log("Not ok");
+     
        if(!err?.response.ok && err.name!=="AbortErr"){
             let errorMessage =null;
             if(err.response.status===404){
-              console.log("Not ok ,********");
-              errorMessage  ="Invalid credentials";
+            
+              errorMessage  =getErrorMessage(err);
             }
             else if(err.response.status===401){
                  errorMessage  ="Denied access";
             }
             else{
-                  console.log("Not ok");
-                  errorMessage  = err.response?.statusText;
+                 
+              errorMessage  = getErrorMessage(err);
             }
-            dispatchQuery({errorMessage:errorMessage,isDataAvailable:false})
+            dispatchQuery({type:"error",message:errorMessage})
 
        }
-       else dispatchQuery({errorMessage:"Internal server error",isDataAvailable:false});
+       else dispatchQuery({type:"error",message:"Internal server error"});
     }
   )
 

@@ -1,16 +1,16 @@
 import "./HolidayPlanForm.css"
-import {Paper,Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel,Box,Card,CardContent,CardActions}  from '@mui/material';
+import {Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel,Box,Card,CardContent,
+CardHeader}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
-import { useReducer, useContext, useState} from "react"
-import {CreateAuthContext} from '../context/CreateAuthContext';
+import { useReducer, useState} from "react"
 import {AddHolidayPlan} from '../utils/HolidayPlan';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CustomerTypography from '../component/CustomerTypography'
 import ApploadFile from '../component/ApploadFile'
+import { PRIMAR_COLOR } from "../utils/Constant";
 
 const HolidayPlanForm =()=>{
-      const { dispatchLogin } = useContext(CreateAuthContext);
       const  useAxiosPrivate=UseAxiosPrivate();
       const [imagePreview , setImagePreview] =useState([]);
 
@@ -37,26 +37,6 @@ const HolidayPlanForm =()=>{
       AddHolidayPlan(useAxiosPrivate,fd, DispatchHolidayPlanData)
   }
 
-
-   const urlToImage  =(url)=>{
-        DispatchHolidayPlanData({isDataCorrect:true, pictureLink:url});
-
-        fetch(url).
-        then(res=>res.Blob())
-        .then(blob=>{
-            const file = new File([blob],"image",{type:blob.type})
-            setFiles(()=>[...Files,file])
-            setImagePreview(()=>[...imagePreview, URL.createObjectURL(file)])
-
-
-        })
-        .catch(err=>
-                   DispatchHolidayPlanData({isDataCorrect:false, errorMessage:"Could not upload photo"})
-
-        );
-
-
-   }
 
   
    const isEmpty= (elementInputData)=>elementInputData.trim()==="";
@@ -89,24 +69,8 @@ const HolidayPlanForm =()=>{
            }
 
             store()
-           if(HolidayPlanData.isDataCorrect)
-           setTimeout(()=>{
-             /* DispatchHolidayPlanData(
-                {
-                  location: "",
-                  city: "",
-                  startDate: "",
-                  endDate: "",
-                  description: "",
-                  event: "",
-                  images: [],
-                  pictureLink:"",
-                  priorityLevel: "",
-
-                }
-              )*/
-
-           },2000);
+         
+          
         }else{
 
              console.log(HolidayPlanData)
@@ -119,12 +83,33 @@ const HolidayPlanForm =()=>{
   return (
       <Box display="flex"
           justifyContent="center"
-          alignItems="center"
+          alignItems="start"
           minHeight="100vh"
             >
             <Card sx={{ maxWidth: 400,display:"block"}}>
+            <CardHeader 
+              title={<CustomerTypography sx={{alignText:"centre"}} className="heading">Add Holiday</CustomerTypography>}
+              titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
+              action={<CustomerTypography onClick={()=>{ setTimeout(()=>{
+                 DispatchHolidayPlanData(
+                   {
+                     location: "",
+                     city: "",
+                     startDate: "",
+                     endDate: "",
+                     description: "",
+                     event: "",
+                     images: [],
+                     pictureLink:"",
+                     priorityLevel: "",
+   
+                   }
+                 ); setImagePreview([])
+   
+              },2000);}}sx={{align:"end"}}>Clear form </CustomerTypography>}
+            />
                 <CardContent>
-                    <CustomerTypography sx={{alignText:"centre"}} className="heading">Add Holiday</CustomerTypography>
+                    
                     <form className="holiday-plan-form">
                          {
                             !HolidayPlanData.isDataCorrect &&
@@ -211,24 +196,8 @@ const HolidayPlanForm =()=>{
                             onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,description:e.currentTarget.value}) }
                             value={HolidayPlanData.description}
                           />
-
-                         <Box
-                                sx={{display:"flex"}}
-                              >
-                            <CssTextField
-                                required
-
-                                sx={{maxWidth:"75%"}}
-                                id="demo-helper-text-aligned"
-                                label="Link Picture"
-                                variant="outlined"
-
-                                type="text" name="images" placeholder="Enter pictureLink mall" className="pictureLink"min={4}
-                                onChange={(e)=>urlToImage(e.currentTarget.value) }
-                                value={HolidayPlanData.pictureLink}
-                              />
-                              <ApploadFile setImages={setImages} margin="1rem 0rem" maxWidth={"100%"} />
-                         </Box>
+                          <ApploadFile setImages={setImages} margin="1rem 0rem" maxWidth={"100%"} />
+                        
                          <Box display="flex"
                           justifyContent="center"
                           alignItems="center">
@@ -240,7 +209,7 @@ const HolidayPlanForm =()=>{
                               }
                          </Box>
                         <PriorityLevelComponent HolidayPlanData={HolidayPlanData}DispatchHolidayPlanData={DispatchHolidayPlanData}/>
-                        <ColorButton style={{marginTop:"15px"}} type="submit" onClick={(e)=>OnSubmit(e)}
+                        <ColorButton style={{marginTop:"15px",width:"100%"}} type="submit" onClick={(e)=>OnSubmit(e)}
                         className="btn btn-primary" >Save</ColorButton>
 
                     </form>

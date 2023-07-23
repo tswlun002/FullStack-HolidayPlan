@@ -28,6 +28,7 @@ const EditUserForm=()=>{
         }
     );
     useEffect(()=>{
+        console.log("*******************************************");
 
         let isMounted = true;
         const controller = new AbortController();
@@ -39,26 +40,31 @@ const EditUserForm=()=>{
                 return true;
             }})
             console.log(response)
-            if(response.ok || response.status===302){
+            try{
+                if(response.ok || response.status===302){
                     console.log(response.data)
-                isMounted&& setUser(response.data)
- 
+                    setUser(response.data)
+    
+                }
+            }catch(err){
+                
+                if(!err?.response.ok && err.name!=="AbortErr"){
+                    let errorMessage  =null;
+                    if(err.response.status===404){
+                        errorMessage  ="Invalid credentials";
+                    }
+                    else if(err.response.status===401){
+                            errorMessage  ="Denied access";
+                    }
+                    else{
+                            console.log(err.response.statusText);
+                            errorMessage  = getErrorMessage(err);
+                    }
+                    dispatchRegister({message:errorMessage,isEditError:true})
+                }else dispatchRegister({message:"Server Error",isEditError:true})
             }
             
-            if(!response?.response.ok && response.name!=="AbortErr"){
-                let errorMessage  =null;
-                if(response.response.status===404){
-                    errorMessage  ="Invalid credentials";
-                }
-                else if(response.response.status===401){
-                        errorMessage  ="Denied access";
-                }
-                else{
-                        console.log(response.response.statusText);
-                        errorMessage  = getErrorMessage(response);
-                }
-                dispatchRegister({message:errorMessage,isEditError:true})
-            }else dispatchRegister({message:"Server Error",isEditError:true})
+           
 
             
             

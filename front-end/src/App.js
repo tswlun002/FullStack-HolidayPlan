@@ -88,10 +88,10 @@ const App=()=>{
     useEffect(()=>{
 
       if(userLoginState.isAuthenticated){
-        const ACCESS = userLoginState.access_token;
-        delete userLoginState.access_token;
+
         window.localStorage.setItem("loginState",JSON.stringify(userLoginState));
-        userLoginState.access_token=ACCESS;
+      
+
       }
       Path = window.localStorage.getItem("currentPath");
       if(Path==='/' && userLoginState.isAuthenticated)Path = userLoginState.roles.find(role=>role.name==="USER")?
@@ -99,14 +99,6 @@ const App=()=>{
       
       navigate(Path);
     }, [userLoginState])
-
-   /* useEffect(()=>{
-
-      const myCookie = window.localStorage.getItem("access_token");
-      if(myCookie !==null)  setCookie(myCookie);
-      dispatchLogin({type:"LOGIN", payload:{access_token:cookies}})
-           
-    }, [])*/
 
     return (
     <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>

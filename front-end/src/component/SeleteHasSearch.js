@@ -15,6 +15,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 const containsText = (element, searchText) => element.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
 
+
 export default function SelectHasSearch({allOptions=[],fieldName="name",setSeletedOptions}) {
         
         const [selected, setSelected] = useState([]);
