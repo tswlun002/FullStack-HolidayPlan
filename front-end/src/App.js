@@ -88,10 +88,7 @@ const App=()=>{
     useEffect(()=>{
 
       if(userLoginState.isAuthenticated){
-
         window.localStorage.setItem("loginState",JSON.stringify(userLoginState));
-      
-
       }
       Path = window.localStorage.getItem("currentPath");
       if(Path==='/' && userLoginState.isAuthenticated)Path = userLoginState.roles.find(role=>role.name==="USER")?

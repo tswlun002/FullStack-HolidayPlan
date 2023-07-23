@@ -3,8 +3,10 @@ import Header  from '../component/Header'
 const MainLayout =()=>{
      return (
       <div className="App">
-        <Header/>
-        <Outlet/>
+        <Header className="app-bar"/>
+        <div style={{marginTop:"6rem"}} className="app-body">
+          <Outlet/>
+        </div>
       </div>
      )
 

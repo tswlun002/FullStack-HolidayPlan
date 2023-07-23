@@ -62,7 +62,7 @@ const Login =()=>{
                     backgroundColor="#dfe0e6"
 
                >
-                   <Card sx={{ maxWidth: 400,padding:"2rem 0rem" ,display:"block"}}>
+                   <Card sx={{ maxWidth: 400 ,display:"block"}}>
                     <CardHeader >
                         <Typography variant="h2">Add New Role</Typography>
                     </CardHeader>

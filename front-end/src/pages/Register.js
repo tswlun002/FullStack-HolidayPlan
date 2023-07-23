@@ -1,7 +1,7 @@
 import './Register.css'
-import {  useReducer, useEffect, useState} from "react"
+import {  useReducer,  useState} from "react"
 import { useNavigate, Link } from "react-router-dom";
-import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel, Typography,Box,Card,CardContent,CardActions } from '@mui/material';
+import { Typography,Box,Card,CardContent,CardActions } from '@mui/material';
 
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
@@ -65,12 +65,12 @@ const Register =()=>{
 
         <Box display="flex"
             justifyContent="center"
-            alignItems="center"
+            alignItems="start"
             minHeight="100vh"
             backgroundColor="#dfe0e6"
 
               >
-              <Card sx={{ maxWidth: 400, margin:"7rem 0rem",display:"block"}}>
+              <Card sx={{ maxWidth: 400,display:"block"}}>
                     <CardContent>
                      <h2 className="heading">Register</h2>
                     <form className="register-inputs" autoComplete="off">

@@ -259,7 +259,6 @@ export default function ListUsers() {
               let isMounted = true;
               const controller = new AbortController();
               const API = '/holiday-plan/api/admin/user/users/';
-              setTimeout(()=>{(!(users.isRequestError&&users.isRequestSuccessful))&&dispatchUsers({message:"Loading ...", isLoading:true});},3000)
               isMounted&&useAxiosPrivate.get(API, {signal:controller.signal})
               .then(response =>
                   {
@@ -295,7 +294,9 @@ export default function ListUsers() {
                 }
               );
 
-              return ()=>{isMounted=false; controller.abort();}
+              return ()=>{isMounted=false; controller.abort();
+                setTimeout(()=>{dispatchUsers( {isRequestError:false,isLoading:false,message:"",isRequestSuccessful:false})},5000)
+              }
       },[isRoleAdded,newPermissionAddedToUser,isUserDeleted]);
 
         //////////////////////////////////////////////////////////////////////////////
@@ -457,10 +458,10 @@ export default function ListUsers() {
 
   return (
   <>
-    {(users.isRequestError||users.isLoading||users.isRequestSuccessful)&&
+    {(users.isRequestError||(users.data.length===0)||users.isRequestSuccessful)&&
       <Typography align="center" variant="h5" 
-         color={users.isRequestError?ERROR_COLOR:users.isLoading?LOADING_COLOR:SUCCESS_COLOR}
-         font-size="0.8rem">{users.message}
+         color={users.isRequestError?ERROR_COLOR:(users.data.length===0)?LOADING_COLOR:SUCCESS_COLOR}
+         font-size="0.8rem">{(users.data.length===0&&!(users.isRequestError||users.isRequestSuccessful))?"Loading ...":users.message}
       </Typography>
     }
    

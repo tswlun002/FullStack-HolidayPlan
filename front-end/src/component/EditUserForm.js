@@ -11,6 +11,7 @@ import Stack from '@mui/material/Stack';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {NavLink} from 'react-router-dom'
 import CustomerTypography from "./CustomerTypography";
+import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from "../utils/Constant";
 
 const EditUserForm=()=>{
     const{username} = useParams();
@@ -28,8 +29,6 @@ const EditUserForm=()=>{
         }
     );
     useEffect(()=>{
-        console.log("*******************************************");
-
         let isMounted = true;
         const controller = new AbortController();
         const API = `/holiday-plan/api/admin/user/${username}`;
@@ -69,9 +68,14 @@ const EditUserForm=()=>{
             
             
         }
-        getUser();
+        isMounted&&getUser();
 
-        return ()=>{isMounted=false; controller.abort();}
+        return ()=>{
+            isMounted=false; controller.abort();
+            setTimeout(()=>{dispatchRegister({firstname:"",lastname:"",email:"",
+            currentUsername:username,currentPassword:"",age:"", isRequestSucceeded:false,
+            isEditError:false, errorMessage:"",   requestResponseMessage:""})},5000);
+        }
     },[]);
     
 
@@ -127,7 +131,7 @@ const EditUserForm=()=>{
 
         <Box display="flex"
             justifyContent="center"
-            alignItems="center"
+            alignItems="start"
             minHeight="100vh"
             backgroundColor="#dfe0e6"
 
@@ -142,7 +146,7 @@ const EditUserForm=()=>{
                             >
                                 <ArrowBackIcon/>  
                             </NavLink> 
-                            <CustomerTypography align="center" color="rgb(143, 88, 175)"><h2>Account</h2></CustomerTypography>
+                            <CustomerTypography align="center" color={PRIMAR_COLOR}><h2>Account</h2></CustomerTypography>
                         </Stack>
                         }
                         
@@ -150,7 +154,7 @@ const EditUserForm=()=>{
                         subheader={(register.isEditError ||register.isEditError)?register.errorMessage:
                                     register.isRequestSucceeded?register.requestResponseMessage:""
                         }
-                        subheaderTypographyProps={{align:"start" ,color:register.isEditError?"red":"green"}}
+                        subheaderTypographyProps={{align:"start" ,color:register.isEditError?ERROR_COLOR:SUCCESS_COLOR}}
                     />
                     <CardContent>
                     <form className="register-inputs" autoComplete="off">
