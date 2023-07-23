@@ -6,3 +6,4 @@ export const LAYOUT_COLOR= '#dfe0e6';
 export  const ERROR_COLOR="red"
 export const SUCCESS_COLOR="green"
 export const LOADING_COLOR=SECONDARY_COLOR;
+
