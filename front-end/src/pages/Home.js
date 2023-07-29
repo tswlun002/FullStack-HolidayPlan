@@ -1,15 +1,23 @@
-import { Box } from '@mui/system';
+import { Box, InputAdornment,TextField,Stack } from '@mui/material';
 import { makeStyles } from  "@mui/styles"
 import Card from '../component/HolidayCard';
-import {  useReducer, useEffect, useContext} from "react"
+import {  useReducer, useEffect, useContext, useState} from "react"
 import AddIcon from '@mui/icons-material/Add';
 import {useNavigate} from 'react-router-dom';
 import { FetchHolidayPlan} from '../utils/HolidayPlan';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
-import Typography from '@mui/material/Typography';
 import ColorButton from '../component/ColorButton';
-import { ERROR_COLOR, LOADING_COLOR } from '../utils/Constant';
+import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
+import CustomerTypography from '../component/CustomerTypography';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import FilterList from '../component/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
+import Divider from '@mui/material/Divider';
+
+
+
 
 const useStyles = makeStyles({
   containerBox0:{
@@ -17,60 +25,43 @@ const useStyles = makeStyles({
       padding:"8px",
       display:"flex",
       flexFlow:"row wrap",
-      alignContent:"flex-start",
+      alignItems:"start",
       
   },
 }
 ); 
-
-function HomeContent({isDataAvailable,Cards, errorMessage}) {
-  const classes = useStyles(); // ✅ This is safe because it is called inside ThemeProvider
-
-
-  return <div>{!isDataAvailable||(Cards.length===0)?
-                     <Typography align="center" sx={{color:(!(isDataAvailable||errorMessage)&&(Cards.length===0))?LOADING_COLOR:ERROR_COLOR}} 
-                          variant="h5" fontSize="0.8rem">{(!(isDataAvailable||errorMessage)&&(Cards.length===0))?"Loading ...":`${errorMessage}, use the button below  to add HolidayPlan`}</Typography>
-                     :<Box className={classes.containerBox0}>
-                           {isDataAvailable && Cards}
-                       </Box>
-
-  } </div>
-}
-
 const Home = ()=>{
     const useAxiosPrivate = UsePrivateAxios();
     const{userLoginState} = useContext(CreateAuthContext)
-
-    const [Data, setData] = useReducer((state,action)=>{
+    const [cards, dispatchCards] = useReducer((state,action)=>{
         console.log(action);
         switch(action.type){
-         case "replace": return {...state, array:[...action.payload],isDataAvailable:true};
-         case "add":return {...state, array:[...state.array,action.payload],isDataAvailable:true};
-         case "error": return {...state, errorMessage:action.errorMessage,isDataAvailable:false};
-         case "dataChange": return {...state, isDataUpdated:true};
-         case "deleteHoliday": return {...state, array:[...action.payload],isDataAvailable:action.payload.isDataAvailable};
+         case "replace": return {...state, data:action.payload,iRequestError:false, isResponseSuccess:true};
+         case "add":return {...state, data:[...state.data,action.payload],iRequestError:false, isResponseSuccess:true};
+         case "error": return {...state, message:action.message,iRequestError:true, isResponseSuccess:false};
+         case "dataChange": return {...state, iRequestError:false, isResponseSuccess:true};
+         case "deleteHoliday": return {...state, data:[...action.payload],iRequestError:false, isResponseSuccess:true};
          
          default: return {...state} ;
       } 
     },
     
     {
-      array:[],
-      errorMessage:"Data is not available",
-      isDataAvailable:false,
-      isDataUpdated:false,
+      data:[],
+      message:"Data is not available",
+      iRequestError:false, isResponseSuccess:false
     }
   )
 
   const deleteHolidayCard = (index)=>{
-        const isDataAvailable = Data.array?.length>0?true:false;
-        const data  = [...Data.array?.slice(0, index), ...Data.array?.slice(index+1)];
-        setData({type:"deleteHoliday", payload:data, isDataAvailable:isDataAvailable});
+        const isDataAvailable = cards.data.length>0?true:false;
+        const data  = [...cards.data.slice(0, index), ...cards.data.slice(index+1)];
+        dispatchCards({type:"deleteHoliday", payload:data, isDataAvailable:isDataAvailable});
 
   }
 
   const updateHolidayCard = (index)=>{
-      setData({type:"dataChange"});
+      dispatchCards({type:"dataChange"});
   }
 
 
@@ -80,27 +71,88 @@ const Home = ()=>{
   useEffect(() =>{
     let isMounted = true;
     const controller = new AbortController();
-    isMounted && FetchHolidayPlan(useAxiosPrivate, setData,controller);
+    isMounted && FetchHolidayPlan(useAxiosPrivate, dispatchCards,controller);
     return ()=>{isMounted=false; controller.abort();}
   },[]);
 
 
   //Make cards
-  const Cards  = Data.array.map((data,index)=>{
+  const CardsComponents  = cards.data.map((data,index)=>{
       if(data !==null){
         return <Card  updateHolidayCard={updateHolidayCard} index={index}
                 key={data.id} deleteHolidayCard={deleteHolidayCard} data={data} />
     }
 
   } );
-
+  console.log(cards);
+  console.log(((cards.data.length===0) && !(cards.iRequestError||cards.isResponseSuccess) || cards.iRequestError));
+  /*const useStyles = makeStyles({
+    containerBox0:{
+        margin:"8px",
+        padding:"8px",
+        display:"flex",
+        flexFlow:"row wrap",
+        alignItems:"start",
+        justifyContent:(cards.data.length===0)||cards.isRequestError?"center":"start",
+        
+    },
+  }
+  ); */
+  const classes = useStyles(); // ✅ This is safe because it is called inside ThemeProvider
   
+  const [openFilter , setOpenFilter] = useState(false);
+  
+  const FILTERS = [{name:'city', label:"city"},{name:"location",label:'location'},{name:"startDate",label:'start date'},{name:"endDate",label:'end date'},{name:'event',label:"event"},{name:'priorityLevel',label:"priority"}]
+   const getFilterField = (filter)=>{
+          return [... new Set(cards.data.map((holiday)=>{ 
+
+            if(filter==="startDate"||filter==="endDate"){
+             
+              return holiday[filter]&&JSON.stringify(holiday[filter]).substring(1,11)
+            }
+            else return holiday[filter]
+          
+          }))].map((field)=>{return {[filter]:field}});
+   }
+
+   console.log(getFilterField("location"));
   return (
     
-    <div className="body">
-        <AddMoreHolidayPlan isDataAvailable={Data.isDataAvailable}  className="add-holiday-btn"/>
-        <HomeContent isDataAvailable={Data.isDataAvailable}  errorMessage={Data.errorMessage} Cards={Cards}/>
-  </div>
+    <>
+        <AddMoreHolidayPlan isDataAvailable={cards.isResponseSuccess}  className="add-holiday-btn"/>
+        {((cards.data.length===0) && !(cards.iRequestError||cards.isResponseSuccess) || cards.iRequestError)&&
+          <CustomerTypography sx={{color:cards.iRequestError?ERROR_COLOR:LOADING_COLOR}}variant="h5" fontSize="0.8rem">
+            {cards.iRequestError?cards.message:"Loading ..."}
+          </CustomerTypography>
+        }
+   
+    <Box  
+           justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
+            className={classes.containerBox0}>
+
+
+          <InputAdornment  position="start">
+          {!openFilter&& <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+          }
+        </InputAdornment>
+          {
+              openFilter&&<Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={{ xs: 0.5, sm: 1, md: 2 }}
+              sx={{width:"100%"}}
+              useFlexGap flexWrap="wrap"
+              divider={<Divider orientation="vertical" flexItem />}
+             >
+              <FilterListIcon sx={{padding:"1.3rem 0rem"}}/>     
+              {FILTERS.map((filter)=><FilterList label={filter.label} name={filter.name}Options={getFilterField(filter.name)} selectOption={()=>{}}/>)}
+              <ClearIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1.3rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+  
+          </Stack>
+        }
+        {cards.isResponseSuccess&&CardsComponents}
+      </Box>
+    
+  </>
   )
 }
 

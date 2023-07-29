@@ -12,8 +12,8 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
               setData({
                     type:"replace",
                    payload:response.data,
-                   isResponseSuccess:true,
-                   isDataAvailable:true
+                   message:"successful",
+                   iRequestError:false, isResponseSuccess:true
                 });
 
              }
@@ -33,11 +33,11 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
                        console.log("Not ok");
                        errorMessage  = err.response.statusText;
                  }
-                 setData({type: "error", errorMessage: errorMessage})
+                 setData({type: "error", message:errorMessage})
 
             }
 
-            else setData({type: "error", errorMessage: err.response.data.statusText});
+            else setData({type: "error", message: err.response.data.statusText});
 
 
          }
@@ -91,26 +91,26 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
 }
 
  //delete  data
- export const DeleteHolidayPlan = (useAxiosPrivate,holidayPlanId,setResponse)=> {
-      
-      const API = `/holiday-plan/api/holiday/delete/holiday-plan/${holidayPlanId}`;
-    useAxiosPrivate.delete(API)
+ export const DeleteHolidayPlan = (useAxiosPrivate,holidayPlanId)=> {
+    const API = `/holiday-plan/api/holiday/delete/holiday-plan/${holidayPlanId}`;
+   return useAxiosPrivate.delete(API)
     .then(response =>
-            {
+            {  
+              const results ={iRequestError:false, isResponseSuccess:false,message:"",responseMessage:""}
+              
               if(response.ok || response.status===200){
                 console.log("Ok");
                 console.log(response.data)
-                setResponse({
-                    isResponseSuccess:true,
-                    responseMessage:"Successfully updated holiday"
-                 });
-
+                results.message="Successful"
+                results.isResponseSuccess=true;
+                
               }
+              return results;
         }
     ).catch(err =>
       {
-         console.log(err);
-         console.log("Not ok");
+        const results ={iRequestError:false, isResponseSuccess:false,message:"",responseMessage:""}
+
          if(!err?.response.ok){
               let errorMessage =null;
               if(err.response.status===404){
@@ -121,13 +121,16 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
                     console.log("Not ok");
                     errorMessage  = err.response.statusText;
               }
-              setResponse({iRequestError:true, errorMessage: errorMessage})
-
-
+              results.iRequestError=true;
+              results.message=errorMessage;
+              
          }
 
-         else setResponse({iRequestError:true,  errorMessage: err.response.data.statusText});
-
+         else {
+          results.iRequestError=true;
+          results.message="Internal server error";
+        }
+        return  results;
 
       }
     )
@@ -146,8 +149,8 @@ export const UpdateHolidayPlan = (useAxiosPrivate,holidayPlanId, priority,setRes
                  console.log("Ok");
                  console.log(response.data)
                  setResponse({
-                     isResponseSuccess:true,
-                     responseMessage:"Successfully updated holiday"
+                  message:"updated ",
+                  iRequestError:false, isResponseSuccess:true
                   });
 
                }
@@ -166,12 +169,12 @@ export const UpdateHolidayPlan = (useAxiosPrivate,holidayPlanId, priority,setRes
                      console.log("Not ok");
                      errorMessage  = err.response.statusText;
                }
-               setResponse({iRequestError:true, errorMessage: errorMessage})
+               setResponse({iRequestError:true, message: errorMessage})
 
 
           }
 
-          else setResponse({iRequestError:true,  errorMessage: err.response.data.statusText});
+          else setResponse({iRequestError:true,  message: err.response.data.statusText});
 
 
        }

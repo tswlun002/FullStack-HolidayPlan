@@ -13,8 +13,8 @@ import { red } from '@mui/material/colors';
 import  {FaTrash,FaMapMarkerAlt, FaMinus, FaPlus} from 'react-icons/fa'
 import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel } from '@mui/material';
 import {DeleteHolidayPlan,UpdateHolidayPlan} from '../utils/HolidayPlan';
-import {CreateAuthContext} from '../context/CreateAuthContext';
 import  UseAxiosPrivate from '../utils/UseAxiosPrivate';
+
 
 
 const ExpandMore = styled((props) => {
@@ -62,7 +62,9 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
 
   const [response, setResponse] = useState({iRequestError:false, isResponseSuccess:false,
                                              errorMessage:"",responseMessage:""
-                                           })
+                                           });
+  //const [isCardDeleted, setCardIsDeleted] = useState(false);
+                                        
 
 
 
@@ -76,22 +78,20 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
         }else alert("Failed to update");
   }
 
+/**
+ * Delete holiday  plan
+ * @param {*} event is the delete event
+ */
 
+  const handleDelete = async(event)=>{
+       const results=await DeleteHolidayPlan(useAxiosPrivate,data.id,setResponse);
+        if(results.isResponseSuccess){
+           deleteHolidayCard(true);
 
-  const handleDelete = (event)=>{
-        DeleteHolidayPlan(useAxiosPrivate,data.id,setResponse);
-        if(response.isResponseSuccess){
-           deleteHolidayCard(index);
-
-       }else alert("Failed to delete");
+       }else setResponse(results);
 
   }
 
-
-
-  const cardBackgroundColor =  ()=> experience===priorityLevelRate[2]?{backgroundColor:priorityLevelColor[2]}:
-  experience===priorityLevelRate[1]?{backgroundColor:priorityLevelColor[1]}:
-  experience===priorityLevelRate[0]?{backgroundColor:priorityLevelColor[0]}:{backgroundColor:priorityLevelColor[3]}
 
   const PriorityComponent = ()=>{
         return(
@@ -140,7 +140,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
         title={data.location}
         subheader={`${data.city} from ${data.startDate.substring(0,10)} to ${data.endDate.substring(0,10)}`}
       />
-      <CardMedia component="img" height="194" src={ ImageSlider(data.images)}/>
+      {data.images?.length>0?<CardMedia component="img" height="194" src={ ImageSlider(data.images)}/>:"No images"}
 
 
 

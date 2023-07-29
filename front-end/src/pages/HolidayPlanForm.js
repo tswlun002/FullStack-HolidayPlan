@@ -1,6 +1,6 @@
 import "./HolidayPlanForm.css"
 import {Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel,Box,Card,CardContent,
-CardHeader}  from '@mui/material';
+CardHeader,Stack}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
 import { useReducer, useState} from "react"
@@ -8,7 +8,9 @@ import {AddHolidayPlan} from '../utils/HolidayPlan';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CustomerTypography from '../component/CustomerTypography'
 import ApploadFile from '../component/ApploadFile'
-import { PRIMAR_COLOR } from "../utils/Constant";
+import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from "../utils/Constant";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {NavLink} from 'react-router-dom'
 
 const HolidayPlanForm =()=>{
       const  useAxiosPrivate=UseAxiosPrivate();
@@ -88,8 +90,20 @@ const HolidayPlanForm =()=>{
             >
             <Card sx={{ maxWidth: 400,display:"block"}}>
             <CardHeader 
-              title={<CustomerTypography sx={{alignText:"centre"}} className="heading">Add Holiday</CustomerTypography>}
+              title={<Stack direction="row" spacing='10%'alignItems="center" justifyContent="flex-start">
+                        <NavLink
+                            to=".."
+                            relative="path"
+                            
+                        >
+                            <ArrowBackIcon/>  
+                        </NavLink> 
+                        <CustomerTypography align="center" color={PRIMAR_COLOR}><h2>Add Plan</h2></CustomerTypography>
+                      </Stack>
+              }
               titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
+              subheader={!HolidayPlanData.isDataCorrect &&HolidayPlanData.errorMessage}
+              subheaderTypographyProps={{align:"start" ,color:!HolidayPlanData.isDataCorrect?ERROR_COLOR:SUCCESS_COLOR}}
               action={<CustomerTypography onClick={()=>{ setTimeout(()=>{
                  DispatchHolidayPlanData(
                    {
@@ -111,12 +125,8 @@ const HolidayPlanForm =()=>{
                 <CardContent>
                     
                     <form className="holiday-plan-form">
-                         {
-                            !HolidayPlanData.isDataCorrect &&
-                            <Typography align="center"sx={{color:"red"}}>
-                            {HolidayPlanData.errorMessage}
-                            </Typography>
-                         }
+                         
+                            
                         <CssTextField
                         required
                             id="demo-helper-text-aligned"

@@ -92,7 +92,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
              System.out.println(holidays.size());
              holidays.forEach(holidayPlan -> {
 
-                    if(deleteImage(holidayPlan.getId())) {
+                    if( deleteImage(holidayPlan.getId())) {
                         holidayPlanRepository.delete(holidayPlan);
                         deleted.set(true);
                     }
@@ -117,6 +117,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
      * @Return  false if failed to  delete all images
      */
     private boolean deleteImage(long holidayPlanId){
+        if(imagesRepository.findByHolidayId(holidayPlanId).isEmpty()) return  true;
         var deleted =false;
         try{
              var deletedRow =imagesRepository.deleteImageForHolidayPlan(holidayPlanId);

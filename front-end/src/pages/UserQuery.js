@@ -40,10 +40,7 @@ const UserQuery =  ()=>{
         isMounted && FetchQueries(useAxiosPrivate, userLoginState.roles, dispatchQuery, controller);
         return  ()=>{
             isMounted=false; controller.abort(); 
-            setTimeout(()=>{dispatchQuery({type:"loading",message:"",
-                            isRequestError:false,
-                            isRequestSuccessful:false
-            })},5000);
+            
         }
     },[])
    const deleteQueryCard =(index)=>{

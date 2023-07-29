@@ -1,12 +1,9 @@
 package com.tour.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
-
-import java.sql.Blob;
 
 @Entity
 @NoArgsConstructor
@@ -28,8 +25,8 @@ public class HolidayLocationImages {
     private Long id;
 
     @Lob
-    @Column(length = 3072)
-    private byte[] image = new byte[0];
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] image = new byte[777215];
     @JsonIgnore
     @ToString.Exclude
     @ManyToOne

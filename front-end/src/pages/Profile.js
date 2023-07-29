@@ -243,13 +243,13 @@ const Profile = ()=> {
 
                 <EditButton  color="secondary" variant="outlined" style={{marginTop:"15px"}}
                                       onClick={(e)=>OnSubmit(e)}>Update</EditButton>
-              <DeleteButton
+              { (userLoginState.isAuthenticated&&userLoginState.roles.find(role=>role.name==='USER'))&&<DeleteButton
                    sx={{ marginTop:"10px", color:"black", borderColor:"white"}}
                    variant="outlined" size="small"
                    onClick={(e)=>deleteAccount(e)}
               >
                                     delete  account
-              </DeleteButton>
+              </DeleteButton>}
         </form>
         </CardContent>
         </Card>
