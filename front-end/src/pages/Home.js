@@ -1,4 +1,4 @@
-import { Box, InputAdornment,Stack,FormControlLabel} from '@mui/material';
+import { Box, InputAdornment,Stack,FormControlLabel,useMediaQuery} from '@mui/material';
 import { makeStyles} from  "@mui/styles"
 import Card from '../component/HolidayCard';
 import {  useReducer, useEffect, useContext, useState,useMemo} from "react"
@@ -15,6 +15,7 @@ import FilterList from '../component/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import Divider from '@mui/material/Divider';
 import Switch from '@mui/material/Switch';
+import { useTheme } from '@material-ui/core';
 
 
 const useStyles = makeStyles({
@@ -104,6 +105,7 @@ const Home = ()=>{
 
    const filter= ()=>{
       setFilterIsChecked(()=>!filterIsChecked);
+      setFilterObject({data:[]});
    }  
 
   //call filter data 
@@ -127,7 +129,8 @@ const Home = ()=>{
   
   //Creates filter component
   const Filters =FILTERS.map((filter,index)=><FilterList key={index} label={filter.label} name={filter.name}Options={getFilterField(filter.name)} selectOption={setFilterObject}/>)
-
+  const theme =  useTheme();
+  const xsmall = useMediaQuery(theme.breakpoints.down('xs'));
   return (
     
     <>
@@ -139,8 +142,10 @@ const Home = ()=>{
         }
    
     <Box  
-           justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
-            className={classes.containerBox0}>
+          justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
+          className={classes.containerBox0}
+          display={{xs:"block",sm:"flex"}}
+      >
 
 
           <InputAdornment  position="start">
