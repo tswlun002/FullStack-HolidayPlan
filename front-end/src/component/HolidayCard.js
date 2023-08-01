@@ -168,7 +168,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
             </CardContent>
         </Collapse>
 
-      <CardActions spacing={2} sx={{display:"flex", justifyContent:"start",alignItemsL:"start"}}>
+      <CardActions spacing={2} sx={{display:"flex", justifyContent:"start",alignItems:"start"}}>
         <PriorityComponent />
           <IconButton sx={{justifyContent:"center",width:"3rem", alignItems:"center", maxWidth:"100%"}} variant="outlined"
                                 onClick={(e)=>handleDelete(e)}

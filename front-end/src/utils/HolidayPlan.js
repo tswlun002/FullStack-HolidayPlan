@@ -44,6 +44,51 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
        )
 
 }
+export const FilterHolidayPlan = (useAxiosPrivate,username,filter, setData,controller) => {
+  let{startDate, endDate} =filter;
+  startDate = startDate&&startDate.map((date)=>date.replaceAll('-','/'));
+  endDate = endDate&&endDate.map((date)=>date.replaceAll('-','/'));
+  const API= `/holiday-plan/api/holiday/filtered-holiday-plans/?username=${username}&city=${filter.city||[]}&location=${filter.location||[]}&end=${endDate||[]}&start=${startDate}&event=${filter.event||[]}&priorityLevel=${filter.priorityLevel||[]}`;
+   useAxiosPrivate.get(API,{signal:controller.signal})
+   .then(response =>
+       {
+         if(response.ok || response.status===200){
+           console.log("Ok");
+           console.log(response.data)
+          setData({
+               data:response.data,
+               message:"successful",
+               iRequestError:false, isResponseSuccess:true
+            });
+
+         }
+
+       }
+   ).catch(err =>
+     {
+        console.log(err);
+        if(!err?.response.ok){
+             let errorMessage =null;
+             if(err.response.status===404){
+
+               errorMessage  =err.response.data.message;
+             }
+             else{
+                  
+                   errorMessage  = err.response.statusText;
+             }
+             setData({iRequestError:true, isResponseSuccess:false, message:errorMessage})
+
+        }
+
+        else setData({iRequestError:true, isResponseSuccess:false, message: err.response.data.statusText});
+
+
+     }
+   )
+
+}
+
 
 //Add new holiday plan
 export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
