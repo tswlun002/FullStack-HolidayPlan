@@ -8,7 +8,6 @@ import Select from '@mui/material/Select';
 import ListSubheader from '@mui/material/ListSubheader';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
-import IconButton from '@mui/material/IconButton';
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from '@mui/material/InputAdornment';
 
@@ -24,7 +23,7 @@ const MenuProps = {
   },
 };
 
-export default function SearchableSelect({Options=[],name="name",deleteOption=()=>{}}) {
+export default function SearchableSelect({Options=[],OptionsOf=null,name="name",deleteOption=()=>{}}) {
 
   
   const containsText = (option, searchText) => option[name].toLowerCase().indexOf(searchText.toLowerCase()) > -1;
@@ -54,7 +53,7 @@ export default function SearchableSelect({Options=[],name="name",deleteOption=()
           variant="filled"
         >
               
-            <ListSubheader muiSkipListHighlight fullWidth sx={{boxShadow:"inherit !important;"}}>
+            <ListSubheader muiskiplisthighlight fullWidth sx={{boxShadow:"inherit !important;"}}>
 
                   <TextField
                     size="small"
@@ -81,7 +80,7 @@ export default function SearchableSelect({Options=[],name="name",deleteOption=()
 
                   <MenuItem key={option[name]} value={option[name]} >
                     <ListItemText primary={option[name]} />
-                    <IconButton sx={{width:"1rem"}} onclick={()=>deleteOption()}><DeleteIcon/></IconButton>
+                    <DeleteIcon onClick={()=>{deleteOption(OptionsOf,option[name]);}}/>
                   </MenuItem>
                 ))
               }

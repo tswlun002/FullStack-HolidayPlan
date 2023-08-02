@@ -68,7 +68,6 @@ function stableSort(array, comparator) {
             }
             return a[1] - b[1];
         });
-        console.log(stabilizedThis.map((el)=>el[0]));
         return stabilizedThis.map((el) => el[0]);
 }
 
@@ -231,9 +230,9 @@ export default function ListUsers() {
         const [rowsPerPage, setRowsPerPage] = React.useState(5);
         const {roles, setRoles} =  React.useContext(RolePermissionContext);
         const [isAddPermission, setAddPermission] = React.useState(false);
-        const [isDeletePermission, setDeletermission] = React.useState(false);
+        const [isDeletePermissionFromUser, setIsDeletePermissionFromUser] = React.useState(false);
         const useAxiosPrivate = UsePrivateAxios();
-        const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
+        const [isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
         const [isDeleteUserOpen , setIsDeleteUserOpen] = React.useState(false);
         const [isUserDeleted, setIsUserDeleted] = React.useState(false);
@@ -263,29 +262,21 @@ export default function ListUsers() {
               .then(response =>
                   {
                     if(response.ok || response.status===200){
-                      console.log("Ok");
-                      console.log(response.data)
                       dispatchUsers({data:response.data})
-
                   }
-
-
                 }
               ).catch(err =>
                 {
-                    console.log(err);
-                    console.log("Not ok");
+
                     if(!err?.response.ok && err.name!=="AbortErr"){
                         let errorMessage =null;
                         if(err.response.status===404){
-                          console.log("Not ok ,********");
                           errorMessage  ="Invalid credentials";
                         }
                         else if(err.response.status===401){
                               errorMessage  ="Denied access";
                         }
                         else{
-                              console.log(err.response.statusText);
                               errorMessage  = getErrorMessage(err);
                         }
                         dispatchUsers({message:errorMessage,isRequestSuccessful : false,isRequestError:true, isLoading:false})
@@ -297,7 +288,7 @@ export default function ListUsers() {
               return ()=>{isMounted=false; controller.abort();
                 setTimeout(()=>{dispatchUsers( {isRequestError:false,isLoading:false,message:"",isRequestSuccessful:false})},5000)
               }
-      },[isRoleAdded,newPermissionAddedToUser,isUserDeleted]);
+      },[isRoleAdded,newPermissionAddedToUser,isUserDeleted, isDeletePermissionFromUser]);
 
         //////////////////////////////////////////////////////////////////////////////
         //                      DELETE USER(s)
@@ -326,7 +317,6 @@ export default function ListUsers() {
                               return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name==roleItem1.name);
                         });
                         const temp =newRoleList(selected);
-                        console.log(temp);
                         setSelected(temp);
                         setIsUserDeleted(true);
                    }
@@ -370,14 +360,60 @@ export default function ListUsers() {
         * @param {*} permissionName of the permission to remove from user
         */
        const  deletePermissionfromUser = async(username, permissionName)=>{
-         
+        if(username===null) setRoles({isRequestError:true, isRequestSuccessful:false, message:"User is not seletect"});
+
+        const API = `/holiday-plan/api/admin/user/delete/permission/?username=${username}&permissionName=${permissionName}`;
+        const results =await useAxiosPrivate.delete(API)
+          .then(response => {
+              if(response.ok || response.status===200){
+                return({isRequestSuccessful:true,isRequestError:false,message:`Successfully deleted permission:${permissionName} from user:${username}.`});
+             }
+             
+          })
+          .catch(err => {
+              if(!err?.response.ok){
+                  return({isRequestSuccessful:false,isRequestError:true,message:getComparator(err)});
+              }
+              else{
+                return({isRequestSuccessful:false,isRequestError:true,message:getErrorMessage(err)});
+
+             }
+          });
+          dispatchUsers(results);
+          if(results.isRequestSuccessful){
+             setIsDeletePermissionFromUser(()=>!isDeletePermissionFromUser);
+          }
+       
        }
        /**
         * delete role from user
         * @param {*} username  of user to remove role from
-        * @param {*} permissionName of the role to remove from user
+        * @param {*} roleName of the role to remove from user
         */
        const  deleteRolefromUser = async(username,roleName)=>{
+        if(username===null) setRoles({isRequestError:true, isRequestSuccessful:false, message:"User is not seletect"});
+
+          const API = `/holiday-plan/api/admin/user/delete/role/?username=${username}&roleName=${roleName}`;
+          const results =await useAxiosPrivate.delete(API)
+            .then(response => {
+                if(response.ok || response.status===200){
+                  return({isRequestSuccessful:true,isRequestError:false,message:`Successfully deleted role:${roleName} from user:${username}.`});
+               }
+               
+            })
+            .catch(err => {
+                if(!err?.response.ok){
+                    return({isRequestSuccessful:false,isRequestError:true,message:getComparator(err)});
+                }
+                else{
+                  return({isRequestSuccessful:false,isRequestError:true,message:getErrorMessage(err)});
+
+               }
+            });
+            dispatchUsers(results);
+            if(results.isRequestSuccessful){
+               setIsDeletePermissionFromUser(()=>!isDeletePermissionFromUser);
+            }
          
        }
 
@@ -558,9 +594,9 @@ export default function ListUsers() {
                            user.age&&JSON.stringify(user.age).substring(1,11)
                           }
                         </TableCell>
-                        <TableCell align="center"><SearchableSelect deleteOption={deleteRolefromUser}  Options={user.roles}/></TableCell>
+                        <TableCell align="center"><SearchableSelect OptionsOf={user.username}  deleteOption={deleteRolefromUser}  Options={user.roles}/></TableCell>
 
-                        <TableCell align="center"><SearchableSelect deleteOption={deletePermissionfromUser}Options={user.permissions}/></TableCell>
+                        <TableCell align="center"><SearchableSelect OptionsOf={user.username}  deleteOption={deletePermissionfromUser}Options={user.permissions}/></TableCell>
                         <TableCell padding="checkbox">
                             <StyleAvatar
                                 sx={{ bgcolor:SECONDARY_COLOR}}

@@ -154,7 +154,7 @@ const EditUserForm=()=>{
                         subheader={(register.isEditError ||register.isEditError)?register.errorMessage:
                                     register.isRequestSucceeded?register.requestResponseMessage:""
                         }
-                        subheaderTypographyProps={{align:"start" ,color:register.isEditError?ERROR_COLOR:SUCCESS_COLOR}}
+                        subheaderTypographyProps={{alignItems:"start" ,color:register.isEditError?ERROR_COLOR:SUCCESS_COLOR}}
                     />
                     <CardContent>
                     <form className="register-inputs" autoComplete="off">

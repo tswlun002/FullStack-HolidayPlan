@@ -15,11 +15,11 @@ const EditUserItem =(props)=>{
             alignItems="center"
             justifyContent="flex-start"
         >
-            <CustomerTypography  fontSize={"1rem"}align="center"> <h4>
+            <CustomerTypography sx={{colro:"black", p:{sm:"1rem 0rem",xs:"0.1rem 0rem"}}}fontFamily={"bold"} fontSize={{sm:"1rem",xs:"0.8rem"}}align="center"> 
                 {`${componentLabel}:  ${componentValue||"loading ..."}`}
-            </h4></CustomerTypography>
+            </CustomerTypography>
             {IsEditFieldOpen?< VisibilityOffIcon sx={editIconProps} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>:
-                <EditIcon sx={editIconProps} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>
+                <EditIcon sx={{...editIconProps,fontSize:{xs:"1rem",sm:"1.5rem"}}} onClick={()=>setIsEditFieldOpen({[field]:!IsEditFieldOpen})}/>
             }
         </Stack>
        {

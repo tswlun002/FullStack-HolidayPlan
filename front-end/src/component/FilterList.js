@@ -2,8 +2,9 @@ import * as React from 'react';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import {ListItemText,Checkbox} from '@mui/material';
+import {ListItemText,Checkbox, ListSubheader,TextField, InputAdornment} from '@mui/material';
 import Select from '@mui/material/Select';
+import SearchIcon from "@mui/icons-material/Search";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -68,7 +69,27 @@ export default function FilterList({Options=[],label="",name="name", selectOptio
          
           inputProps={{ 'aria-label': 'Without label' }}
         >
-              
+              <ListSubheader muiskiplisthighlight fullWidth sx={{boxShadow:"inherit !important;"}}>
+                  <TextField
+                    size="small"
+                    autoFocus
+                    placeholder="Type to search..."
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment sx ={{padding:"1rem",}} position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      )
+                    }}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Escape") {
+                        e.stopPropagation();
+                      }
+                    }}
+                  />
+              </ListSubheader>
           
               {
                displayedOptions.map((option) => {

@@ -5,12 +5,13 @@ import  {FaTrash} from 'react-icons/fa'
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CustomerTypography from './CustomerTypography'
-import { Button ,CardActions, Box,Stack} from '@mui/material';
+import { Button ,CardActions,CardHeader,Typography} from '@mui/material';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel } from '@mui/material';
 import CustomerTextArea from'../component/CustomerTextArea'
 import {SendQueryResponse,DeleteQuery} from '../utils/Query'
+import { ERROR_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 const header_background  ="linear-gradient(to right,rgba(145, 111, 179, 0.5),rgba(102, 51, 153, 0.85),rgba(77,26,127  , 0.90),rgba(155, 104, 207, 0.6))!important";
 
 const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
@@ -20,7 +21,7 @@ const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
         <RadioGroup  className='radio-group'
             aria-labelledby="demo-controlled-radio-buttons-group"
             name="controlled-radio-buttons-group"
-            onChange={(event)=>{dispatchQuery({queryStatus:event.target.value}); console.log(event.target.value);}}
+            onChange={(event)=>{dispatchQuery({queryStatus:event.target.value});}}
             value={queryState.queryStatus}
             >
             <div className='radio-group'style={{display:"flex"}}>
@@ -76,7 +77,6 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
 
                editResponse= await SendQueryResponse({username:data.user.username, queryId:data.id,useAxiosPrivate,
                response:queryState.response, queryStatus:queryState.queryStatus});
-               console.log(editResponse);
                dispatchQuery(editResponse);
                if(editResponse.isResponseSuccess){
 
@@ -93,25 +93,33 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
   
     <Card key={data.id} sx={{ maxWidth: 400,  margin:"1%",
        paddingBottom:"1rem" ,display:"block", minWidth:"20rem"}}>
+        <CardHeader 
+            sx={{background:SECONDARY_HEADER_COLOR}}
+            title={<CustomerTypography
+                        align="center"
+                        sx={{ width:"100%" , width:"100%",}}
+                        >
+                            <span >  Query From: {
+                                data.user?.firstname && data.user?.lastname  &&
+                                `${data.user?.firstname}  ${data.user?.lastname }`
+                                }
+                            </span>
+            </CustomerTypography>}
+                 
+            subheader={queryState.isQueryingError? queryState.requestResponse:queryState.isResponseSuccess?queryState.requestResponse:""}
+            subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:queryState.isQueryingError?ERROR_COLOR:queryState.isResponseSuccess&&SUCCESS_COLOR}}
+                 
+            
+            />
+            
+           
+        
        <CardContent>
-         <CustomerTypography
-           direction="row"
-            justifyContent="start"
-            alignItems="start"
-            flowdirection="row"
-            spacing={2}
-            sx={{     background:header_background,padding:"1rem 0rem", width:"100%",}}
-            >
-                <span style={{padding:"0rem 2rem"}}>  Query From: {
-                     data.user?.firstname && data.user?.lastname  &&
-                    `${data.user?.firstname}  ${data.user?.lastname }`
-                    }
-                </span>
-         </CustomerTypography>
+         
 
 
          <CustomerTypography gutterBottom variant="h7" component="div" align="center">
-            Date:{data.localDateTime}
+            Date:{data.localDateTime&&JSON.stringify(data.localDateTime).substring(1,11)}
 
           </CustomerTypography>
 
@@ -168,17 +176,6 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
                 </IconButton>
             }
           </CardActions >
-          {
-               queryState.isResponseError ?
-               <CustomerTypography sx={{color:"red"}}>
-                    {queryState.requestResponse}
-               </CustomerTypography>
-               :
-               queryState.isResponseSuccess&&<CustomerTypography sx={{color:"green"}}>
-                    {queryState.requestResponse}
-               </CustomerTypography>
-
-          }
 
     </CardContent>
 
