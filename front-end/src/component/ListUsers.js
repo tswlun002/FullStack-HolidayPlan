@@ -18,7 +18,7 @@ import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
 import Modal from '@mui/material/Modal';
 import { styled } from '@mui/material/styles';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useSearchParams} from 'react-router-dom';
 import SelectedItems from '../component/SelectedItems';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
@@ -26,7 +26,10 @@ import SearchableSelect from './SearchableSelect';
 import AddRoleToUser from './AddRoleToUser';
 import AddPermissionToUser from './AddPermissionToUser';
 import {FaUserEdit} from 'react-icons/fa';
-import Avatar from '@mui/material/Avatar';
+import {Avatar,Divider,Stack,FormControlLabel,Switch} from '@mui/material';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FilterList from '../component/FilterList';
+import ClearIcon from '@mui/icons-material/Clear';
 import { ERROR_COLOR, LOADING_COLOR, PRIMAR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 const header_background  =SECONDARY_HEADER_COLOR
 
@@ -168,10 +171,27 @@ EnhancedTableHead.propTypes = {
         rowCount: PropTypes.number.isRequired,
 };
 
+const Filters =({filters, getFilterField,setFilterObject})=>{
+
+  return filters.map((filter,index)=>
+   <FilterList 
+       key={index} 
+       label={filter.label} 
+       name={filter.name}
+       Options={getFilterField(filter.name)} 
+       selectOption={setFilterObject}
+     />
+   )
+}
+
 function EnhancedTableToolbar(props) {
         const { numSelected, setAddPermission} = props;
+        const FILTERS = [{name:'fullname', label:"Fullname"},{name:"username",label:'Email'},{name:"age",label:'Date of birth'}]
+
+        
         return (
         <Toolbar disableGutters sx={{background:header_background,}} >
+
           <Typography
               sx={{ flex: '1 1 10%' , padding:"0rem 1rem"}}
               color={numSelected > 0 ?"red":"black"}
@@ -183,28 +203,51 @@ function EnhancedTableToolbar(props) {
           <Box
              justifyContent="center" alignItems="center" sx={{ flexGrow: 1, display:'flex'}}
           >
-
-
+            {
+              props.openFilter&&
+              <Stack
+                  direction={{ xs: 'column', sm: 'row' }} 
+                  spacing={{ xs: 0.5, sm: 1, md: 2 }}
+                  sx={{width:"100%"}}
+                  useFlexGap flexWrap="wrap"
+                  divider={<Divider orientation="vertical" flexItem />}   
+             >
+             
+              {Filters({filters:FILTERS, getFilterField:props.getFilterField, setFilterObject:props.setFilterObject})}
+              <FormControlLabel  
+                  sx={{width:"2.5rem"}} 
+                  control={<Switch   checked={props.filterIsChecked} onChange={props.filter} inputProps={{ 'aria-label': 'controlled' }}/>}
+                 label="Filter" 
+              />
+               
+              </Stack>
+            }
+            {
+              props.openFilter? <ClearIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1.3rem 0rem"}}onClick={props.clearFilter}/>:
+              <FilterAltIcon  sx={{color:"black", padding:{lg:"2rem 1rem",sm:"1rem 1rem"}}}onClick={()=>props.setOpenFilter(()=>!props.openFilter)}/>
+            }
             {props.BarItems.map((item, index) =>{
 
-              return  <NavLink
-                          onClick={()=>{
-                           item.fun(()=>!item.flag);
-                          }}
-                          
-                          end ={item.name=="Add Role"}
-                          key={index}
-                          style={{
-                              color:item.flag?"white":"black",
-                              textDecoration:"none",  padding:"2rem 1rem"
-                          }}
-                        >
-                          {item.name}
-                        </NavLink>
+              return   (<NavLink
+                                  onClick={()=>{
+                                  item.fun(()=>!item.flag);
+                                  }}
+                                  
+                                  end ={item.name=="Add Role"}
+                                  key={index}
+                                  style={{
+                                      color:item.flag?"white":"black",
+                                      textDecoration:"none",  
+                                      padding:"2rem 1rem"
+                                  }}
+                                >
+                                  {item.name}
+                      </NavLink>)
+                    
 
-                  })
+              })
 
-              }
+          }
           </Box>
         </Toolbar>);
 }
@@ -221,7 +264,21 @@ const StyleAvatar =styled(Avatar)(({ theme }) => ({
     border:`2px solid ${PRIMAR_COLOR}`    },
   border: `2px solid ${theme.palette.background.paper}`,
 }));
+
+
+function filterUsers(AllUsers=[], filtersObject={}){
+  
+   if(AllUsers.length===0) return AllUsers;
+   return AllUsers.filter((user)=>{  
+         return filtersObject['fullname'].some((element)=>element===`${user['firstname']} ${user['lastname']}`) || 
+                filtersObject['username'].some((element)=>element===user['username']) ||
+                filtersObject['age'].some((element)=>element===(user['age']&&JSON.stringify(user['age']).substring(1,11)));
+   });
+
+}
+
 export default function ListUsers() {
+        let [searchParams, setSearchParams] = useSearchParams();
         const [order, setOrder] = React.useState('asc');
         const [orderBy, setOrderBy] = React.useState('f');
         const [selected, SetSelected] = React.useState([]);
@@ -241,6 +298,11 @@ export default function ListUsers() {
                 (state, action)=>{return {...state,...action}},
                 {data:[],isLoading:false,isRequestError:false,message:"",isRequestSuccessful:false}
         );
+        const FILTER_INIT_STATE={data:[],fullname:[], username:[],age:[]}
+        const[filterIsChecked, setFilterIsChecked] = React.useState(false);
+        const [openFilter , setOpenFilter] = React.useState(false);
+        const[filterObject, setFilterObject] = React.useReducer((state, action)=>{return {...state, ...action}},FILTER_INIT_STATE);
+        
         
         //const[users, dispatchUsers] = React.useState([]);
 
@@ -438,6 +500,7 @@ export default function ListUsers() {
         };
          // Handle click on permission checkbox
         const handleClick = (event, user) => {
+                 setSearchParams({username:user.username})
                 const selectedIndex = selected.map(user1=>user1.username).indexOf(user.username);
                 let newSelected = [];
 
@@ -483,14 +546,51 @@ export default function ListUsers() {
         const emptyRows =page > 0 ? Math.max(0, (1 + page) * rowsPerPage - roles.listRoles.length) : 0;
 
         const visibleRows = React.useMemo(() =>
-              stableSort(users.data, getComparator(order, orderBy)).slice(
+              stableSort(filterIsChecked?filterObject.data:users.data, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
               ),
-            [users.data,order, orderBy, page, rowsPerPage],
+            [users.data,filterObject.data,filterIsChecked,order, orderBy, page, rowsPerPage],
         );
 
         const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+        const getFilterField = (filter)=>{
+          return [... new Set(visibleRows.map((user)=>{ 
+        
+            if(filter==="age"){
+             
+              return user[filter]&&JSON.stringify(user[filter]).substring(1,11)
+            }
+            else if(filter==="fullname"){
+              return `${user['firstname']} ${user['lastname']}`
+            }
+            else return user[filter]
+          
+          }))].map((field)=>{return {[filter]:field}});
+        }
+
+
+  //clears filters
+  const clearFilter=()=>{
+    setOpenFilter(()=>!openFilter);
+    setFilterIsChecked(false);
+    setFilterObject(FILTER_INIT_STATE);
+  }
+  const filter= ()=>{
+    setFilterIsChecked(()=>!filterIsChecked);
+    if(!filterIsChecked){
+
+      setFilterObject({data:filterUsers(visibleRows,filterObject)});
+      const data  = filterObject['data'];
+      delete filterObject['data']
+      setSearchParams(filterObject)
+      filterObject['data']=data;
+    }
+    else setSearchParams({})
+
+    
+  }  
 
   return (
   <>
@@ -514,6 +614,14 @@ export default function ListUsers() {
           numSelected={selected.length} 
           setAddPermission={setAddPermission} 
           setAddRole={setAddRoleOpen}
+          openFilter={openFilter}
+          setOpenFilter={setOpenFilter}
+          setFilterObject={setFilterObject}
+          clearFilter={clearFilter}
+          filter={filter}
+          filterIsChecked={filterIsChecked}
+          getFilterField={getFilterField}
+         
         />
         <TableContainer>
           <Table

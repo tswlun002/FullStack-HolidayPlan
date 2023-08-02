@@ -117,13 +117,7 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
    .then(response =>
        {
          if(response.ok || response.status===200){
-           dispatchRegister({
-               edited : response.data.message,
-               isEditError:false,
-                errorMessage: "",
-                isRequestSucceeded:true,
-                requestResponseMessage:"Profile updated successful"
-            });
+           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:"Account successfully updated"})
 
          }
          return ()=>{isMounted=false; controller.abort()}
@@ -145,15 +139,8 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
                   
                    errorMessage  = getErrorMessage(err);
              }
-             dispatchRegister({errorMessage:errorMessage,
-                             isEditError:true, edited:false,
-                             isRequestSucceeded:false,
-                             requestResponseMessage:""})
-        }else dispatchRegister({errorMessage:"Server Error",
-                                isEditError:true, edited:false,
-                                 isRequestSucceeded:false,
-                                 requestResponseMessage:""
-        })
+             dispatchRegister({isRequestError:true,isRequestSuccessful:false, message:errorMessage})
+        }else dispatchRegister({isRequestError:true,isRequestSuccessful:false, message:"Internal server error"})
 
      }
    )
@@ -169,10 +156,9 @@ export const DeleteUser = (useAxiosPrivate,password,email,dispatchRegister) => {
        {
          if(response.ok || response.status===200){
           dispatchRegister({
-            isEditError:false,
-             errorMessage: "",
-             isRequestSucceeded:true,
-             requestResponseMessage:"Account deleted successful"
+            isRequestError:false,
+            isRequestSuccessful:true,
+             message:"Account deleted successful"
          });
 
          }
@@ -194,15 +180,8 @@ export const DeleteUser = (useAxiosPrivate,password,email,dispatchRegister) => {
                   
                     errorMessage  = getErrorMessage(err);
               }
-              dispatchRegister({errorMessage:errorMessage,
-                              isEditError:true, edited:false,
-                              isRequestSucceeded:false,
-                              requestResponseMessage:""})
-        }else dispatchRegister({errorMessage:"Server Error",
-                                isEditError:true, edited:false,
-                                  isRequestSucceeded:false,
-                                  requestResponseMessage:""
-        })
+              dispatchRegister({isRequestError:true,isRequestSuccessful:false, message:errorMessage})
+        }else dispatchRegister({isRequestError:true,isRequestSuccessful:false, message:"Internal server error"})
 
      }
    )

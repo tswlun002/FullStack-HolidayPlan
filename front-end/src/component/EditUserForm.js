@@ -18,13 +18,13 @@ const EditUserForm=()=>{
     const useAxiosPrivate  =UseAxiosPrivate();
     const [dateType, setDateType]= useState("text");
     const[user, setUser] = useReducer((state,action)=>{return{...state, ...action}},{firstname:"",lastname:"",age:"",username:""});
-    //Login isRequestSucceeded values
+    //Login isRequestSuccessful values
     const[register, dispatchRegister] = useReducer((state, action)=>{
         return {...state,...action}
         },
         { 
-            firstname:"",lastname:"",email:"",currentUsername:username,currentPassword:"",age:"", isRequestSucceeded:false,
-            isEditError:false, errorMessage:"",   requestResponseMessage:"",
+            firstname:"",lastname:"",email:"",currentUsername:username,currentPassword:"",age:"",
+            isRequestError:false, age:"",message: "",isRequestSuccessful:false,
             openFirstname:false,openLastname:false,openAge:false,opeUsername:false
         }
     );
@@ -38,29 +38,27 @@ const EditUserForm=()=>{
                 // in simplest case just return true to handle status checks externally.
                 return true;
             }})
-            console.log(response)
             try{
                 if(response.ok || response.status===302){
-                    console.log(response.data)
                     setUser(response.data)
     
                 }
             }catch(err){
                 
                 if(!err?.response.ok && err.name!=="AbortErr"){
-                    let errorMessage  =null;
+                    let message  =null;
                     if(err.response.status===404){
-                        errorMessage  ="Invalid credentials";
+                        message  ="Invalid credentials";
                     }
                     else if(err.response.status===401){
-                            errorMessage  ="Denied access";
+                            message  ="Denied access";
                     }
                     else{
                             console.log(err.response.statusText);
-                            errorMessage  = getErrorMessage(err);
+                            message  = getErrorMessage(err);
                     }
-                    dispatchRegister({message:errorMessage,isEditError:true})
-                }else dispatchRegister({message:"Server Error",isEditError:true})
+                    dispatchRegister({message:message,isRequestError:true,isRequestSuccessful:false})
+                }else dispatchRegister({message:"Server Error",isRequestError:true,isRequestSuccessful:false})
             }
             
            
@@ -73,8 +71,8 @@ const EditUserForm=()=>{
         return ()=>{
             isMounted=false; controller.abort();
             setTimeout(()=>{dispatchRegister({firstname:"",lastname:"",email:"",
-            currentUsername:username,currentPassword:"",age:"", isRequestSucceeded:false,
-            isEditError:false, errorMessage:"",   requestResponseMessage:""})},5000);
+            currentUsername:username,currentPassword:"",age:"", isRequestSuccessful:false,
+            isRequestError:false, message:""})},5000);
         }
     },[]);
     
@@ -92,27 +90,24 @@ const EditUserForm=()=>{
         setTimeout(()=>{
             dispatchRegister(
               {
-                firstname:"",lastname:"",email:"",currentPassword:"",age:'', isRequestSucceeded:false,
-
-  
+                firstname:"",lastname:"",email:"",currentPassword:"",age:'', isRequestSuccessful:false,isRequestError:false
               }
             )
         },200)
     }
     const OnSubmit = (e)=>{
         e.preventDefault(); 
-         console.log(register)
          if(register.currentPassword.trim()===""){
-            dispatchRegister({errorMessage:"password is required", isEditError:true});
+            dispatchRegister({message:"password is required", isRequestError:true,isRequestSuccessful:false});
          }
         else if(isValid()){
             UpdateUser(useAxiosPrivate,register,dispatchRegister);
-            if(register.isRequestSucceeded){
+            if(register.isRequestSuccessful){
                 ClearForm();
             }
         
         }else {
-            dispatchRegister({errorMessage:"No field was updated, need update atleast one field", isEditError:true});
+            dispatchRegister({message:"No field was updated, need update atleast one field", isRequestError:true,isRequestSuccessful:false});
 
         }
     }
@@ -146,15 +141,14 @@ const EditUserForm=()=>{
                             >
                                 <ArrowBackIcon/>  
                             </NavLink> 
-                            <CustomerTypography align="center" color={PRIMAR_COLOR}><h2>Account</h2></CustomerTypography>
+                            <CustomerTypography  variant="h4" align="center" color={PRIMAR_COLOR}>Account</CustomerTypography>
                         </Stack>
                         }
                         
                         
-                        subheader={(register.isEditError ||register.isEditError)?register.errorMessage:
-                                    register.isRequestSucceeded?register.requestResponseMessage:""
+                        subheader={(register.isRequestError ||register.isRequestSuccessful)?register.message:""
                         }
-                        subheaderTypographyProps={{alignItems:"start" ,color:register.isEditError?ERROR_COLOR:SUCCESS_COLOR}}
+                        subheaderTypographyProps={{alignItems:"center" ,color:register.isRequestError?ERROR_COLOR:SUCCESS_COLOR}}
                     />
                     <CardContent>
                     <form className="register-inputs" autoComplete="off">
@@ -167,8 +161,6 @@ const EditUserForm=()=>{
                             editIconProps={{color:'#4169e1',}}
                             componentValue={user.firstname}
                             componentLabel={"Firstname"}
-                            
-                                    
                             focus
                             variant="outlined"
                             helpertext=""id="demo-helper-text-aligned"
@@ -177,7 +169,7 @@ const EditUserForm=()=>{
                             className="firstname-input" 
                             placeholder="enter firstname"
                             value={register.firstname}
-                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isEditError:false,isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isRequestError:false,isRequestSuccessful:false})}
                         />
                         <EditUserItem
                             IsEditFieldOpen={register.openLastname}
@@ -191,7 +183,7 @@ const EditUserForm=()=>{
                             variant="outlined"
                             helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
                             type="text" className="lastname-input" placeholder="enter lastname" value={register.lastname}
-                            onChange={(e)=>dispatchRegister({lastname:e.target.value ,isEditError:false,isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({lastname:e.target.value ,isRequestError:false,isRequestSuccessful:false})}
                         />
 
                         <EditUserItem
@@ -208,7 +200,7 @@ const EditUserForm=()=>{
                             id="demo-helper-text-aligned"
                             label="Email"
                             type="text" className="email-input" placeholder="enter email" value={register.email}
-                            onChange={(e)=>dispatchRegister({email:e.target.value,isEditError:false,isRequestSucceeded:false })}
+                            onChange={(e)=>dispatchRegister({email:e.target.value,isRequestError:false,isRequestSuccessful:false })}
                          />
                        <EditUserItem
                             IsEditFieldOpen={register.openAge}
@@ -226,7 +218,7 @@ const EditUserForm=()=>{
                             onClick={()=>setDateType("date")}
                             onBlur={()=>{setDateType("text");}}
                             type={dateType} className="age-input" placeholder="enter date of birth" value={register.age}
-                            onChange={(e)=>dispatchRegister({age:e.target.value,isEditError:false,isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({age:e.target.value,isRequestError:false,isRequestSuccessful:false})}
                        />
                        <CssTextField
                             required
@@ -240,7 +232,7 @@ const EditUserForm=()=>{
                             className="currentPassword-input" 
                             placeholder="current password" 
                             value={register.currentPassword}
-                            onChange={(e)=>dispatchRegister({currentPassword:e.target.value, isEditError:false, isRequestSucceeded:false})}
+                            onChange={(e)=>dispatchRegister({currentPassword:e.target.value, isRequestError:false, isRequestSuccessful:false})}
                         />
 
                             <Button 
