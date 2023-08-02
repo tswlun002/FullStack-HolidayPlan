@@ -8,13 +8,11 @@ import { ERROR_COLOR, LOADING_COLOR, SECONDARY_COLOR, SUCCESS_COLOR } from "../u
 
 
 const UserQuery =  ()=>{
-   console.log("Here on user query");
    const useAxiosPrivate = UseAxiosPrivate();
    const{userLoginState} = useContext(CreateAuthContext);
 
 
     const [query, dispatchQuery] =  useReducer((state, action)=>{
-        console.log(action);
 
         switch(action.type){
             case "loading": return{...state,...action}
@@ -61,14 +59,12 @@ const UserQuery =  ()=>{
     })
     
     return (
-        <Box   sx={{display:"flex",
-                    justifyContent:(query.data.length===0)||query.isRequestError?"center":"start",
-                    alignItems:"start",
-                    minHeight:"100vh",
-                    flexFlow:"row wrap",
-                    padding:"5% 0%"
-                    }}
-                >
+        <Box    display="flex"
+                justifyContent={(query.data.length===0)||query.isRequestError?"center":"start"}
+                alignItems="start"
+                minHeight="100vh"
+                flexFlow="row wrap"
+        >
             {
                 
                 ((query.data.length===0)||query.isRequestError||query.isRequestSuccessful)&&

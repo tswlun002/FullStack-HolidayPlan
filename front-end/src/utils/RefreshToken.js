@@ -12,13 +12,8 @@ const UseRefreshToken = ()=>{
             {
                 withCredentials:true,
 
-
-
             }
         );
-
-        console.log(response)
-
          dispatchLogin(
             {
 
@@ -28,15 +23,10 @@ const UseRefreshToken = ()=>{
             }
         )
 
-
         return response.data?.tokens?.access_token;
-
     }
 
     return refresh;
-
-
-
 }
 
 export default UseRefreshToken;

@@ -79,15 +79,15 @@ const Profile = ()=> {
 
 
        }
-
-        const[userAccount, dispatchUserAccount]  = React.useReducer((state, action)=>{return {state, ...action}}, {isDeleted:false,
-                                                                                  errorMessage: "",
-                                                                                  isRequestSucceeded:false,
-                                                                                  requestResponseMessage:""})
-
         const deleteAccount =(e)=>{
-            e.preventDefault();
-           DeleteUser(useAxiosPrivate,userLoginState.email,dispatchUserAccount);
+          e.preventDefault();
+          if(profile.currentPassword.trim() === ""){
+
+               dispatchProfile({isEditError:true, errorMessage:"Current password of user is required."});
+               return;
+          }
+           
+           DeleteUser(useAxiosPrivate,profile.currentPassword, userLoginState.username,dispatchProfile);
         }
         const ClearForm= ()=>{
           setTimeout(()=>{
@@ -130,7 +130,7 @@ const Profile = ()=> {
               subheader={(profile.isLoginError ||profile.isEditError)?profile.errorMessage:
                           profile.isRequestSucceeded?profile.requestResponseMessage:""
               }
-              subheaderTypographyProps={{align:"start" ,color:profile.isLoginError?"red":"green"}}
+              subheaderTypographyProps={{alignItems:"start" ,color:profile.isLoginError?"red":"green"}}
               
           />
            <CardContent>            

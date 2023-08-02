@@ -174,7 +174,7 @@ function Header(props) {
             </Menu>
           </Box>
          
-          <Box  justifyContent="end" alignItem="center" sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Box  justifyContent="end" alignItems="center" sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
 
             {pages.map((item) => (
               <NavLink

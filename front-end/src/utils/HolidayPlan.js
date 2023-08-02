@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./Error";
 
 export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
 
@@ -7,8 +8,7 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
        .then(response =>
            {
              if(response.ok || response.status===200){
-               console.log("Ok");
-               console.log(response.data)
+              
               setData({
                     type:"replace",
                    payload:response.data,
@@ -21,16 +21,12 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
            }
        ).catch(err =>
          {
-            console.log(err);
-            console.log("Not ok");
             if(!err?.response.ok){
                  let errorMessage =null;
                  if(err.response.status===404){
-                   console.log("Not ok ,********");
                    errorMessage  =err.response.data.message;
                  }
                  else{
-                       console.log("Not ok");
                        errorMessage  = err.response.statusText;
                  }
                  setData({type: "error", message:errorMessage})
@@ -53,8 +49,6 @@ export const FilterHolidayPlan = (useAxiosPrivate,username,filter, setData,contr
    .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
           setData({
                data:response.data,
                message:"successful",
@@ -66,7 +60,6 @@ export const FilterHolidayPlan = (useAxiosPrivate,username,filter, setData,contr
        }
    ).catch(err =>
      {
-        console.log(err);
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
@@ -94,14 +87,11 @@ export const FilterHolidayPlan = (useAxiosPrivate,username,filter, setData,contr
 export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
 
     const API = '/holiday-plan/api/holiday/save/';
-     console.log(Images)
 
      useAxiosPrivate.post(API,Images,{headers:{Accept:'multipart/form-data','Content-Type':'multipart/form-data'}})
     .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
            setData({
                isDataCorrect:false,
                errorMessage:"Successfully added holiday"
@@ -112,17 +102,14 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
 
    ).catch(err =>
      {
-        console.log(err);
-        console.log("Not ok");
+       
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-               console.log("Not ok ,********");
-               errorMessage  =err.response.data.message;
+               errorMessage  =getErrorMessage(err);
              }
              else{
-                   console.log("Not ok");
-                   errorMessage  = err.response.statusText;
+                   errorMessage  = getErrorMessage(err);
              }
              setData({isDataCorrect:false, errorMessage: errorMessage})
 
@@ -144,8 +131,6 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
               const results ={iRequestError:false, isResponseSuccess:false,message:"",responseMessage:""}
               
               if(response.ok || response.status===200){
-                console.log("Ok");
-                console.log(response.data)
                 results.message="Successful"
                 results.isResponseSuccess=true;
                 
@@ -159,12 +144,10 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
          if(!err?.response.ok){
               let errorMessage =null;
               if(err.response.status===404){
-                console.log("Not ok ,********");
-                errorMessage  =err.response.data.message;
+                errorMessage  =getErrorMessage(err);
               }
               else{
-                    console.log("Not ok");
-                    errorMessage  = err.response.statusText;
+                    errorMessage  = getErrorMessage(err);
               }
               results.iRequestError=true;
               results.message=errorMessage;
@@ -191,8 +174,6 @@ export const UpdateHolidayPlan = (useAxiosPrivate,holidayPlanId, priority,setRes
      .then(response =>
              {
                if(response.ok || response.status===200){
-                 console.log("Ok");
-                 console.log(response.data)
                  setResponse({
                   message:"updated ",
                   iRequestError:false, isResponseSuccess:true
@@ -202,17 +183,13 @@ export const UpdateHolidayPlan = (useAxiosPrivate,holidayPlanId, priority,setRes
          }
      ).catch(err =>
        {
-          console.log(err);
-          console.log("Not ok");
           if(!err?.response.ok){
                let errorMessage =null;
                if(err.response.status===404){
-                 console.log("Not ok ,********");
-                 errorMessage  =err.response.data.message;
+                 errorMessage  =getErrorMessage(err);
                }
                else{
-                     console.log("Not ok");
-                     errorMessage  = err.response.statusText;
+                     errorMessage  = getErrorMessage(err);
                }
                setResponse({iRequestError:true, message: errorMessage})
 

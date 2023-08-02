@@ -55,9 +55,7 @@ const Login =()=>{
     }  
     return (
 
-        <Box display="flex"
-                    justifyContent="center"
-                    alignItems="center"
+        <Box display="flex"justifyContent="center"alignItems="start"
                     minHeight="100vh"
                     backgroundColor="#dfe0e6"
 

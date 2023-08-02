@@ -31,7 +31,6 @@ const Home = ()=>{
     const{userLoginState} = useContext(CreateAuthContext)
     const CARDS_INIT_STATE={data:[],  message:"", iRequestError:false, isResponseSuccess:false}
     const [cards, dispatchCards] = useReducer((state,action)=>{
-        console.log(action);
         switch(action.type){
          case "replace": return {...state, data:action.payload,iRequestError:false, isResponseSuccess:true};
          case "add":return {...state, data:[...state.data,action.payload],iRequestError:false, isResponseSuccess:true};
@@ -148,10 +147,12 @@ const Home = ()=>{
       >
 
 
-          <InputAdornment  position="start">
-          {!openFilter&& <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+          {  cards.isResponseSuccess&&<InputAdornment  position="start">
+            {
+              !openFilter&& <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+            }
+            </InputAdornment>
           }
-        </InputAdornment>
           {
               openFilter&&<Stack
               direction={{ xs: 'column', sm: 'row' }}
@@ -164,9 +165,9 @@ const Home = ()=>{
               {Filters}
               <FormControlLabel  sx={{width:"2.5rem"}} control={<Switch   checked={filterIsChecked} onChange={filter} inputProps={{ 'aria-label': 'controlled' }}/>} label="Filter" />
                
-          </Stack>
-        }
-        {cards.isResponseSuccess&&CardsComponents}
+            </Stack>
+          }
+          {cards.isResponseSuccess&&CardsComponents}
       </Box>
     
   </>

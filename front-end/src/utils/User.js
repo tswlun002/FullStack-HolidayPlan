@@ -117,9 +117,6 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
    .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
-
            dispatchRegister({
                edited : response.data.message,
                isEditError:false,
@@ -134,19 +131,18 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
        }
    ).catch(err =>
      {
-        console.log(err);
-       console.log("Not ok");
+        
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-               console.log("Not ok ,********");
+            
                errorMessage  ="Invalid credentials";
              }
              else if(err.response.status===401){
                   errorMessage  ="Denied access";
              }
              else{
-                   console.log(err.response.statusText);
+                  
                    errorMessage  = getErrorMessage(err);
              }
              dispatchRegister({errorMessage:errorMessage,
@@ -165,50 +161,47 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
 
 
 
-export const DeleteUser = (useAxiosPrivate,email,dispatchUserAccount) => {
+export const DeleteUser = (useAxiosPrivate,password,email,dispatchRegister) => {
 
-   const API = `/holiday-plan/api/user/delete/${email}`;
+   const API = `/holiday-plan/api/user/delete/?username=${email}&password=${password}`;
    useAxiosPrivate.delete(API)
    .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
-
-           dispatchUserAccount({
-               isRequestError:false,
-                isRequestSucceeded:true,
-                requestResponseMessage:"User deleted successful"
-            });
+          dispatchRegister({
+            isEditError:false,
+             errorMessage: "",
+             isRequestSucceeded:true,
+             requestResponseMessage:"Account deleted successful"
+         });
 
          }
 
        }
    ).catch(err =>
      {
-        console.log(err);
-       console.log("Not ok");
-        if(!err?.response.ok){
-             let errorMessage =null;
-             if(err.response.status===404){
-               console.log("Not ok ,********");
-               errorMessage  ="Invalid credentials";
-             }
-             else if(err.response.status===401){
+       
+            if(!err?.response.ok){
+              let errorMessage =null;
+              if(err.response.status===404){
+            
+                errorMessage  ="Invalid credentials";
+              }
+              else if(err.response.status===401){
                   errorMessage  ="Denied access";
-             }
-             else{
-                   console.log(err.response.statusText);
-                   errorMessage  = getErrorMessage(err);
-             }
-             dispatchUserAccount({
-                             isRequestError:true,
-                             isRequestSucceeded:false,
-                             requestResponseMessage:errorMessage})
-        }else dispatchUserAccount({
-                                isRequestError:true,
-                                 isRequestSucceeded:false,
-                                 requestResponseMessage:"Server Error"
+              }
+              else{
+                  
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchRegister({errorMessage:errorMessage,
+                              isEditError:true, edited:false,
+                              isRequestSucceeded:false,
+                              requestResponseMessage:""})
+        }else dispatchRegister({errorMessage:"Server Error",
+                                isEditError:true, edited:false,
+                                  isRequestSucceeded:false,
+                                  requestResponseMessage:""
         })
 
      }
