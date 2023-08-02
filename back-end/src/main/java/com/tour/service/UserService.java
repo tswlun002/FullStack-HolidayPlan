@@ -158,7 +158,7 @@ public class UserService implements OnUser {
     @Override
     public boolean deleteUser(String  username) {
         User user = getUser(username);
-        if(user ==null)throw  new NullPointerException("Can not delete null User");
+        if(user ==null)throw  new NullPointerException("User is not found");
         boolean deleted = false;
         try {
             var numberRolesToDelete  = user.getRoles().size();

@@ -62,15 +62,8 @@ public class UserController {
   
     @DeleteMapping("delete/" )
     public  ResponseEntity<Boolean> delete(@RequestParam String username,@RequestParam String password){
-
         boolean deleted= userService.confirmPassword(password)&& userService.deleteUser(username);
-        if(!deleted) return   new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
-        try {
-            deleted= userService.deleteUser(username);
-        }catch (Exception e){
-            CatchException.catchException(e);
-        }
-        if (deleted) return new ResponseEntity<>(true, HttpStatus.OK);
-        return new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
+        return deleted? new ResponseEntity<>(true, HttpStatus.OK) :
+                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
 }

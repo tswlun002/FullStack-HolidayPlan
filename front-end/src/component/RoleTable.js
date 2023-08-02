@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
+import {Paper,TextField,InputAdornment} from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
@@ -25,6 +25,8 @@ import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
 import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 import SearchableSelect from './SearchableSelect';
+import SearchIcon from "@mui/icons-material/Search";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 
 function descendingComparator(a, b, orderBy) {
@@ -144,12 +146,37 @@ function EnhancedTableToolbar(props) {
             >
               {numSelected} selected
             </Typography>
+           { props.openFilter&&<TextField
+                    size="small"
+                    autoFocus
+                    placeholder="Type search name..."
+                    fullWidth
+                    sx={{'&.Mui-focused fieldset':
+                    {border:"1px solid black"}}}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment sx ={{padding:"1rem",  '&.Mui-focused fieldset':
+                                                               {border:"1px solid black"}
+                      
+                        }} position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      )
+                    }}
+                    onChange={(e) => props.containsText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== "Escape") {
+                        e.stopPropagation();
+                      }
+                    }}
+                  />}
           <Box
              justifyContent="center" alignItems="center" sx={{ flexGrow: 1, display:'flex'}}
           >
 
-
+            <FilterAltIcon  sx={{color:"black", padding:{lg:"2rem 1rem",sm:"1rem 1rem"}}}onClick={()=>props.setOpenFilter(()=>!props.openFilter)}/>
             {props.BarItems.map((item, index) =>{
+              
 
               return  <NavLink
                           onClick={()=>{
@@ -189,7 +216,6 @@ export default function EnhancedTable() {
         const {roles, setRoles} =  React.useContext(RolePermissionContext);
         const [isAddPermission, setAddPermission] = React.useState(false);
         const useAxiosPrivate = UsePrivateAxios();
-
         const currentPath = "/home-admin/roles-permissions";
         const [isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
@@ -197,6 +223,10 @@ export default function EnhancedTable() {
         const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
         const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
         const [isPermissionDeleteFromRole, setIsPermissionDeleteFromRole] = React.useState(false);
+        const [openFilter , setOpenFilter] = React.useState(false);
+        const[filteredData, setFilteredData] = React.useState([])
+        const[isFiltering , setIsFiltering] =React.useState(false);
+        
         
 
         const setSelected =(role)=>{
@@ -403,14 +433,19 @@ export default function EnhancedTable() {
         const emptyRows =page > 0 ? Math.max(0, (1 + page) * rowsPerPage - roles.data.length) : 0;
 
         const visibleRows = React.useMemo(() =>
-              stableSort(roles.data, getComparator(order, orderBy)).slice(
+              stableSort(isFiltering?filteredData:roles.data, getComparator(order, orderBy)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
               ),
-            [roles.data,order, orderBy, page, rowsPerPage],
+            [roles.data,order,filteredData, orderBy, page, rowsPerPage],
         );
 
         const [anchorElUser, setAnchorElUser] = React.useState(null);
+        const containsText = (searchText='') => {
+           setIsFiltering((searchText.trim().length>0));
+           setFilteredData(visibleRows.filter((data)=>data["name"].toLowerCase().indexOf(searchText.toLowerCase()) > -1));
+        }
+      
     
   return (
     <>
@@ -443,6 +478,9 @@ export default function EnhancedTable() {
           numSelected={selected.length} 
           setAddPermission={setAddPermission} 
           setAddRole={setAddRoleOpen}
+          setOpenFilter={setOpenFilter}
+          openFilter={openFilter}
+          containsText={containsText}
         />
         <TableContainer>
           <Table
