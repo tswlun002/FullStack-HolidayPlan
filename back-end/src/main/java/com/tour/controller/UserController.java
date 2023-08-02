@@ -43,7 +43,7 @@ public class UserController {
 
     @PatchMapping(value = "update/")
     public ResponseEntity<Boolean> updateUserDetails(@RequestBody EditUserRequest editUserRequest) {
-        System.out.println(editUserRequest);
+
         if(! userService.confirmPassword(editUserRequest.currentPassword())){
             throw  new InvalidCredentials("Invalid credentials");
         }
@@ -60,9 +60,11 @@ public class UserController {
         return  new ResponseEntity<>(user, HttpStatus.FOUND);
     }
   
-    @DeleteMapping("delete/{username}" )
-    public  ResponseEntity<Boolean> delete(@RequestParam String username){
-        boolean deleted=false;
+    @DeleteMapping("delete/" )
+    public  ResponseEntity<Boolean> delete(@RequestParam String username,@RequestParam String password){
+
+        boolean deleted= userService.confirmPassword(password)&& userService.deleteUser(username);
+        if(!deleted) return   new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
         try {
             deleted= userService.deleteUser(username);
         }catch (Exception e){

@@ -35,13 +35,12 @@ public class AdminController {
     }
     @GetMapping(path="users/")
     public ResponseEntity<Set<UserResponseToAdmin>> getAllUsersByAdmin(){
-        System.out.println("Username: "+userService.getLoginedUser());
         var users = userService.getUsers()
                 .stream().map(user-> UserResponseToAdmin.builder().age(user.getAge())
                         .username(user.getUsername()).lastname(user.getLastname())
                         .firstname(user.getFirstname()).roles(user.getRoles()).permissions(user.getPermissions()).build())
                 .collect(Collectors.toSet());
-        if(users.size()==0)throw new NotFoundException("User(s) is not found");
+        if(users.isEmpty())throw new NotFoundException("User(s) is not found");
         return  new ResponseEntity<>(users,HttpStatus.OK);
     }
 
@@ -91,6 +90,7 @@ public class AdminController {
 
     @DeleteMapping("delete/" )
     public  ResponseEntity<Boolean> delete(@RequestParam String username){
+
         boolean deleted= userService.deleteUser(username);
         if(deleted)return  new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);

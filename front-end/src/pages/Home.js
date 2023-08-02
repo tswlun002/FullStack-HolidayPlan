@@ -1,31 +1,27 @@
-import { Box, InputAdornment,TextField,Stack } from '@mui/material';
-import { makeStyles } from  "@mui/styles"
+import { Box, InputAdornment,Stack,FormControlLabel,useMediaQuery} from '@mui/material';
+import { makeStyles} from  "@mui/styles"
 import Card from '../component/HolidayCard';
-import {  useReducer, useEffect, useContext, useState} from "react"
+import {  useReducer, useEffect, useContext, useState,useMemo} from "react"
 import AddIcon from '@mui/icons-material/Add';
 import {useNavigate} from 'react-router-dom';
-import { FetchHolidayPlan} from '../utils/HolidayPlan';
+import { FetchHolidayPlan, FilterHolidayPlan} from '../utils/HolidayPlan';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import ColorButton from '../component/ColorButton';
 import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
 import CustomerTypography from '../component/CustomerTypography';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import FilterList from '../component/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import Divider from '@mui/material/Divider';
-
-
+import Switch from '@mui/material/Switch';
+import { useTheme } from '@material-ui/core';
 
 
 const useStyles = makeStyles({
   containerBox0:{
-      margin:"8px",
-      padding:"8px",
-      display:"flex",
-      flexFlow:"row wrap",
-      alignItems:"start",
+      margin:"8px", padding:"8px", display:"flex",
+      flexFlow:"row wrap", alignItems:"start",
       
   },
 }
@@ -33,8 +29,8 @@ const useStyles = makeStyles({
 const Home = ()=>{
     const useAxiosPrivate = UsePrivateAxios();
     const{userLoginState} = useContext(CreateAuthContext)
+    const CARDS_INIT_STATE={data:[],  message:"", iRequestError:false, isResponseSuccess:false}
     const [cards, dispatchCards] = useReducer((state,action)=>{
-        console.log(action);
         switch(action.type){
          case "replace": return {...state, data:action.payload,iRequestError:false, isResponseSuccess:true};
          case "add":return {...state, data:[...state.data,action.payload],iRequestError:false, isResponseSuccess:true};
@@ -45,13 +41,11 @@ const Home = ()=>{
          default: return {...state} ;
       } 
     },
-    
-    {
-      data:[],
-      message:"Data is not available",
-      iRequestError:false, isResponseSuccess:false
-    }
+    CARDS_INIT_STATE
   )
+  const FILTER_INIT_STATE={data:[],city:[], location:[],startDate:[],endDate:[], event:[],priorityLevel:[], message:"Data is not available",iRequestError:false, isResponseSuccess:false}
+  const[filterIsChecked, setFilterIsChecked] = useState(false);
+  const[filterObject, setFilterObject] = useReducer((state, action)=>{return {...state, ...action}},FILTER_INIT_STATE);
 
   const deleteHolidayCard = (index)=>{
         const isDataAvailable = cards.data.length>0?true:false;
@@ -59,52 +53,44 @@ const Home = ()=>{
         dispatchCards({type:"deleteHoliday", payload:data, isDataAvailable:isDataAvailable});
 
   }
-
+   
+  //update cards
   const updateHolidayCard = (index)=>{
       dispatchCards({type:"dataChange"});
   }
-
-
-
 
   //call fetch data on hooks
   useEffect(() =>{
     let isMounted = true;
     const controller = new AbortController();
+    
     isMounted && FetchHolidayPlan(useAxiosPrivate, dispatchCards,controller);
+    
     return ()=>{isMounted=false; controller.abort();}
   },[]);
 
+  //Memorize data 
+  const displayedCards = useMemo(
+    () => {return filterIsChecked?filterObject.data:cards.data},
+    [filterIsChecked,cards,filterObject]
+  );
 
   //Make cards
-  const CardsComponents  = cards.data.map((data,index)=>{
+  const CardsComponents  = displayedCards.map((data,index)=>{
       if(data !==null){
         return <Card  updateHolidayCard={updateHolidayCard} index={index}
                 key={data.id} deleteHolidayCard={deleteHolidayCard} data={data} />
     }
 
   } );
-  console.log(cards);
-  console.log(((cards.data.length===0) && !(cards.iRequestError||cards.isResponseSuccess) || cards.iRequestError));
-  /*const useStyles = makeStyles({
-    containerBox0:{
-        margin:"8px",
-        padding:"8px",
-        display:"flex",
-        flexFlow:"row wrap",
-        alignItems:"start",
-        justifyContent:(cards.data.length===0)||cards.isRequestError?"center":"start",
-        
-    },
-  }
-  ); */
+
   const classes = useStyles(); // ✅ This is safe because it is called inside ThemeProvider
   
   const [openFilter , setOpenFilter] = useState(false);
   
   const FILTERS = [{name:'city', label:"city"},{name:"location",label:'location'},{name:"startDate",label:'start date'},{name:"endDate",label:'end date'},{name:'event',label:"event"},{name:'priorityLevel',label:"priority"}]
    const getFilterField = (filter)=>{
-          return [... new Set(cards.data.map((holiday)=>{ 
+          return [... new Set(displayedCards.map((holiday)=>{ 
 
             if(filter==="startDate"||filter==="endDate"){
              
@@ -114,8 +100,36 @@ const Home = ()=>{
           
           }))].map((field)=>{return {[filter]:field}});
    }
+   
 
-   console.log(getFilterField("location"));
+   const filter= ()=>{
+      setFilterIsChecked(()=>!filterIsChecked);
+      setFilterObject({data:[]});
+   }  
+
+  //call filter data 
+  useEffect(() =>{
+      let isMounted = true;
+      const controller = new AbortController();
+      if(filterIsChecked){
+          isMounted &&FilterHolidayPlan(useAxiosPrivate,userLoginState.username ,filterObject,setFilterObject,controller);
+      
+      }
+    return ()=>{isMounted=false; controller.abort();}
+  },[filterIsChecked,filterObject.city,filterObject.location,filterObject.startDate,filterObject.endDate,filterObject.event,filterObject.priorityLevel]);
+  
+
+  //clears filters
+  const clearFilter=()=>{
+        setOpenFilter(()=>!openFilter);
+        setFilterIsChecked(false);
+        setFilterObject(FILTER_INIT_STATE);
+  }
+  
+  //Creates filter component
+  const Filters =FILTERS.map((filter,index)=><FilterList key={index} label={filter.label} name={filter.name}Options={getFilterField(filter.name)} selectOption={setFilterObject}/>)
+  const theme =  useTheme();
+  const xsmall = useMediaQuery(theme.breakpoints.down('xs'));
   return (
     
     <>
@@ -127,14 +141,18 @@ const Home = ()=>{
         }
    
     <Box  
-           justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
-            className={classes.containerBox0}>
+          justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
+          className={classes.containerBox0}
+          display={{xs:"block",sm:"flex"}}
+      >
 
 
-          <InputAdornment  position="start">
-          {!openFilter&& <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+          {  cards.isResponseSuccess&&<InputAdornment  position="start">
+            {
+              !openFilter&& <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+            }
+            </InputAdornment>
           }
-        </InputAdornment>
           {
               openFilter&&<Stack
               direction={{ xs: 'column', sm: 'row' }}
@@ -143,19 +161,19 @@ const Home = ()=>{
               useFlexGap flexWrap="wrap"
               divider={<Divider orientation="vertical" flexItem />}
              >
-              <FilterListIcon sx={{padding:"1.3rem 0rem"}}/>     
-              {FILTERS.map((filter)=><FilterList label={filter.label} name={filter.name}Options={getFilterField(filter.name)} selectOption={()=>{}}/>)}
-              <ClearIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1.3rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
-  
-          </Stack>
-        }
-        {cards.isResponseSuccess&&CardsComponents}
+              <ClearIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1.3rem 0rem"}}onClick={clearFilter}/>
+              {Filters}
+              <FormControlLabel  sx={{width:"2.5rem"}} control={<Switch   checked={filterIsChecked} onChange={filter} inputProps={{ 'aria-label': 'controlled' }}/>} label="Filter" />
+               
+            </Stack>
+          }
+          {cards.isResponseSuccess&&CardsComponents}
       </Box>
     
   </>
   )
-}
 
+}
 
 const AddMoreHolidayPlan = ({isDataAvailable}) => {
 

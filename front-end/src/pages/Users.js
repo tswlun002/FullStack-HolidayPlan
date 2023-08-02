@@ -8,7 +8,6 @@ import ListUsers from '../component/ListUsers';
 import {RolePermissionContext} from '../context/RolePermissionContext';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@material-ui/core';
-import Permissions from '../component/Permissions';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
 import RegisterAdminForm from '../component/RegisterAdmin';

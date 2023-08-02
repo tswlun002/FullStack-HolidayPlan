@@ -1,6 +1,7 @@
 package com.tour.controller;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tour.exception.NotFoundException;
 import com.tour.exception.NullException;
 import com.tour.dto.HolidayPlaDTO;
@@ -17,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,13 +48,47 @@ public class HolidayPlanController {
     @GetMapping(value = "holiday/holidays/")
     public ResponseEntity<Set<HolidayPlanResponseDTO>> getHolidayPlans()  {
         var holidayPlans=  holidayPlanService.getHolidayPlans();
-        if(holidayPlans.size()==0) throw  new NotFoundException("No HolidayPlan");
+        if(holidayPlans.isEmpty()) throw  new NotFoundException("No HolidayPlan");
 
         var response =  holidayPlans.stream().map(hp->{
              var images  = holidayPlanService.getHolidayPlanImages(hp.getId());
              return  HolidayPlanResponseDTO.builder().event(hp.getEvent()).description(hp.getDescription())
                      .startDate(hp.getStartDate()).endDate(hp.getEndDate()).city(hp.getCity()).images(images).
             priorityLevel(String.valueOf(hp.getPriorityLevel())).id(hp.getId()).location(hp.getLocation()).build();
+
+        }).collect(Collectors.toSet());
+        return  response.isEmpty()?new ResponseEntity<>(null,HttpStatus.NOT_FOUND):new ResponseEntity<>(response, OK);
+    }
+    Date parseDate(String date){
+        try {
+            return new SimpleDateFormat("dd/MM/yyyy").parse(date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @GetMapping(value = "holiday/filtered-holiday-plans/")
+    public ResponseEntity<Set<HolidayPlanResponseDTO>> getHolidayPlans(
+            @RequestParam(name = "username") String username,
+            @RequestParam(required = false,name = "city",defaultValue = " ") List<String> city,
+            @RequestParam(required = false ,name = "location", defaultValue = "") List<String> location,
+            @RequestParam(required = false, name = "start", defaultValue = "")  List<Date> start,
+            @RequestParam(required = false, name = "end", defaultValue = "")   List<Date>  end,
+            @RequestParam(required = false , name = "event") List<String>event,
+            @RequestParam(required = false, name = "priorityLevel")List<Integer> priorityLevel
+    )  {
+
+        System.out.println("city: "+(city)+" location: "+(location)+" start: "+ (start)+" end: "+(end)+" event: "+ (event)+" priority: "+(priorityLevel));
+        //var startDates=start.stream().map(this::parseDate).toList();
+        //var endDates=endDate.stream().map(this::parseDate).toList();
+
+        var holidayPlans=  holidayPlanService.filterHolidayPlan(username,city, location,start,end, event, priorityLevel);
+        if(holidayPlans.isEmpty()) throw  new NotFoundException("No HolidayPlan for given filter(s)");
+
+        var response =  holidayPlans.stream().map(hp->{
+            var images  = holidayPlanService.getHolidayPlanImages(hp.getId());
+            return  HolidayPlanResponseDTO.builder().event(hp.getEvent()).description(hp.getDescription())
+                    .startDate(hp.getStartDate()).endDate(hp.getEndDate()).city(hp.getCity()).images(images).
+                    priorityLevel(String.valueOf(hp.getPriorityLevel())).id(hp.getId()).location(hp.getLocation()).build();
 
         }).collect(Collectors.toSet());
         return  response.isEmpty()?new ResponseEntity<>(null,HttpStatus.NOT_FOUND):new ResponseEntity<>(response, OK);

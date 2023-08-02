@@ -57,7 +57,6 @@ function stableSort(array, comparator) {
             }
             return a[1] - b[1];
         });
-        console.log(stabilizedThis.map((el)=>el[0]));
         return stabilizedThis.map((el) => el[0]);
 }
 
@@ -192,11 +191,12 @@ export default function EnhancedTable() {
         const useAxiosPrivate = UsePrivateAxios();
 
         const currentPath = "/home-admin/roles-permissions";
-        const[isAddRoleOpen, setAddRoleOpen] = React.useState(false);
+        const [isAddRoleOpen, setAddRoleOpen] = React.useState(false);
         const [isRoleAdded, setIsRoleAdded] = React.useState(false);
         const [isDeleteRoleOpen , setIsDeleteRoleOpen] = React.useState(false);
         const [isRoleDeleted, setIsRoleDeleted] = React.useState(false);
         const [newPermissionAddedToRole,setNewPermissionAddedToRole]=React.useState(false);
+        const [isPermissionDeleteFromRole, setIsPermissionDeleteFromRole] = React.useState(false);
         
 
         const setSelected =(role)=>{
@@ -217,14 +217,12 @@ export default function EnhancedTable() {
             .then(response => {
                     
                     if(response.ok || response.status===200){
-                      console.log(response.data);
                       setRoles({data:response.data});
                       
                     }
                     
             })
             .catch(err => {
-                    console.log(err);
                     if(!err?.response.ok){
                       const errorMessage  = getErrorMessage(err);
                       setRoles({message:errorMessage, isRequestError:true,isRequestSuccessful:false});
@@ -238,7 +236,7 @@ export default function EnhancedTable() {
               setTimeout(()=>{setRoles({isLoading:false,isRequestError:false,message:"",isRequestSuccessful:false});},5000);
             }
 
-        },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted]);
+        },[isRoleAdded,newPermissionAddedToRole,isRoleDeleted, isPermissionDeleteFromRole]);
 
         //////////////////////////////////////////////////////////////////////////////
         //                      DELETE ROLE(s)
@@ -266,9 +264,8 @@ export default function EnhancedTable() {
                         const newRoleList =(list)=> list.filter((roleItem)=>{
                               return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name==roleItem1.name);
                         });
-                        const temp =newRoleList(selected);
-                        console.log(temp);
-                        setSelected(temp);
+                      
+                        setSelected(newRoleList(selected));
                         setIsRoleDeleted(true);
                    }
                    setRoles(results);
@@ -313,7 +310,30 @@ export default function EnhancedTable() {
         * @param {*} permissionName of the permission to remove from role
         */
        const  deletePermissionfromRole = async(roleName, permissionName)=>{
-         
+          if(roleName===null) setRoles({isRequestError:true, isRequestSuccessful:false, message:"Role is not seletect"});
+
+          const API = `/holiday-plan/api/admin/role/delete/permission/?roleName=${roleName}&permissionName=${permissionName}`;
+          const results =await useAxiosPrivate.delete(API)
+            .then(response => {
+                if(response.ok || response.status===200){
+                  return({isRequestSuccessful:true,isRequestError:false,message:`Successfully deleted permission:${permissionName} from role:${roleName}.`});
+               }
+               
+            })
+            .catch(err => {
+                if(!err?.response.ok){
+                    return({isRequestSuccessful:false,isRequestError:true,message:getComparator(err)});
+                }
+                else{
+                  return({isRequestSuccessful:false,isRequestError:true,message:getErrorMessage(err)});
+
+               }
+            });
+            setRoles(results)
+            if(results.isRequestSuccessful){
+               setIsPermissionDeleteFromRole(()=>!isPermissionDeleteFromRole)
+            }
+
        }
 
          //Sort Request
@@ -392,9 +412,6 @@ export default function EnhancedTable() {
 
         const [anchorElUser, setAnchorElUser] = React.useState(null);
     
-    console.log((roles.data.length===0))
-    console.log(!(roles.isRequestError||roles.isRequestSuccessful))
-    console.log(((roles.data.length===0)&&!(roles.isRequestError||roles.isRequestSuccessful)))
   return (
     <>
       {
@@ -481,7 +498,7 @@ export default function EnhancedTable() {
                         >
                           {row.name}
                         </TableCell>
-                        <TableCell align="right"><SearchableSelect Options={row.permissions} deleteOption={deletePermissionfromRole}/></TableCell>
+                        <TableCell align="right"><SearchableSelect OptionsOf={row.name} Options={row.permissions} deleteOption={deletePermissionfromRole}/></TableCell>
                       </TableRow>
                     );
                   })

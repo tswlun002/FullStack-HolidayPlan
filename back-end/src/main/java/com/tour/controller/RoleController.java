@@ -25,7 +25,7 @@ public class RoleController  {
     @GetMapping(value = "roles/")
     public ResponseEntity<Set<Role>>getRoles() {
         var roles = service.getRoles();
-        if(roles.size()==0)throw new NotFoundException("Role(s) is not found");
+        if(roles.isEmpty())throw new NotFoundException("Role(s) is not found");
         return  new ResponseEntity<>(roles, HttpStatus.OK);
     }
     @GetMapping(value = "get/id/{id}")
@@ -44,7 +44,7 @@ public class RoleController  {
         else return  new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
 
     }
-    @DeleteMapping(value = "delete/permission/role/")
+    @DeleteMapping(value = "delete/permission/")
     public ResponseEntity<Boolean>  deletePermissionFromRole(
             @RequestParam String roleName, @RequestParam String permissionName){
 

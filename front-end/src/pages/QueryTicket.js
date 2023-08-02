@@ -1,6 +1,5 @@
-import {  Link } from "react-router-dom";
 import './Login.css'
-import {Paper,Typography,Box,Card,CardContent}  from '@mui/material';
+import {Typography,Box,Card,CardContent,CardHeader}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import CustomerTextArea from'../component/CustomerTextArea'
 import ColorButton from '../component/ColorButton';
@@ -8,6 +7,7 @@ import React,{ useReducer} from 'react';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import {SendQuery} from '../utils/Query';
+import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 
 
 const QueryTicket =()=>{
@@ -33,7 +33,6 @@ const QueryTicket =()=>{
             dispatchForm({isQueryingError:true, errorMessage:"Both summary and description are required"});
         }
         else if(!formState.isQueryingError){
-        console.log(formState)
             SendQuery(formState,useAxiosPrivate, dispatchForm )
             ClearForm();
         }
@@ -52,26 +51,19 @@ const QueryTicket =()=>{
     return (
        <Box display="flex"
             justifyContent="center"
-            alignItems="center"
+            alignItems="start"
             minHeight="100vh"
        >
-           <Card sx={{ maxWidth: 400,padding:"2rem 0rem" ,display:"block"}}>
+           <Card sx={{ maxWidth: 400,display:"block"}}>
+           <CardHeader
+              title={<Typography align="center"  sx={{width:"100%",color:PRIMAR_COLOR}} variant={"h4"} >Enter Query</Typography>}
+             
+              subheader={formState.isQueryingError?formState.errorMessage:formState.isRequestSuccessful?formState.querySentStatus:""}
+              subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:formState.isRequestSuccessful?SUCCESS_COLOR:formState.isQueryingError&&ERROR_COLOR}}
+              
+          />
                <CardContent>
-                <h1 className="heading">Enter Query</h1>
                 <form className="login-inputs" autoComplete='off'>
-                    {
-                        formState.isQueryingError ?
-                        <Typography align="center"sx={{color:"red"}}>
-                            {formState.errorMessage}
-                        </Typography>
-                        :formState.isRequestSuccessful&&
-                        <Typography align="center"sx={{color:"green"}}>
-                            {formState.querySentStatus}
-                        </Typography>
-
-
-
-                    }
 
                     <CssTextField
                         required
