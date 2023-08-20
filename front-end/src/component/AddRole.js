@@ -1,7 +1,6 @@
-import { useRef, useState ,useReducer} from "react";
-import CssTextField from  './CssTextField';
+import { useRef ,useReducer} from "react";
 import ColorButton from "./ColorButton";
-import { Box, Card, CardContent, CardHeader, TextField, Typography, useMediaQuery } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, TextField, useMediaQuery } from "@mui/material";
 import { useTheme } from "@material-ui/core";
 import CancelIcon from '@mui/icons-material/Cancel';
 import {IconButton} from "@mui/material";
@@ -11,7 +10,6 @@ import {getErrorMessage} from '../utils/Error';
 
 export default function AddRole({setAddRoleOpen, setIsRoleAdded}){
     const roleRef = useRef(null);
-    const [error , setError] = useState("");
     const usePrivateAxios =UsePrivateAxios();
     const [requestResponse , setResponse] = useReducer(
         (state, action)=>{return {...state,...action}},{isRequestError:false,message:"",submitting:false,isRequestSuccessful:false}
@@ -20,7 +18,6 @@ export default function AddRole({setAddRoleOpen, setIsRoleAdded}){
 
           e.preventDefault();
 
-          console.log(roleRef.current.value)
           if(roleRef.current===null || roleRef.current.value.trim()===''){
                 setResponse({isRequestError:true,submitting:false,message:"Role name is require",isRequestSuccessful:false});
           }else{
@@ -30,7 +27,6 @@ export default function AddRole({setAddRoleOpen, setIsRoleAdded}){
              usePrivateAxios.post(API,{name:roleRef.current.value})
              .then(response=>{
                    if(response.ok || response.status===200){
-                           console.log(response.data);
                            setResponse({isRequestError:false,submitting:false,message:"Role added successful",isRequestSuccessful:true});
                            setIsRoleAdded(true);
                    }
@@ -60,9 +56,7 @@ export default function AddRole({setAddRoleOpen, setIsRoleAdded}){
             },
             
             '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'green',
-              },
+             
               '&:hover fieldset': {
                 border:"1px solid transparent",
                 borderBottom:'1.5px solid blueviolet',
@@ -104,7 +98,7 @@ export default function AddRole({setAddRoleOpen, setIsRoleAdded}){
                         <TextField  
                        
                             onChange={()=>{
-                                setError(''); setIsRoleAdded(false);
+                                 setIsRoleAdded(false);
                                 setResponse({isRequestError:false,message:"",submitting:false,isRequestSuccessful:false});
                               }
                             }

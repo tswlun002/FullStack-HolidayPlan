@@ -17,7 +17,7 @@ export default function AddPermission({ setAddPermissionOpen,setIsNewPermissionA
    //Extract name of permission
     const submit = (e)=>{
           e.preventDefault();
-          console.log(permissionRef.current.value)
+          
           if(permissionRef.current===null || permissionRef.current.value.trim()===''){
                 setError("Permission name is required");
           }
@@ -65,9 +65,7 @@ export default function AddPermission({ setAddPermissionOpen,setIsNewPermissionA
              
             },
             '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'green',
-              },
+              
               '&:hover fieldset': {
                 border:"1px solid transparent",
                 borderBottom:'1.5px solid blueviolet',

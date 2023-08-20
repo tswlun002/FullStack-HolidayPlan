@@ -107,8 +107,6 @@ public class RoleService implements  OnRole{
      * @Return  Role with updated information
      */
     private Role updateRole(Role role){
-        System.out.println("*******************************************\n"
-        + role);
        try{
            role.setName(role.getName().toUpperCase());
           role= rolesRepository.save(role);

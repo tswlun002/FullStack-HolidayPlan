@@ -1,10 +1,9 @@
-import { Box, Card, CardActions, CardContent, CardHeader, useMediaQuery } from "@mui/material";
+import { Box, Card, CardActions, CardContent, CardHeader } from "@mui/material";
 import SelectHasSearch from "./SeleteHasSearch";
-import { useReducer, useState, useEffect, useContext } from "react";
+import { useReducer, useState, useEffect } from "react";
 import CancelIcon from '@mui/icons-material/Cancel';
 import {IconButton} from "@mui/material";
 import ColorButton from '../component/ColorButton';
-import { useTheme } from "@material-ui/core";
 import SelectedItems from "./SelectedItems";
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import {getErrorMessage} from '../utils/Error';
@@ -18,8 +17,6 @@ export default function AddRoleToUser({setAddRole, users=[],setNewRoleAddedToUse
                         (state, action)=>{return {...state,...action}},
                         {isRequestError:false,message:"",isRequestSuccessful:false}
             );
-            const theme = useTheme();
-            const small =useMediaQuery(theme.breakpoints.down('sm'));
             const [selected, Setselected] = useState([]);
 
             const setselected =(item)=>{
@@ -27,7 +24,6 @@ export default function AddRoleToUser({setAddRole, users=[],setNewRoleAddedToUse
                         setResponse({isRequestError:false,message:"",isRequestSuccessful:false});
             }
             const [open, setOpen] = useState(false);
-            //const [roles, setRoles] = useState([]);
             /////////////////////////////////////////////////////////////////
             //           FETCH ROLES
             ///////////////////////////////////////////////////////////////
@@ -38,13 +34,13 @@ export default function AddRoleToUser({setAddRole, users=[],setNewRoleAddedToUse
             isMounted && useAxiosPrivate.get(API, {signal:controller.signal})
             .then(response => {
                         if(response.ok || response.status===200){
-                                    console.log(response.data);
+                                   
                                     setRoles(response.data);
 
                         }
             })
             .catch(err => {
-                        console.log(err);
+                        
                         if(!err?.response.ok){
                         const errorMessage  = getErrorMessage(err);
                                     setResponse({message:errorMessage,isRequestError:true,isRequestSuccessful:false});

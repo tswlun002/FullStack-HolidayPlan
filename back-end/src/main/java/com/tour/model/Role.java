@@ -19,6 +19,7 @@ import java.util.Set;
 @Table(name = "Role")
 public class Role  {
 
+    @Getter
     @Id
     @GenericGenerator(name="cmrSeq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
@@ -39,9 +40,6 @@ public class Role  {
     )
      @Builder.Default
     private Set<Permission> permissions =  new HashSet<>();
-    public Long getId() {
-        return id;
-    }
 
     public void setId(Long id) {
         this.id = id;

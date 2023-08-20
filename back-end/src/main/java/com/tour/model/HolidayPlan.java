@@ -11,12 +11,12 @@ import java.util.Date;
 import java.util.Objects;
 
 
+@Getter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Builder
-@Getter
 @Setter
 @ToString
 @Table(name = "HolidayPlan")
@@ -59,9 +59,6 @@ public class HolidayPlan {
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name = "tourist_id", nullable = false)
     private User user;
-    public Long getId() {
-        return id;
-    }
 
     public void setId(Long id) {
         this.id = id;

@@ -1,10 +1,8 @@
-import { Box, Button, Card, CardActionArea, CardActions, CardContent, CardHeader, 
-Collapse, IconButton, List, ListItem, ListItemButton, ListItemIcon,
-ListItemText, ListSubheader, Modal, Typography, useMediaQuery } from "@mui/material";
+import { Box, Card, CardActions, CardContent, CardHeader, 
+Collapse,Modal, Typography,} from "@mui/material";
 import SelectHasSearch from "./SeleteHasSearch";
 import { useContext, useReducer, useState, useEffect} from "react";
 import ColorButton from '../component/ColorButton';
-import { useTheme } from "@material-ui/core";
 import AddPermission from "./AddPermission";
 import SelectedItems from "./SelectedItems";
 import { RolePermissionContext } from '../context/RolePermissionContext';
@@ -13,9 +11,7 @@ import {getErrorMessage} from '../utils/Error';
 
 export default function Permissions(){
 
-        const {permissions,setPermissions} =  useContext(RolePermissionContext);
-        const theme = useTheme();
-        const small =useMediaQuery(theme.breakpoints.down('sm'));
+        const {permissions,setPermissions} =  useContext(RolePermissionContext);       
         const [isAddPermissionOpen, setAddPermissionOpen] =  useState(false);
         const [isNewPermissionAdded, setIsNewPermissionAdded] =  useState(false);
         const [selectedPermissions, SetSelectedPermissions] = useState([]);
@@ -80,7 +76,7 @@ export default function Permissions(){
         if(results.isRequestSuccessful){
             //remove deleted permissions from list
             const newPermList =(list)=> list.filter((permItem)=>{
-                  return !deletedPerm.find((permItem1)=>permItem.id===permItem1.id && permItem.name==permItem1.name);
+                  return !deletedPerm.find((permItem1)=>permItem.id===permItem1.id && permItem.name===permItem1.name);
             });
             const temp =newPermList(permissions.listPermissions);
             setPermissions({ listPermissions: temp});

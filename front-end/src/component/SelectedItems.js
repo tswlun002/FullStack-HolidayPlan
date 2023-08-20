@@ -2,7 +2,7 @@ import { CardHeader,Card, List, ListItem,ListItemText, Button,IconButton } from 
 import Modal from '@mui/material/Modal';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { useState ,useReducer} from 'react';
+import { useState } from 'react';
 
 export default function SelectedItems({heading, SelectedItems,fieldName="name",setSelectedItems,openListSelectedItems, setOpenListSelectedItems}){
     const itemName =(item)=>{
@@ -15,7 +15,6 @@ export default function SelectedItems({heading, SelectedItems,fieldName="name",s
 
     const [itemsLocally, setItemsLocally] = useState(SelectedItems);
 
-   const [reuqestResponse , setResponse] = useReducer((state, action)=>{return {...state,...action}},{isRequestError:false,message:"",isRequestSuccessful:false});
     return (
          <Modal
                   open ={openListSelectedItems}

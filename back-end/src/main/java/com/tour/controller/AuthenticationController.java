@@ -21,7 +21,6 @@ import java.util.HashSet;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@CrossOrigin( origins = "*")
 @RequestMapping("/holiday-plan/api/authenticate/")
 @AllArgsConstructor
 public class AuthenticationController {

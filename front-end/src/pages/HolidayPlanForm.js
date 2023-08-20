@@ -1,5 +1,5 @@
 import "./HolidayPlanForm.css"
-import {Typography,FormControl,RadioGroup, FormControlLabel,Radio,FormLabel,Box,Card,CardContent,
+import {FormControl,RadioGroup, FormControlLabel,Radio,FormLabel,Box,Card,CardContent,
 CardHeader,Stack}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
@@ -35,7 +35,6 @@ const HolidayPlanForm =()=>{
          const fd = new FormData();
          fd.append("holiday",new Blob([JSON.stringify({startDate, location, endDate, event, city, description, priorityLevel}, {'Content-Type':'application/json'})]));
          Files.forEach(file=>fd.append("images",file));
-        console.log(fd)
       AddHolidayPlan(useAxiosPrivate,fd, DispatchHolidayPlanData)
   }
 
@@ -51,7 +50,6 @@ const HolidayPlanForm =()=>{
              list1.push(file);
         });
         setImagePreview(list);
-        console.log(list1);
         setFiles(list1);
    };
 
@@ -74,8 +72,6 @@ const HolidayPlanForm =()=>{
          
           
         }else{
-
-             console.log(HolidayPlanData)
 
              DispatchHolidayPlanData({isDataCorrect:false, errorMessage:"All data is required"})
         }
@@ -159,7 +155,7 @@ const HolidayPlanForm =()=>{
                             variant="outlined"
                             name="startDate"
                              onClick={()=>setDateType1("date")}
-                             onBlur={()=>{setDateType1("text"); console.log("abort")}}
+                             onBlur={()=>{setDateType1("text"); }}
                             type={dateType1}   className="start-date"min={10}
                             onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,startDate:event.currentTarget.value}) }
                             value={HolidayPlanData.startDate}
@@ -176,7 +172,7 @@ const HolidayPlanForm =()=>{
                           name="endDate"
 
                            onClick={()=>setDateType("date")}
-                           onBlur={()=>{setDateType("text"); console.log("abort")}}
+                           onBlur={()=>{setDateType("text"); }}
                            type={dateType}  className="end-date"min={10}
                           onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,endDate:event.currentTarget.value}) }
                           value={HolidayPlanData.endDate}
@@ -213,7 +209,7 @@ const HolidayPlanForm =()=>{
                           alignItems="center">
                               {
                               imagePreview.map((image, index)=>
-                                <img style={{maxWidth:"25%", margin:"0rem 0.3rem"}}key={index} src={image}/>
+                                <img style={{maxWidth:"25%", margin:"0rem 0.3rem"}}key={index} src={image} alt="Location image(s) preview"/>
                               )
 
                               }

@@ -11,9 +11,6 @@ const CustomerTextArea = styled(TextField)({
     },
 
     '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: 'green',
-      },
       '&:hover fieldset': {
         border:"1px solid transparent",
         borderBottom:'1.5px solid blueviolet',

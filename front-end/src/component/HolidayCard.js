@@ -1,4 +1,4 @@
-import {useState,useContext, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -34,10 +34,10 @@ function ImageSlider(images) {
     // Use useEffect to increment the index and update the image every 5 seconds
     useEffect(() => {
     const intervalId = setInterval(() => {
-    setIndex(prevIndex => (prevIndex + 1) % images.length);
-    }, 5000);
+        setIndex(prevIndex => (prevIndex + 1) % images.length);
+        }, 5000);
 
-    return () => clearInterval(intervalId);
+        return () => clearInterval(intervalId);
     }, []);
 
      const type = images[index].imageType;
@@ -49,8 +49,6 @@ function ImageSlider(images) {
 export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayCard}) {
   
   const priorityLevelRate = [1, 2, 3];
-  const priorityLevelColor = ["green", "yellow", "orange","bisque"];
-
   const [expanded, setExpanded] = useState(false);
   if(Boolean(data.priorityLevel))data.priorityLevel = parseInt(data.priorityLevel);
   const priority_obj = (data.priorityLevel===1) ?priorityLevelRate[0] :(data.priorityLevel===2)
@@ -75,7 +73,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
         if(response.isResponseSuccess){
            updateHolidayCard(index);
 
-        }else alert("Failed to update");
+        }
   }
 
 /**
@@ -125,7 +123,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
   return (
     <Card sx={
     {
-        maxWidth: 345 , padding:"0rem 1rem",
+        maxWidth: 345 , padding:{sm:"0rem 1rem",xs:0},
         background: "linear-gradient(to right,rgba(97, 118, 175, 0.5),rgba(17, 170, 132, 0.85),rgba(48, 235, 57, 0.9),rgba(8, 241, 144, 0.6))",
         margin:"10px",    display: "inline-block"
 
@@ -137,10 +135,13 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
           </Avatar>
         }
     
-        title={data.location}
-        subheader={`${data.city} from ${data.startDate.substring(0,10)} to ${data.endDate.substring(0,10)}`}
+        title={`${data.location}, ${data.city}`}
+        subheader={`${data.startDate.substring(0,10)} to ${data.endDate.substring(0,10)}`}
       />
-      {data.images?.length>0?<CardMedia component="img" height="194" src={ ImageSlider(data.images)}/>:"No images"}
+      {data.images?.length>0?
+        <CardMedia sx={{backgroundSize:"cover",width:{sm:340,xs:330},height:194, backgroundRepeat: 'no-repeat'}} component="img" image={ ImageSlider(data.images)}/>:
+        "No images"
+      }
 
 
 

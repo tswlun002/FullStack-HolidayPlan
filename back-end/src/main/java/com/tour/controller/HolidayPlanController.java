@@ -1,13 +1,12 @@
 package com.tour.controller;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.tour.exception.NotFoundException;
-import com.tour.exception.NullException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.HolidayPlaDTO;
 import com.tour.dto.HolidayPlanResponseDTO;
+import com.tour.exception.NotFoundException;
+import com.tour.exception.NullException;
 import com.tour.service.HolidayPlanService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +25,6 @@ import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@CrossOrigin( origins = "*",originPatterns = "http://localhost:3000/**")
 @RequestMapping("/holiday-plan/api/")
 public class HolidayPlanController {
     @Autowired
@@ -37,7 +34,7 @@ public class HolidayPlanController {
         var holiday = request.getPart("holiday");
         var  images = request.getParts().stream().filter(part -> part.getName().equals("images")).toList();
         if(holiday==null) throw  new NullException("Holiday is invalid");
-        HolidayPlaDTO holidayDTO  =new  ObjectMapper().readValue(holiday.getInputStream().readAllBytes(), HolidayPlaDTO.class);;
+        HolidayPlaDTO holidayDTO  =new  ObjectMapper().readValue(holiday.getInputStream().readAllBytes(), HolidayPlaDTO.class);
         var saved= holidayPlanService.saveHolidayPlan(holidayDTO,images);
         Map<String,String> response_ = new HashMap<>();
         response_.put("message", saved?"Saved successfully":"Not saved");
@@ -76,10 +73,6 @@ public class HolidayPlanController {
             @RequestParam(required = false , name = "event") List<String>event,
             @RequestParam(required = false, name = "priorityLevel")List<Integer> priorityLevel
     )  {
-
-        System.out.println("city: "+(city)+" location: "+(location)+" start: "+ (start)+" end: "+(end)+" event: "+ (event)+" priority: "+(priorityLevel));
-        //var startDates=start.stream().map(this::parseDate).toList();
-        //var endDates=endDate.stream().map(this::parseDate).toList();
 
         var holidayPlans=  holidayPlanService.filterHolidayPlan(username,city, location,start,end, event, priorityLevel);
         if(holidayPlans.isEmpty()) throw  new NotFoundException("No HolidayPlan for given filter(s)");

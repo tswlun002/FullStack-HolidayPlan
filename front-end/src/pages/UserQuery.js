@@ -1,10 +1,11 @@
-import { Box,Typography} from "@mui/material"
-import { useReducer,useEffect ,useContext, useState} from "react";
+import { Box} from "@mui/material"
+import { useReducer,useEffect ,useContext} from "react";
 import { FetchQueries } from "../utils/Query";
 import QueryCard from '../component/QueryCard'
 import  UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import {CreateAuthContext} from '../context/CreateAuthContext'
-import { ERROR_COLOR, LOADING_COLOR, SECONDARY_COLOR, SUCCESS_COLOR } from "../utils/Constant";
+import { ERROR_COLOR, LOADING_COLOR,SUCCESS_COLOR } from "../utils/Constant";
+import CustomerTypography from "../component/CustomerTypography";
 
 
 const UserQuery =  ()=>{
@@ -47,34 +48,28 @@ const UserQuery =  ()=>{
         dispatchQuery({type:"replace", payload:newQueryData, isRequestError:isRequestError});
 
    }
-   const updateQueryCard = (index)=>{
-        const isRequestError = query.data?.length>0?true:false;
-        const data  = query.data?.slice(index, index+1);
-        data.queryStatus="SOLVED";
-        let newQueryData  = [data,...query.data?.slice(0, index),...query.data?.slice(index+1)];
-        dispatchQuery({type:"replace", payload:newQueryData, isRequestError:isRequestError});
-   }
+  
     const Cards  = query.data.map((data, index)=>{
-        return <QueryCard key={data.id} index={index} deleteQueryCard={deleteQueryCard} updateQueryCard={updateQueryCard}data={data}/>;
+        return <QueryCard key={data.id} index={index} deleteQueryCard={deleteQueryCard} data={data}/>;
     })
     
     return (
-        <Box    display="flex"
+        <Box    display={{sm:"block",md:"flex"}}
                 justifyContent={(query.data.length===0)||query.isRequestError?"center":"start"}
                 alignItems="start"
                 minHeight="100vh"
-                flexFlow="row wrap"
+                
         >
             {
                 
                 ((query.data.length===0)||query.isRequestError||query.isRequestSuccessful)&&
-                    <Typography 
+                    <CustomerTypography 
                         variant="h5" 
                         align="center"
-                        sx={{color:query.isRequestError?ERROR_COLOR:(query.data.length==0)?LOADING_COLOR:SUCCESS_COLOR}}
+                        sx={{color:query.isRequestError?ERROR_COLOR:(query.data.length===0)?LOADING_COLOR:SUCCESS_COLOR,fontSize:{sm:"0.8rem",md:"1rem"}}}
                     >
                         {(query.data.length===0)&&!(query.isRequestError||query.isRequestSuccessful)?"Loading ...":query.message}
-                    </Typography>
+                    </CustomerTypography>
             }
             {
                 Cards

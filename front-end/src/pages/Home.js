@@ -1,4 +1,4 @@
-import { Box, InputAdornment,Stack,FormControlLabel,useMediaQuery} from '@mui/material';
+import { Box, InputAdornment,Stack,FormControlLabel} from '@mui/material';
 import { makeStyles} from  "@mui/styles"
 import Card from '../component/HolidayCard';
 import {  useReducer, useEffect, useContext, useState,useMemo} from "react"
@@ -14,8 +14,8 @@ import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterList from '../component/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import Divider from '@mui/material/Divider';
-import Switch from '@mui/material/Switch';
-import { useTheme } from '@material-ui/core';
+import {Switch, IconButton} from '@mui/material';
+
 
 
 const useStyles = makeStyles({
@@ -27,6 +27,7 @@ const useStyles = makeStyles({
 }
 ); 
 const Home = ()=>{
+    
     const useAxiosPrivate = UsePrivateAxios();
     const{userLoginState} = useContext(CreateAuthContext)
     const CARDS_INIT_STATE={data:[],  message:"", iRequestError:false, isResponseSuccess:false}
@@ -77,10 +78,10 @@ const Home = ()=>{
 
   //Make cards
   const CardsComponents  = displayedCards.map((data,index)=>{
-      if(data !==null){
-        return <Card  updateHolidayCard={updateHolidayCard} index={index}
+      return(data !==null)?
+      <Card  updateHolidayCard={updateHolidayCard} index={index}
                 key={data.id} deleteHolidayCard={deleteHolidayCard} data={data} />
-    }
+      :[]
 
   } );
 
@@ -90,7 +91,7 @@ const Home = ()=>{
   
   const FILTERS = [{name:'city', label:"city"},{name:"location",label:'location'},{name:"startDate",label:'start date'},{name:"endDate",label:'end date'},{name:'event',label:"event"},{name:'priorityLevel',label:"priority"}]
    const getFilterField = (filter)=>{
-          return [... new Set(displayedCards.map((holiday)=>{ 
+          return [...new Set(displayedCards.map((holiday)=>{ 
 
             if(filter==="startDate"||filter==="endDate"){
              
@@ -128,29 +129,17 @@ const Home = ()=>{
   
   //Creates filter component
   const Filters =FILTERS.map((filter,index)=><FilterList key={index} label={filter.label} name={filter.name}Options={getFilterField(filter.name)} selectOption={setFilterObject}/>)
-  const theme =  useTheme();
-  const xsmall = useMediaQuery(theme.breakpoints.down('xs'));
+  
   return (
     
     <>
         <AddMoreHolidayPlan isDataAvailable={cards.isResponseSuccess}  className="add-holiday-btn"/>
-        {((cards.data.length===0) && !(cards.iRequestError||cards.isResponseSuccess) || cards.iRequestError)&&
-          <CustomerTypography sx={{color:cards.iRequestError?ERROR_COLOR:LOADING_COLOR}}variant="h5" fontSize="0.8rem">
-            {cards.iRequestError?cards.message:"Loading ..."}
-          </CustomerTypography>
-        }
-   
-    <Box  
-          justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
-          className={classes.containerBox0}
-          display={{xs:"block",sm:"flex"}}
-      >
-
-
-          {  cards.isResponseSuccess&&<InputAdornment  position="start">
+        
+           {  cards.isResponseSuccess&&<InputAdornment sx={{padding:"1.3rem"}} position="start">
             {
-              !openFilter&& <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1rem 0rem"}}onClick={()=>setOpenFilter(()=>!openFilter)}/>
+              !openFilter&& <IconButton  sx={{justifyContent:"center",width:"3rem",fontSize:"1rem", alignItems:"center", maxWidth:"100%"}} arial-label="filter"onClick={()=>setOpenFilter(()=>!openFilter)}><FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, }}/>{openFilter?"":"Filter"}</IconButton>
             }
+             
             </InputAdornment>
           }
           {
@@ -166,6 +155,18 @@ const Home = ()=>{
               <FormControlLabel  sx={{width:"2.5rem"}} control={<Switch   checked={filterIsChecked} onChange={filter} inputProps={{ 'aria-label': 'controlled' }}/>} label="Filter" />
                
             </Stack>
+          }
+   
+    <Box  
+          justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
+          className={classes.containerBox0}
+          display={{xs:"block",sm:"flex"}}
+          minHeight="100vh"
+      >    {
+            ( ((cards.data.length===0) && !(cards.iRequestError||cards.isResponseSuccess) ) || cards.iRequestError )&&
+            <CustomerTypography sx={{color:cards.iRequestError?ERROR_COLOR:LOADING_COLOR,fontSize:{sm:"0.8rem",md:"1rem"}}}variant="h5" >
+              {cards.iRequestError?cards.message:"Loading ..."}
+            </CustomerTypography>
           }
           {cards.isResponseSuccess&&CardsComponents}
       </Box>

@@ -1,5 +1,6 @@
 package com.tour.model;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ import org.hibernate.annotations.Parameter;
 @Setter
 @ToString
 public class Permission  implements  Comparable<Permission>{
+    @Getter
     @Id
     @GenericGenerator(name="cmrSeq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
@@ -30,16 +32,13 @@ public class Permission  implements  Comparable<Permission>{
     @NotBlank(message = "Permission name cannot be blank")
     @Column(name = "user_permission",unique = true, nullable = false)
     private String name;
-    public Long getId() {
-        return id;
-    }
+
     public void setId(Long id) {
         this.id = id;
     }
 
     @Override
-    public int compareTo(Permission obj) {
-        if(obj==null)throw  new NullPointerException("Can not compare permission with null");
+    public int compareTo(@Nonnull Permission obj) {
         return this.id.compareTo(obj.id);
     }
 

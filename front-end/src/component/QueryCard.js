@@ -1,18 +1,18 @@
 import * as React from 'react';
 import './QueryCard.css';
 import IconButton from '@mui/material/IconButton';
-import  {FaTrash} from 'react-icons/fa'
+import  {FaTrash,FaMinus, FaPlus} from 'react-icons/fa'
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CustomerTypography from './CustomerTypography'
-import { Button ,CardActions,CardHeader,Typography} from '@mui/material';
+import { Button ,CardActions,CardHeader,Grid} from '@mui/material';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel } from '@mui/material';
 import CustomerTextArea from'../component/CustomerTextArea'
 import {SendQueryResponse,DeleteQuery} from '../utils/Query'
-import { ERROR_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
-const header_background  ="linear-gradient(to right,rgba(145, 111, 179, 0.5),rgba(102, 51, 153, 0.85),rgba(77,26,127  , 0.90),rgba(155, 104, 207, 0.6))!important";
+import { ERROR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
+
 
 const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
     return(
@@ -25,15 +25,33 @@ const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
             value={queryState.queryStatus}
             >
             <div className='radio-group'style={{display:"flex"}}>
-                <FormControlLabel disabled={disAbled} value="ACTIVE"  control={<Radio  />} label="Active" />
-                <FormControlLabel disabled={disAbled} value="SOLVED"  control={<Radio  />} label="Solved" />
+                <FormControlLabel disabled={disAbled} value="ACTIVE"  control={<Radio  style={{color:SECONDARY_COLOR}}/>} label="Active" />
+                <FormControlLabel disabled={disAbled} value="SOLVED"  control={<Radio  style={{color:SUCCESS_COLOR}}/>} label="Solved" />
             </div>
         </RadioGroup>
     </FormControl>)
 }
+const AdjustableParagraph = ({message})=>{
+    const truncate = (input) =>input.length > 50 ? true : false;
+    const [showMore,setShowMore] =React.useState(true);
 
-const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
-     const {querySummary, queryDescription,date,queryStatus}=data;
+    return(
+        <Grid container wrap="nowrap" spacing={1}>
+            <Grid item xs zeroMinWidth>
+             <CustomerTypography noWrap={showMore}>{message}</CustomerTypography>
+            </Grid>
+            <Grid item xs={1}>
+                { truncate(message)?
+                  showMore?<FaPlus onClick={()=>setShowMore(false)}/>:
+                  <FaMinus onClick={()=>setShowMore(true)}/>:
+                  ""
+                }
+            </Grid>
+        </Grid>
+    )
+}
+const QueryCard = ({data, index,deleteQueryCard})=> {
+     const {querySummary, queryDescription,queryStatus}=data;
     const{userLoginState} = React.useContext(CreateAuthContext)
 
     const useAxiosPrivate = UseAxiosPrivate();
@@ -75,8 +93,7 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
                dispatchQuery({isResponseError:true, requestResponse:"All fields are required"})
             }else{
 
-               editResponse= await SendQueryResponse({username:data.user.username, queryId:data.id,useAxiosPrivate,
-               response:queryState.response, queryStatus:queryState.queryStatus});
+               editResponse= await SendQueryResponse({username:data.user.username, queryId:data.id,useAxiosPrivate,response:queryState.response, queryStatus:queryState.queryStatus});
                dispatchQuery(editResponse);
                if(editResponse.isResponseSuccess){
 
@@ -88,6 +105,8 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
             DeleteQuery(useAxiosPrivate,data.id, dispatchQuery)
         }
     }
+   
+
 
     return (
   
@@ -97,7 +116,7 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
             sx={{background:SECONDARY_HEADER_COLOR}}
             title={<CustomerTypography
                         align="center"
-                        sx={{ width:"100%" , width:"100%",}}
+                        sx={{width:"100%",}}
                         >
                             <span >  Query From: {
                                 data.user?.firstname && data.user?.lastname  &&
@@ -108,8 +127,6 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
                  
             subheader={queryState.isQueryingError? queryState.requestResponse:queryState.isResponseSuccess?queryState.requestResponse:""}
             subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:queryState.isQueryingError?ERROR_COLOR:queryState.isResponseSuccess&&SUCCESS_COLOR}}
-                 
-            
             />
             
            
@@ -120,21 +137,15 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
 
          <CustomerTypography gutterBottom variant="h7" component="div" align="center">
             Date:{data.localDateTime&&JSON.stringify(data.localDateTime).substring(1,11)}
-
           </CustomerTypography>
-
           <CustomerTypography sx={{fontWeight: "bold"}}  gutterBottom variant="h7" component="div" align="center">
                Query Summary:
           </CustomerTypography>
-           <CustomerTypography>
-               {querySummary}
-          </CustomerTypography>
+          <AdjustableParagraph message={querySummary}/>
           <CustomerTypography  sx={{fontWeight: "bold"}}   gutterBottom variant="h7" component="div" align="center">
            Query description:
           </CustomerTypography>
-          <CustomerTypography>
-               {queryDescription}
-           </CustomerTypography>
+          <AdjustableParagraph message={queryDescription}/>
           
           {
 
@@ -154,9 +165,8 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
                   <CustomerTypography  sx={{fontWeight: "bold"}}   gutterBottom variant="h7" component="div" align="center">
                     Query Response:
                    </CustomerTypography>
-                   <CustomerTypography>
-                        {data.response}
-                   </CustomerTypography>
+                   <AdjustableParagraph message={data.response}/>
+                  
                </>
 
           }
@@ -166,7 +176,7 @@ const QueryCard = ({data, index, updateQueryCard,deleteQueryCard})=> {
             {
 
               userLoginState.roles.find(role=>role.name==="ADMIN")?
-              <Button   disabled={queryState.response.trim()==='' || queryState.queryStatus==="ACTIVE" ?true:false} variant="outlined" size="small" color="primary" onClick={onSubmit}>
+              <Button   disabled={queryState.response.trim()===''?true:false} variant="outlined" size="small" color="primary" onClick={onSubmit}>
                     Send Response
               </Button>
                :

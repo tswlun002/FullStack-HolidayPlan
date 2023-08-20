@@ -26,7 +26,6 @@ public record CustomerUserDetails(User user) implements UserDetails {
             if(!permissions.contains(perm))permissions.add(perm);
         });
 
-        permissions.forEach(System.out::println);
         return permissions;
     }
 

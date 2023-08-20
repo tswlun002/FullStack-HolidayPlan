@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@CrossOrigin("*")
-@RequestMapping("/holiday-plan/api/admin/role/")
 @AllArgsConstructor
 public class RoleController  {
     final private RoleService service;

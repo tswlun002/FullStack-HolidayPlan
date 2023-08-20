@@ -1,7 +1,7 @@
 import './App.css';
 import Home from './pages/Home';
 import MainLayout from './layouts/MainLayout.js';
-import {  useReducer,useState} from "react"
+import {  useReducer} from "react"
 import HolidayPlanForm from './pages/HolidayPlanForm';
 import  React,{ useEffect} from 'react';
 import {Route, Routes,useNavigate, useLocation} from 'react-router-dom';
@@ -15,10 +15,11 @@ import UserQuery from './pages/UserQuery';
 import QueryTicket from './pages/QueryTicket';
 import AdminLayout from './layouts/AdminLayout';
 import UserLayout from './layouts/UserLayout';
-import {LogoutUser} from './utils/User';
 import RoleAndPermission from './pages/RoleAndPermission';
 import Users from './pages/Users';
 import EditUserForm from './component/EditUserForm';
+import About from './pages/About';
+import FetchAppData from "./utils/AppInfoApi";
 
 const initialState = {
   isAuthenticated: false,
@@ -32,53 +33,61 @@ const initialState = {
   permissions:[]
   
 };
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "LOGIN":
-       let user = initialState;
-       try{
-          user =jwtDecode(action.payload?.access_token).user;
-       }catch(e){
-         console.error(e);
-       }
-      console.log(user);
-      return {
-        ...state,
-        isAuthenticated: true,
-        access_token: action.payload.access_token,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        age:user.age,
-        username:user.username,
-        userType: user.userType,
-        roles:user.roles
-      };
-    case "UPDATE_TOKEN":
 
-        return {...state, access_token:action.payload.access_token}
-
-    case "LOGOUT":
-      
-      return {
-        ...state,
-        isAuthenticated: false,
-        access_token: null,
-        firstname: "",
-        lastname: "",
-        age:"",
-        username: "",
-        userType: "",
-        roles:[],
-        permissions:[]
-        
-      };
-    default:
-      return state;
-  }
-}
 const App=()=>{
     const navigate = useNavigate();
-
+    const INITIAL_STATE ={data:{},isRequestError:false,isRequestSuccessful:false};
+    const[appData, dispatchAppData] = useReducer((state,action)=>{return{state,...action}},INITIAL_STATE);
+    useEffect(()=>{
+      let isMounted = true;
+       const controller = new AbortController();
+       isMounted&&FetchAppData(dispatchAppData,controller);
+       return ()=>{isMounted=false; controller.abort();}
+    },[])
+    const reducer = (state, action) => {
+      switch (action.type) {
+        case "LOGIN":
+           let user = initialState;
+           try{
+              user =jwtDecode(action.payload?.access_token).user;
+           }catch(e){
+             console.error(e);
+           }
+          return {
+            ...state,
+            isAuthenticated: true,
+            access_token: action.payload.access_token,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            age:user.age,
+            username:user.username,
+            userType: user.userType,
+            roles:user.roles
+          };
+        case "UPDATE_TOKEN":
+    
+            return {...state, access_token:action.payload.access_token}
+    
+        case "LOGOUT":
+          navigate('/')
+          return {
+            ...state,
+            isAuthenticated: false,
+            access_token: null,
+            firstname: "",
+            lastname: "",
+            age:"",
+            username: "",
+            userType: "",
+            roles:[],
+            permissions:[]
+            
+          };
+    
+        default:
+          return state;
+      }
+    }
     //Login registered user
     const[userLoginState, dispatchLogin] = useReducer(reducer,JSON.parse(window.localStorage.getItem("loginState"))||initialState)
 
@@ -100,9 +109,10 @@ const App=()=>{
     return (
     <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>
       <Routes>
-        <Route path="/" element={<MainLayout/>}>  
+        <Route path="/" element={<MainLayout appData={appData}/>}>  
           <Route index   element={<Login/>}/>
           <Route path="register" element={<Register />}/>
+          <Route path="about" element={<About appData={appData}/>}/>
 
           <Route path='home-user' element={<UserLayout/>}>  
              <Route index element={<Home/>}/>

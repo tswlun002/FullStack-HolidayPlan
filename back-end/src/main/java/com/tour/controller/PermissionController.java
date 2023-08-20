@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/holiday-plan/api/admin/permission/")
 @AllArgsConstructor
 public class PermissionController  {
@@ -25,7 +24,7 @@ public class PermissionController  {
     @GetMapping(value = "permissions/")
     public ResponseEntity<Set<Permission>> getPermissions() {
         var permissions= service.getPermissions();
-        if(permissions.size()==0)throw  new NotFoundException("Permission(s) is not found");
+        if(permissions.isEmpty())throw  new NotFoundException("Permission(s) is not found");
         return new ResponseEntity<>(permissions,HttpStatus.OK);
     }
 

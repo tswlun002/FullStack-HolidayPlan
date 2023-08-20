@@ -18,6 +18,6 @@ public interface OnUser {
     boolean addNewRoleToUser( String username,String roleName);
 
 
-    public boolean deletePermissionFromUser(String username, String userPermission) ;
-    public boolean addPermissionToUser( String username,String permissionName) ;
+    boolean deletePermissionFromUser(String username, String userPermission) ;
+    boolean addPermissionToUser(String username, String permissionName) ;
 }

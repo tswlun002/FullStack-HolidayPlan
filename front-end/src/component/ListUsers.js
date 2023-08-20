@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
+import {Table,Grid} from '@mui/material';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -185,7 +185,7 @@ const Filters =({filters, getFilterField,setFilterObject})=>{
 }
 
 function EnhancedTableToolbar(props) {
-        const { numSelected, setAddPermission} = props;
+        const { numSelected} = props;
         const FILTERS = [{name:'fullname', label:"Fullname"},{name:"username",label:'Email'},{name:"age",label:'Date of birth'}]
 
         
@@ -233,7 +233,7 @@ function EnhancedTableToolbar(props) {
                                   item.fun(()=>!item.flag);
                                   }}
                                   
-                                  end ={item.name=="Add Role"}
+                                  end ={item.name==="Add Role"}
                                   key={index}
                                   style={{
                                       color:item.flag?"white":"black",
@@ -278,7 +278,7 @@ function filterUsers(AllUsers=[], filtersObject={}){
 }
 
 export default function ListUsers() {
-        let [searchParams, setSearchParams] = useSearchParams();
+        let [,setSearchParams] = useSearchParams();
         const [order, setOrder] = React.useState('asc');
         const [orderBy, setOrderBy] = React.useState('f');
         const [selected, SetSelected] = React.useState([]);
@@ -376,7 +376,7 @@ export default function ListUsers() {
 
                         //remove deleted permissions from list
                         const newRoleList =(list)=> list.filter((roleItem)=>{
-                              return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name==roleItem1.name);
+                              return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name===roleItem1.name);
                         });
                         const temp =newRoleList(selected);
                         setSelected(temp);
@@ -556,7 +556,7 @@ export default function ListUsers() {
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
         const getFilterField = (filter)=>{
-          return [... new Set(visibleRows.map((user)=>{ 
+          return [...new Set(visibleRows.map((user)=>{ 
         
             if(filter==="age"){
              
@@ -737,15 +737,26 @@ export default function ListUsers() {
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={roles.listRoles.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        <Grid container spacing={1}>
+            <Grid item xs={2}>
+              <FormControlLabel
+               sx={{p:2}}
+              control={<Switch  checked={dense} onChange={handleChangeDense} />}
+              label="Adjust rows"
+              />
+            </Grid>
+            <Grid item xs={9}>
+              <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={roles.listRoles.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+            </Grid>
+        </Grid>
       </Paper>
       
       <Collapse 
@@ -802,6 +813,7 @@ export default function ListUsers() {
                     setOpenListSelectedItems={setIsDeleteUserOpen}
                 
       />}
+     
     </Box></>
   );
 }

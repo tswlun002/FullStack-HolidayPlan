@@ -3,17 +3,12 @@ import { getErrorMessage } from "./Error";
 export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=>{
 
    const API = '/holiday-plan/api/user-query/query/save/';
-   console.log({summary,description})
    const querySummary = summary;
    const queryDescription =description;
    useAxiosPrivate.post(API,{querySummary,queryDescription})                      
    .then(response =>
        {
-          console.log(response.data)
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
-
            dispatchQuery({
                isRequestSuccessful:true,
                querySentStatus:"Query  sent successfully."
@@ -23,19 +18,18 @@ export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=
        }
    ).catch(err =>
      {
-        console.log(err);
-       console.log("Not ok");
+       
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-               console.log("Not ok ,********");
+               
                errorMessage  ="Invalid credentials";
              }
              else if(err.response.status===401){
                   errorMessage  ="Denied access";
              }
              else{
-                   console.log("Not ok");
+                  
                    errorMessage  = err.response?.statusText;
              }
              dispatchQuery({errorMessage:errorMessage,
@@ -56,10 +50,8 @@ export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=
   .then(response =>
       {
         if(response.ok || OK_RESPONSES.includes(response.status)){
-          console.log("Ok");
-          console.log(response.data)
-
-         dispatchQuery({
+          
+        dispatchQuery({
             type:"replace",
             payload:response.data,
           });
@@ -100,8 +92,8 @@ return useAxiosPrivate.patch(API,{username,queryId,response, queryStatus})
     .then(response =>
       {
         if(response.ok || response.status===200){
-          console.log("Ok");
-          console.log(response.data)
+          
+         
           editResponse.isResponseError=false;
           editResponse.isResponseSuccess =true;
           editResponse.requestResponse="Updated successfully";
@@ -111,21 +103,20 @@ return useAxiosPrivate.patch(API,{username,queryId,response, queryStatus})
       }
     ).catch(err =>
     {
-        console.log(err);
-        console.log("Not ok");
+        
+       
         editResponse.isResponseError=true;
         editResponse.isResponseSuccess =false;
        if(!err?.response.ok){
-            let errorMessage =null;
             if(err.response.status===404){
-              console.log("Not ok ,********");
+              
               editResponse.requestResponse="Invalid credentials";
             }
             else if(err.response.status===401){
                  editResponse.requestResponse="Denied access";
             }
             else{
-                  console.log("Not ok");
+                 
                   editResponse.requestResponse=err.response?.statusText;
             }
        }
@@ -142,8 +133,8 @@ export const DeleteQuery= (useAxiosPrivate,queryId, dispatchQuery)=>{
   .then(response =>
       {
         if(response.ok || response.status===200){
-          console.log("Ok");
-          console.log(response.data)
+          
+         
 
           dispatchQuery({
                   isResponseError : false,
@@ -155,19 +146,19 @@ export const DeleteQuery= (useAxiosPrivate,queryId, dispatchQuery)=>{
       }
   ).catch(err =>
     {
-       console.log(err);
-      console.log("Not ok");
+       
+     
        if(!err?.response.ok){
             let errorMessage =null;
             if(err.response.status===404){
-              console.log("Not ok ,********");
+              
               errorMessage  ="Invalid credentials";
             }
             else if(err.response.status===401){
                  errorMessage  ="Denied access";
             }
             else{
-                  console.log("Not ok");
+                 
                   errorMessage  = err.response?.statusText;
             }
              dispatchQuery({errorMessage:errorMessage,  isResponseError:true})

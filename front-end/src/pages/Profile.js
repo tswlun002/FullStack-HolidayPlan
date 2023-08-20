@@ -31,7 +31,7 @@ const EditButton= styled(Button)({
 const Profile = ()=> {
       const useAxiosPrivate = UseAxiosPrivate();
 
-      const{userLoginState} = React.useContext(CreateAuthContext)
+      const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)
 
       const[profile, dispatchProfile] = React.useReducer((state, action)=>{
               return {...state,...action}
@@ -41,7 +41,8 @@ const Profile = ()=> {
             firstname:"",lastname:"",email:"",currentUsername:userLoginState.username,newPassword:"",
             currentPassword:"",confirmNewPassword:"", edited:false,
             isRequestError:false, age:"",message: "",isRequestSuccessful:false
-            ,openFirstname:false,openLastname:false,openAge:false,opeUsername:false,openNewPassword:false
+            ,openFirstname:false,openLastname:false,openAge:false,opeUsername:false,openNewPassword:false,
+            AccountDeleted:false,
           }
       );
 
@@ -97,7 +98,17 @@ const Profile = ()=> {
               isRequestError:false, message:""})
           },200)
         }
-
+        React.useEffect(()=>{
+            setTimeout(()=>{
+              if(profile.AccountDeleted){
+                window.localStorage.removeItem('access_token');
+                dispatchLogin({type:"LOGOUT"})
+                window.localStorage.clear()
+                 
+      
+             }}, 5000);
+        
+        },[profile.AccountDeleted])
 
 
       return (
@@ -126,7 +137,7 @@ const Profile = ()=> {
                             </Avatar>
                     </Stack>
                     }
-              titleTypographyProps={{align:"center",color:PRIMAR_COLOR,align:"center"}}
+              titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
               subheader={(profile.isRequestSuccessful ||profile.isRequestError)?profile.message:""}
               subheaderTypographyProps={{alignItems:"center" ,color:profile.isRequestSuccessful?SUCCESS_COLOR:ERROR_COLOR}}
               
@@ -148,7 +159,7 @@ const Profile = ()=> {
                             className="firstname-input" 
                             placeholder="enter firstname"
                             value={profile.firstname}
-                            onChange={(e)=> dispatchProfile({firstname:e.target.value,isRequestSuccessful:false,isRequestSuccessful:false})}
+                            onChange={(e)=> dispatchProfile({firstname:e.target.value,isRequestSuccessful:false,isRequestError:false})}
                         />
                         <EditUserItem
                             IsEditFieldOpen={profile.openLastname}
@@ -161,7 +172,7 @@ const Profile = ()=> {
                             variant="outlined"
                             helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
                             type="text" className="lastname-input" placeholder="enter lastname" value={profile.lastname}
-                            onChange={(e)=> dispatchProfile({lastname:e.target.value ,isRequestSuccessful:false,isRequestSuccessful:false})}
+                            onChange={(e)=> dispatchProfile({lastname:e.target.value ,isRequestSuccessful:false,isRequestError:false})}
                         />
 
                         <EditUserItem
@@ -178,7 +189,7 @@ const Profile = ()=> {
                             id="demo-helper-text-aligned"
                             label="Email"
                             type="text" className="email-input" placeholder="enter email" value={profile.email}
-                            onChange={(e)=> dispatchProfile({email:e.target.value,isRequestSuccessful:false,isRequestSuccessful:false })}
+                            onChange={(e)=> dispatchProfile({email:e.target.value,isRequestSuccessful:false ,isRequestError:false})}
                           />
                         <EditUserItem
                             IsEditFieldOpen={profile.openAge}
@@ -186,8 +197,7 @@ const Profile = ()=> {
                             setIsEditFieldOpen={ dispatchProfile}
                             editIconProps={{color:SECONDARY_COLOR,}}
                             componentLabel={"Date of Birth"}                
-                            componentValue={userLoginState.age&&(new Date(parseInt(userLoginState.age))).
-                              toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'})}
+                            componentValue={userLoginState.age&&(new Date(parseInt(userLoginState.age))).toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'})}
                             focus
                             variant="outlined"
                             helpertext=""
@@ -196,7 +206,7 @@ const Profile = ()=> {
                             onClick={()=>setDateType("date")}
                             onBlur={()=>{setDateType("text");}}
                             type={dateType} className="age-input" placeholder="enter date of birth" value={profile.age}
-                            onChange={(e)=> dispatchProfile({age:e.target.value,isRequestSuccessful:false,isRequestSuccessful:false})}
+                            onChange={(e)=> dispatchProfile({age:e.target.value,isRequestSuccessful:false,isRequestError:false})}
                         />
                         <EditUserItem
                             IsEditFieldOpen={profile.openNewPassword}
@@ -212,7 +222,7 @@ const Profile = ()=> {
                             color="secondary"
                             type="password" autoComplete='new-password' className="new-password-input"
                             placeholder="Enter new password" value={profile.newPassword}
-                            onChange={(e)=>dispatchProfile({newPassword:e.target.value, isRequestError:false})}
+                            onChange={(e)=>dispatchProfile({newPassword:e.target.value, isRequestError:false,isRequestSuccessful:false})}
                         />
                         {profile.openNewPassword&&<CssTextField
                             required
@@ -222,7 +232,7 @@ const Profile = ()=> {
                             color="secondary"
                             type="password" autoComplete='new-password' className="confirm-new-password-input" 
                             placeholder="Confirm new password" value={profile.confirmNewPassword}
-                            onChange={(e)=>dispatchProfile({confirmNewPassword:e.target.value, isRequestError:false})}
+                            onChange={(e)=>dispatchProfile({confirmNewPassword:e.target.value, isRequestError:false,isRequestSuccessful:false})}
                         />}
                         <CssTextField
                             required
@@ -236,7 +246,7 @@ const Profile = ()=> {
                             className="currentPassword-input" 
                             placeholder="current password" 
                             value={profile.currentPassword}
-                            onChange={(e)=> dispatchProfile({currentPassword:e.target.value, isRequestSuccessful:false, isRequestSuccessful:false})}
+                            onChange={(e)=> dispatchProfile({currentPassword:e.target.value, isRequestSuccessful:false, isRequestError:false})}
                         />
 
                 <EditButton  color="secondary" variant="outlined" style={{marginTop:"15px"}}

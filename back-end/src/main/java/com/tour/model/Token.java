@@ -53,13 +53,13 @@ public class Token {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Token token = (Token) o;
-        return id != null && Objects.equals(id, token.id);
+        if (!(o instanceof Token token1)) return false;
+        return isRevoked() == token1.isRevoked() && isExpired() == token1.isExpired() && Objects.equals(getToken(),
+                token1.getToken()) && getTokenType() == token1.getTokenType();
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(getToken(), getTokenType(), isRevoked(), isExpired());
     }
 }

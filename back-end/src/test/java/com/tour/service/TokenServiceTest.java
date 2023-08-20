@@ -16,11 +16,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
-
 import static com.tour.security.TokenType.ACCESS_TOKEN;
 import static com.tour.security.TokenType.REFRESH_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,7 +83,7 @@ class TokenServiceTest {
         var actual  =service.findByToken(token.getToken());
         verify(repository, times(1)).findByTokenName(token.getToken());
         assertThat(actual.isPresent()).isEqualTo(true);
-        assertThat(actual.get()).isEqualTo(token);
+        assertThat(actual.orElseThrow()).isEqualTo(token);
     }
     @Test
     void findByTokenDoesNotExists() {

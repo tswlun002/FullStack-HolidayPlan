@@ -76,8 +76,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }catch (Exception e)
         {
-            System.out.println("**********************************************************************************");
-            System.out.println(e.getMessage());
             Map<String,String> tokens = new HashMap<>();
             tokens.put("error_message", e.getMessage());
             response.setStatus(HttpStatus.FORBIDDEN.value());
