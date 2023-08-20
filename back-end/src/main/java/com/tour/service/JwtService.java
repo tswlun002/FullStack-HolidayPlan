@@ -10,6 +10,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +21,10 @@ import java.util.function.Function;
 public class JwtService {
     @Value("${jwt.signing.key}")
     private String SECRET_KEY;
-
+    @Value("${jwt.refresh.token.period}")
+    private double REFRESH_TOKEN_PERIOD;
+    @Value("${jwt.access.token.period}")
+    private double ACCESS_TOKEN_PERIOD;
     public String extractUsername(String token) {
         if(token==null || token.isEmpty())throw new NullException("Token is invalid");
 
@@ -45,7 +50,7 @@ public class JwtService {
         if(extraClaims!=null && extraClaims.isEmpty()){
             getExtraClaims(extraClaims, user);
         }
-        return  buildJwtToken(extraClaims,user, 15);
+        return  buildJwtToken(extraClaims,user, ACCESS_TOKEN_PERIOD);
     }
     public String generateRefreshToken(User user) {
         if(user==null)throw new NullException("User is invalid");
@@ -62,16 +67,16 @@ public class JwtService {
         if(extraClaims!=null && extraClaims.isEmpty()){
             getExtraClaims(extraClaims, user);
         }
-        return  buildJwtToken(extraClaims,user, 1440);
+        return  buildJwtToken(extraClaims,user, REFRESH_TOKEN_PERIOD);
     }
     private String buildJwtToken(  Map<String, Object> extraClaims,
-                                   User user, long time){
+                                   User user, double time){
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * time))
+                .setExpiration(new Date((long)( System.currentTimeMillis()+1000 * 60 * time)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
