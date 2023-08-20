@@ -1,10 +1,11 @@
 
 import {  useReducer, useState} from "react"
-import {  Box,Card,CardContent,CardHeader } from '@mui/material';
+import {  Typography,Box,Card,CardContent,CardHeader } from '@mui/material';
 import CssTextField from './CssTextField';
 import ColorButton from './ColorButton';
 import {RegisterAdmin } from '../utils/User';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
+import { PRIMAR_COLOR } from "../utils/Constant";
 
 
 
@@ -40,7 +41,6 @@ const RegisterAdminForm =()=>{
     }
     const OnSubmit = (e)=>{
         e.preventDefault(); 
-         console.log(register)
         if(isValid()){
             if(register.password===register.confirmPassword){
 
@@ -69,7 +69,16 @@ const RegisterAdminForm =()=>{
               >
               <Card sx={{ maxWidth: 400,display:"block"}}>
                      <CardHeader
-                        title={<h2>Add user</h2>}
+                        title={ 
+                              <Typography align="center"  
+                                sx={{fontSize:"2rem",textTransform: "none",fontWeight: 700, 
+                                    fontFamily: `Poppins, sans-serif`,width:"100%",color:PRIMAR_COLOR
+                                }} 
+                                variant={"h2"}
+                            >
+                                Add user
+                            </Typography>
+                        }
                         titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)"}}
                         subheader={register.isLoginError?register.errorMessage:register.registered?register.requestResponseMessage:""}
                         subheaderTypographyProps={{align:"start" ,color:register.isLoginError?"red":"green"}}

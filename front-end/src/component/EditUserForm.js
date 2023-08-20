@@ -23,7 +23,7 @@ const EditUserForm=()=>{
         return {...state,...action}
         },
         { 
-            firstname:"",lastname:"",email:"",currentUsername:username,currentPassword:"",age:"",
+            firstname:"",lastname:"",email:"",currentUsername:username,currentPassword:"",
             isRequestError:false, age:"",message: "",isRequestSuccessful:false,
             openFirstname:false,openLastname:false,openAge:false,opeUsername:false
         }
@@ -54,7 +54,6 @@ const EditUserForm=()=>{
                             message  ="Denied access";
                     }
                     else{
-                            console.log(err.response.statusText);
                             message  = getErrorMessage(err);
                     }
                     dispatchRegister({message:message,isRequestError:true,isRequestSuccessful:false})

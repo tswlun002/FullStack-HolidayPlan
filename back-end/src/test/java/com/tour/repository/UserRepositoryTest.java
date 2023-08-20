@@ -189,7 +189,7 @@ class UserRepositoryTest {
         var actual  = userRepository.findAllUser().stream().toList();
         Assertions.assertNotNull(actual);
         Assertions.assertEquals(3, actual.size());
-        actual =actual.stream().sorted(Comparator.comparing(User::getFirstname)).toList();;
+        actual =actual.stream().sorted(Comparator.comparing(User::getFirstname)).toList();
         Assertions.assertArrayEquals(new User[]{user3, user1, user2}, actual.toArray());
     }
     @Test

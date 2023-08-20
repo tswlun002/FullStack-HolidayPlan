@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
+import {Table,Grid} from '@mui/material';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
@@ -16,7 +16,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
 import Collapse from '@mui/material/Collapse';
-import Modal from '@mui/material/Modal';
+import {Modal,FormControlLabel,Switch} from '@mui/material';
 import AddPermissionToRole from '../component/AddPermissionToRole';
 import { NavLink} from 'react-router-dom';
 import AddRole from './AddRole';
@@ -183,7 +183,7 @@ function EnhancedTableToolbar(props) {
                            item.fun(true);
                           }}
                           to={item.link}
-                          end ={item.name=="Add Role"}
+                          end ={item.name==="Add Role"}
                           key={index}
                           style={({isPending, isActive})=>{
                             return {
@@ -292,7 +292,7 @@ export default function EnhancedTable() {
 
                         //remove deleted permissions from list
                         const newRoleList =(list)=> list.filter((roleItem)=>{
-                              return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name==roleItem1.name);
+                              return !successfulDeletedRoles.find((roleItem1)=>roleItem.id===roleItem1.id && roleItem.name===roleItem1.name);
                         });
                       
                         setSelected(newRoleList(selected));
@@ -554,15 +554,23 @@ export default function EnhancedTable() {
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={roles.data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        <Grid container spacing={1}>
+        <Grid item xs={2}> <FormControlLabel sx={{p:2}}
+            control={<Switch checked={dense} onChange={handleChangeDense} />}
+            label="Adjust Rows"
+          /></Grid>
+           <Grid item xs={9}>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={roles.data.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            /></Grid>
+        </Grid>
+        
       </Paper>
       
       <Collapse 
@@ -614,6 +622,7 @@ export default function EnhancedTable() {
                     setOpenListSelectedItems={setIsDeleteRoleOpen}
                 
       />}
+      
     </Box></>
   );
 }

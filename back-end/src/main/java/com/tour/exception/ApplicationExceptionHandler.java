@@ -72,7 +72,6 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
   public ResponseEntity<Object> NotFoundException(
           NotFoundException ex, WebRequest request) {
 
-       System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
       ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
               .date(LocalDateTime.now()).build();
       return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
@@ -140,7 +139,6 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
     @ExceptionHandler(value={AppInternalException.class})
     public ResponseEntity<Object> appInternalException(
             ApplicationExpiredJwtException ex) {
-        System.out.println("***************************************************");
         ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);

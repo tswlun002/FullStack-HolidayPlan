@@ -15,7 +15,6 @@ import { Typography} from '@mui/material';
     if (!e.target.files) {
       return;
     }
-     console.log(e.target.files)
     setFile([...e.target.files]);
     setImages([...e.target.files])
 

@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin( origins = "*")
 @RequestMapping("/holiday-plan/api/admin/user/")
 @AllArgsConstructor
 public class AdminController {
@@ -49,7 +48,6 @@ public class AdminController {
     public ResponseEntity<User> getMyDetails()  {
 
         User user =  userService.getLoginedUser();
-        System.out.println(user);
         if(user ==null)throw  new NotFoundException("User is not found");
         return  new ResponseEntity<>(user, HttpStatus.FOUND);
 

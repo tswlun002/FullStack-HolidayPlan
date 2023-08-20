@@ -154,7 +154,7 @@ public class QueryService  implements OnUserQuery{
         if(queries.isEmpty())throw  new NotFoundException("No query");
         boolean isDeleted = false;
         try {
-            queries.forEach(queryRepository::delete);;
+            queries.forEach(queryRepository::delete);
             isDeleted=true;
         }catch(Exception e){
             CatchException.catchException(e);

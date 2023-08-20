@@ -29,7 +29,7 @@ public class SecurityConfiguration {
     private  final  String[] SECURED_URLS_ADMIN = {"/holiday-plan/api/admin/**"};
     private  final  String[] SECURED_URLS_EDIT_USER = {"/holiday-plan/api/user/**"};
     private  final  String[] SECURED_URLS_EDIT_USER_HOLIDAY = {"/holiday-plan/api/holiday/**"};
-    private  final  String[]  AUTHENTICATE_PATH={"/holiday-plan/api/authenticate/**","/holiday-plan/api/logout/"};
+    private  final  String[]  AUTHENTICATE_PATH={"/holiday-plan/api/app-details/**","/holiday-plan/api/authenticate/**","/holiday-plan/api/logout/"};
     private  final  String[] SECURE_QUERY_END_POINT ={"/holiday-plan/api/user-query/**"};
     @Autowired @Lazy
     private  CustomerAuthenticationProvider authenticationProvider;

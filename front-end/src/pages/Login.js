@@ -1,78 +1,95 @@
 import {  Link } from "react-router-dom";
 import './Login.css'
-import {Typography,Box,Card,CardContent,CardActions, CardHeader}  from '@mui/material';
+import {Typography,Box,Card,CardContent,CardActions, CardHeader,Paper}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
 import { LogInUser} from '../utils/User';
 import React,{ useReducer} from 'react';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
+import background from '../images/2.jpg'
+import WelcomeMessage from "../component/WelcomeMessage";
+import { APP_NAME, ERROR_COLOR, PRIMAR_COLOR } from "../utils/Constant";
 
+const HEADING ="OH!"
+const MESSAGE =`THE PLACES YOU'LL GO ... book them  here, at ${APP_NAME}`
 
 const Login =()=>{
     const {dispatchLogin } = React.useContext(CreateAuthContext);
 
     const useAxiosPrivate = UseAxiosPrivate();
+    const INITI_STATE = {   email: "",password: "", isLoginError:false,message: '', isLoginSuccessful:false,data:{}}
 
     const [formState, dispatchForm] = useReducer((state, action)=>{
             
-            return {...state , ...action}}, 
+            return {...state , ...action}}, INITI_STATE
                
-            {   email: "",
-                password: ""
-            }
             
         );
-    const[error, setError] = useReducer((state, action)=>{
-        return {...state , ...action}
-    }, {
-         isLoginError:false,
-         errorMessage: null
-        }
-    )
-
+   
   
-    const OnSubmit = (e)=>{
+    const OnSubmit = async(e)=>{
         e.preventDefault(); 
         if(formState.email.trim() === ""|| formState.password.trim() === ""){
-            setError({isLoginError:true, errorMessage:"Both password and email are required"});
+            dispatchForm({isLoginError:true, message:"Both password and email are required",isLoginSuccessful:false});
         }
-        else if(!error.isLoginError){
-            LogInUser(formState,dispatchLogin,setError,useAxiosPrivate);
+        else if(!formState.isLoginError){
+            let data = await LogInUser(formState,useAxiosPrivate);
+            if(data.isLoginSuccessful){
+                dispatchLogin(data)
+            }else dispatchForm(data);
             ClearForm();
         }
 
     }
     const ClearForm= ()=>{
         setTimeout(()=>{
-            dispatchForm(
-            {
-               email:"",password:"",
-
-            }
-            )
-       })
+            dispatchForm(INITI_STATE );
+       },3000)
     }  
     return (
+        <Paper  
+            style={{backgroundImage:`url(${background})`,backgroundRepeat: 'no-repeat'}}
+            sx={{
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "light"
+                    ? theme.palette.grey[200]
+                    : theme.palette.grey[800],
+                    p:2
+                    ,
+                    backgroundSize: "cover",
+                    
+              }}
+            
+        >
+        <WelcomeMessage  heading={HEADING} message={MESSAGE}/>
 
-        <Box display="flex"justifyContent="center"alignItems="start"
+        <Box       
                     minHeight="100vh"
-                    backgroundColor="#dfe0e6"
+                    
+                    sx={{width:"100%", alignItems:"start",justifyContent:"center", display:"flex"} }
 
-               >
-                   <Card sx={{ maxWidth: 400 ,display:"block"}}>
-                    <CardHeader >
-                        <Typography variant="h2">Add New Role</Typography>
-                    </CardHeader>
+               >   
+                   <Card sx={{ maxWidth: 400 ,display:"block",}}>
+                   <CardHeader
+                        title={
+                                <Typography align="center"  
+                                sx={{fontSize:"2rem",textTransform: "none",fontWeight: 700, 
+                                    fontFamily: `Poppins, sans-serif`,width:"100%",color:PRIMAR_COLOR
+                                }} 
+                                variant={"h2"}
+                                >
+                                    Login
+                                </Typography>
+                            }
+                        subheader={ formState.isLoginError&&formState.message}
+                        subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:ERROR_COLOR}}
+                        
+                    />
                     <CardContent>
-                    <h1 className="heading">Login</h1>
+      
                     <form className="login-inputs" autoComplete='off'>
-                        {
-                            error.isLoginError &&
-                            <Typography align="center"sx={{color:"red"}}>
-                            {error.errorMessage}
-                            </Typography>
-                        }
+                      
 
                         <CssTextField 
                             required
@@ -83,8 +100,8 @@ const Login =()=>{
                             type="email" className="email-input" placeholder="Enter email"
                             value={formState.email} 
                             onChange={(e)=>{
-                                setError({isLoginError:false,message:null})
-                                dispatchForm({email:e.target.value})}}></CssTextField>
+                               
+                                dispatchForm({email:e.target.value,isLoginError:false,message:'',isLoginSuccessful:false})}}></CssTextField>
                     
                         <CssTextField 
                             required
@@ -95,8 +112,8 @@ const Login =()=>{
                             color="secondary" type="password" className="password-input" placeholder="password" 
                             autoComplete='new-password' value={formState.password}
                         onChange={(e)=>{
-                             setError({isLoginError:false,message:null});
-                            dispatchForm({password:e.target.value})
+                             
+                            dispatchForm({password:e.target.value,isLoginError:false,message:'',isLoginSuccessful:false})
                         }}></CssTextField>
 
 
@@ -106,13 +123,13 @@ const Login =()=>{
 
                     </form>
                  </CardContent>
-                 <CardActions>
+                 <CardActions sx={{display:"flex", justifyContent:"center",}}>
                     <div className="login-nav">
                            <Link   to="/register" className="login-link" >Not registered?, click to register </Link>
                     </div>
                  </CardActions>
                 </Card>
-        </Box>
+        </Box></Paper>
     )
 }
 

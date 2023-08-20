@@ -90,7 +90,6 @@ public class HolidayPlanService  implements  OnHolidayPlan{
          AtomicBoolean deleted = new AtomicBoolean(false);
          try {
              var holidays  = getHolidayPlans(user.getId());
-             System.out.println(holidays.size());
              holidays.forEach(holidayPlan -> {
 
                     if( deleteImage(holidayPlan.getId())) {

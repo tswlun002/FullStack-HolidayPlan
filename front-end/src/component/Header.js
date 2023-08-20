@@ -14,14 +14,14 @@ import { useNavigate ,NavLink} from "react-router-dom";
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import {LogoutUser} from '../utils/User';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
-
-
-
-
-function Header(props) {
-
+import {useMediaQuery} from '@mui/material';
+import { useTheme } from '@material-ui/core';
+function Header({appData}) {
+  const{data}=appData;
+  const theme =  useTheme();
+  const tabletLaptop = useMediaQuery(theme.breakpoints.down('1053'));
   const navigate = useNavigate();
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const [anchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const  useAxiosPrivate=UseAxiosPrivate();
 
@@ -40,8 +40,6 @@ function Header(props) {
           window.localStorage.clear()
 
     }
-        
-
 
     }
     if(item !=="Roles-Permissions")setAnchorElUser(null);
@@ -60,7 +58,7 @@ function Header(props) {
   const [pages, setPages] = React.useState([]);
   const [settingAndPages, setSettingAndPages] = React.useState([]);
 
-  const userHeader = `${userLoginState.firstname} ${userLoginState.lastname} `;
+  const userHeader = `${userLoginState.firstname} ${userLoginState.lastname}`;
   const userMenu=()=> {
 
      if(userLoginState.roles.find(element=>element.name==='ADMIN')){
@@ -101,16 +99,16 @@ function Header(props) {
   }
   React.useEffect(()=>{ setSettings(initialSettingsState);userMenu(); },[userLoginState?.roles])
 
-  const linkStyle =(page,isActive=false, isPending=false)=>{
+  const linkStyle =(isActive=false, isPending=false)=>{
      return{textDecoration:"none",
              my: 1,display: 'block' ,
-             padding:"0rem 3rem",
+             padding:tabletLaptop?"0rem 1rem":"0rem 3rem",
 
               color:isActive?"orange":isPending?"green":"white",
 
           }
   }
-    const menuItemtyle =(page,isActive=false, isPending=false)=>{
+    const menuItemtyle =(isActive=false, isPending=false)=>{
        return{textDecoration:"none",
                my: 1,display: 'block' ,
                padding:"0.5rem",
@@ -119,16 +117,46 @@ function Header(props) {
 
             }
     }
-  const[open, setOpen ]= React.useState(false);
-  const handleClickNested = () => {  
-    setOpen(!open);
-  }
+  const ABOUT = <NavLink      
+                              to={'about'}
+                              key={'about'}
+                              end={'about'==="Home"}
+                              style={({isPending, isActive})=>{
+                                    return{textDecoration:"none",
+                                        my: 1,display: 'block' ,
+                                        padding:"0rem 5rem",
+                        
+                                        color:isActive?"orange":isPending?"green":"white",
+                        
+                                        }
+                                  }
+                            }
+                              >
+                            {'About'}
+                </NavLink>
+   const LOGO=  <NavLink      
+     to={userLoginState.isAuthenticated?'.':'/'}
+     key={'logo'}
+     end={'home'==="Home"}
+     >
+        <img style={{maxWidth:"30%", maxHeight:"100%"}}src={`${data?.logoFormat||''},${data?.logo||''}`} alt="" loading="lazy"/>
+
+</NavLink>
 
   return (
-    <AppBar position="static" {...props}>
+    <AppBar position="static">
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Typography sx={{padding:"2rem 0rem"}}>{`${userHeader} ${userLoginState.isAuthenticated?"'s":""} Holiday Plans`}</Typography>
+        <Toolbar sx={{justifyContent:"start"}} disableGutters>
+          {LOGO}
+          <Typography 
+              sx={{padding:{md:"2rem 0rem",sm:"1.5rem 0rem"},
+              fontSize: "1.3rem",
+              textTransform: "none",fontWeight: 700, 
+              fontFamily: `Poppins, sans-serif`
+                                      
+             }}
+             align="start" variant="title"
+            >{`${userHeader&&userHeader.trim()} ${userLoginState.isAuthenticated?"'s":""} ${userLoginState.isAuthenticated?`Holiday Plans`:data?.name||''}`}</Typography>
 
           <Box sx={{ flexGrow: 1, display:"block"}}>
             <Menu
@@ -153,6 +181,7 @@ function Header(props) {
                open={Boolean(anchorElUser)}
                onClose={handleCloseUserMenu}
             >
+              
               {
 
                settingAndPages.map((item) => (
@@ -163,7 +192,7 @@ function Header(props) {
                             to={item.link}
                             key={item.name}
                             end={item.name==="Home"}
-                            style={({isPending, isActive})=> menuItemtyle(item.name,isActive,isPending)}
+                            style={({isPending, isActive})=> menuItemtyle(isActive,isPending)}
                             >
                           {item.name}
                         </NavLink>
@@ -171,6 +200,10 @@ function Header(props) {
                       
                     </MenuItem>
                   ))}
+                {(!userLoginState.isAuthenticated)&&
+                <MenuItem className="item-tittle" sx={{color:"black",display:"block", width:"100%"}}key={'about'}>
+                       {ABOUT}
+                 </MenuItem>}
             </Menu>
           </Box>
          
@@ -181,12 +214,13 @@ function Header(props) {
                 to={item.link}
                 key={item.name}
                 end={item.name==="Home"}
-                style={({isPending, isActive})=>linkStyle(item.name,isActive,isPending)}
+                style={({isPending, isActive})=>linkStyle(isActive,isPending)}
 
               >
                 {item.name}
               </NavLink>
             ))}
+            {(!userLoginState.isAuthenticated)&&ABOUT}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
@@ -224,15 +258,16 @@ function Header(props) {
                       to={item.link}
                       key={item.name}
                       end={item.name==="Home"}
-                      style={({isPending, isActive})=>menuItemtyle(item.name,isActive,isPending)}
+                      style={({isPending, isActive})=>menuItemtyle(isActive,isPending)}
                   >
                      {item.name}
                  </NavLink>
+                 
                 </MenuItem>
                 ))
 
              }
-
+              
             </Menu>
           </Box>
         </Toolbar>

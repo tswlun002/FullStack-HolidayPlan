@@ -6,8 +6,6 @@ const CustomerTypography = styled(Typography)({
     width:"100%",
     marginTop:"8px",
     textTransform: "capitalize",
-
-    textTransform: "none",
     textAlign: "start",
 
     '& label.Mui-focused': {

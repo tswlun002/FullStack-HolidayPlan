@@ -9,7 +9,7 @@ import axios from "./Axios"
       response.response.data.message :response.response.statusText;
 
  }
-export const RegisterUser = ({firstname,lastname,email,password,age, registered,userType},dispatchRegister) => {
+export const RegisterUser = ({firstname,lastname,email,password,age,userType},dispatchRegister) => {
 
    //dispatchRegister({registered:true})
   const username=email.replace('/','-');
@@ -18,23 +18,21 @@ export const RegisterUser = ({firstname,lastname,email,password,age, registered,
    .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
- 
            dispatchRegister({
                registered : true,
+               isRegisterError:false,
             });
    
          }
        }
    ).catch(err => 
      {
-        console.log(err);
-       console.log("Not ok");
+        
+       
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-               console.log("Not ok ,********");
+              
                errorMessage = getErrorMessage(err);
                errorMessage  =errorMessage?errorMessage:"Invalid credentials";
              }
@@ -42,13 +40,11 @@ export const RegisterUser = ({firstname,lastname,email,password,age, registered,
                   errorMessage  ="Denied access";
              }
              else{
-                   console.log(err.response.statusText);
+                   
                    errorMessage  = getErrorMessage(err);
              }
-             dispatchRegister({errorMessage:errorMessage,
-                             isLoginError:true})
-        }else dispatchRegister({errorMessage:"Server Error",
-        isLoginError:true})
+             dispatchRegister({errorMessage:errorMessage,isRegisterError:true,registered:false})
+        }else dispatchRegister({errorMessage:"Server Error", isRegisterError:true,registered:false})
  
      }
    )
@@ -62,8 +58,8 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
    .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
+           
+           
 
          dispatchUsers({
                data:response.data,
@@ -77,19 +73,19 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
        }
    ).catch(err =>
      {
-        console.log(err);
-       console.log("Not ok");
+        
+       
         if(!err?.response.ok && err.name!=="AbortErr"){
              let errorMessage =null;
              if(err.response.status===404){
-               console.log("Not ok ,********");
+              
                errorMessage  ="Invalid credentials";
              }
              else if(err.response.status===401){
                   errorMessage  ="Denied access";
              }
              else{
-                   console.log(err.response.statusText);
+                   
                    errorMessage  = getErrorMessage(err);
              }
              dispatchUsers({errorMessage:errorMessage,
@@ -106,18 +102,18 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
 
 
 
-export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,email,newPassword,age,currentPassword, edited},dispatchRegister) => {
+export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,email,newPassword,age,currentPassword},dispatchRegister) => {
 
    //dispatchRegister({registered:true})
    let isMounted = true;
    const controller = new AbortController();
   const username=email.replace('/','-');
    const API = '/holiday-plan/api/user/update/';
-   useAxiosPrivate.patch(API,{firstname,lastname,currentUsername,username,age,newPassword,currentPassword,signal:controller.signal})
+   isMounted&& useAxiosPrivate.patch(API,{firstname,lastname,currentUsername,username,age,newPassword,currentPassword,signal:controller.signal})
    .then(response =>
        {
          if(response.ok || response.status===200){
-           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:"Account successfully updated"})
+           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:"Account successfully updated,logout and in to see changes."})
 
          }
          return ()=>{isMounted=false; controller.abort()}
@@ -148,16 +144,17 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
 
 
 
-export const DeleteUser = (useAxiosPrivate,password,email,dispatchRegister) => {
+export const DeleteUser = (useAxiosPrivate,password,email,dispatchAccount) => {
 
    const API = `/holiday-plan/api/user/delete/?username=${email}&password=${password}`;
    useAxiosPrivate.delete(API)
    .then(response =>
        {
          if(response.ok || response.status===200){
-          dispatchRegister({
+          dispatchAccount({
             isRequestError:false,
             isRequestSuccessful:true,
+            AccountDeleted:true,
              message:"Account deleted successful"
          });
 
@@ -180,8 +177,8 @@ export const DeleteUser = (useAxiosPrivate,password,email,dispatchRegister) => {
                   
                     errorMessage  = getErrorMessage(err);
               }
-              dispatchRegister({isRequestError:true,isRequestSuccessful:false, message:errorMessage})
-        }else dispatchRegister({isRequestError:true,isRequestSuccessful:false, message:"Internal server error"})
+              dispatchAccount({isRequestError:true,isRequestSuccessful:false, message:errorMessage})
+        }else dispatchAccount({isRequestError:true,isRequestSuccessful:false, message:"Internal server error"})
 
      }
    )
@@ -189,16 +186,13 @@ export const DeleteUser = (useAxiosPrivate,password,email,dispatchRegister) => {
 
 export const RegisterAdmin = ({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister) => {
   const username=email.replace('/','-');
-  console.log(JSON.stringify({firstname,lastname,username,password,age, userType}));
-  ///dispatchRegister({registered:true})
-
    const API = '/holiday-plan/api/admin/user/save/';
    useAxiosPrivate.post(API,{firstname,lastname,username,password, age,usertype:userType})
    .then(response =>
        {
          if(response.ok || response.status===200){
-           console.log("Ok");
-           console.log(response.data)
+           
+           
  
            dispatchRegister({
                registered : true,
@@ -209,19 +203,19 @@ export const RegisterAdmin = ({firstname,lastname,email,password, age,registered
        }
    ).catch(err => 
      {
-        console.log(err);
-       console.log("Not ok");
+        
+       
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-               console.log("Not ok ,********");
+              
                errorMessage  ="Invalid credentials";
              }
              else if(err.response.status===401){
                   errorMessage  ="Denied access";
              }
              else{
-                   console.log("Not ok");
+                   
                    errorMessage  = getErrorMessage(err);
              }
              dispatchRegister({errorMessage:errorMessage,
@@ -239,46 +233,50 @@ export const RegisterAdmin = ({firstname,lastname,email,password, age,registered
  * @param {*} user  to login 
  * @param {*} setLogin  is the function to set the login status of the user
  */
-export const LogInUser = ({email, password},dispatchLogin,setError,controller) => {
-  console.log(email, password);
+export const LogInUser = ({email, password},controller) => {
+
   const API= `/holiday-plan/api/authenticate/user/login/?password=${password}&username=${email}`;
 
-  axios.post(API, {signal:controller.signal})
+  return axios.post(API, {signal:controller.signal})
   .then(response =>
-      {
+      { 
+        let data ={isLoginError:false, message: "", isLoginSuccessful:false,}
         if(response.ok || response.status===200){
-          console.log("Ok");
-          console.log(response.data);
 
-          dispatchLogin({
+          data={
             type:"LOGIN",      
-            payload:response.data
-           });
+            payload:response.data,
+            isLoginSuccessful:true,
+            isLoginError:false, message: ""
+           };
   
         }
+        return data;
+
       }
   ).catch(err => 
     {
-       console.log(err);
-      console.log("Not ok");
+       
+      
        if(!err?.response.ok){
             let errorMessage =null;
             if(err.response.status===404){
-              console.log("Not ok ,********");
+             
               errorMessage  ="Invalid credentials";
             }
             else if(err.response.status===401){
                  errorMessage  ="Denied access";
             }
             else{
-                  console.log("Not ok");
+                  
                   errorMessage  = getErrorMessage(err);
 
 
             }
-            setError({errorMessage:errorMessage,
-                            isLoginError:true})
+            return {message:errorMessage,isLoginSuccessful:false,
+              isLoginError:true}
        }
+       return {isLoginError:false, message: getErrorMessage(err), isLoginSuccessful:false,}
 
     }
   )
@@ -287,7 +285,7 @@ export const LogInUser = ({email, password},dispatchLogin,setError,controller) =
 
 
 export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPrivate) => {
-  console.log(refresh_token)
+  
   const API= '/holiday-plan/api/user/my-details/';
     useAxiosPrivate.get(API)
     .then(response =>
@@ -325,7 +323,7 @@ export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPr
   }
 
 
-export const LogoutUser = (useAxiosPrivate,dispatchLogin, navigate) => {
+export const LogoutUser = (useAxiosPrivate,dispatchLogin) => {
 
   const API= '/holiday-plan/api/logout/';
     useAxiosPrivate.get(API)
@@ -335,8 +333,6 @@ export const LogoutUser = (useAxiosPrivate,dispatchLogin, navigate) => {
                 dispatchLogin({
                     type:"LOGOUT",
                 });
-                navigate("/")
-
               }
 
             }

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@CrossOrigin( origins = "*",originPatterns = "http://localhost:3000/**")
 @RequestMapping("/holiday-plan/api/user-query/")
 @AllArgsConstructor
 public class QueryController {

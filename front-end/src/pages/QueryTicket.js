@@ -4,7 +4,6 @@ import CssTextField from '../component/CssTextField';
 import CustomerTextArea from'../component/CustomerTextArea'
 import ColorButton from '../component/ColorButton';
 import React,{ useReducer} from 'react';
-import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import {SendQuery} from '../utils/Query';
 import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
@@ -12,7 +11,6 @@ import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 
 const QueryTicket =()=>{
     const useAxiosPrivate = UseAxiosPrivate();
-    const { dispatchLogin } = React.useContext(CreateAuthContext);
     const initialState = {
               isQueryingError:false,
               isRequestSuccessful:false,
@@ -56,8 +54,16 @@ const QueryTicket =()=>{
        >
            <Card sx={{ maxWidth: 400,display:"block"}}>
            <CardHeader
-              title={<Typography align="center"  sx={{width:"100%",color:PRIMAR_COLOR}} variant={"h4"} >Enter Query</Typography>}
-             
+              title={
+                    <Typography align="center"  
+                    sx={{fontSize:"2rem",textTransform: "none",fontWeight: 700, 
+                        fontFamily: `Poppins, sans-serif`,width:"100%",color:PRIMAR_COLOR
+                    }} 
+                    variant={"h2"}
+                     >
+                        Enter Query
+                    </Typography>
+                }
               subheader={formState.isQueryingError?formState.errorMessage:formState.isRequestSuccessful?formState.querySentStatus:""}
               subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:formState.isRequestSuccessful?SUCCESS_COLOR:formState.isQueryingError&&ERROR_COLOR}}
               
@@ -77,7 +83,7 @@ const QueryTicket =()=>{
 
                             dispatchForm({summary:e.target.value,isQueryingError:false})}}
 
-                            ></CssTextField>
+                    />
 
                     <CustomerTextArea
                         required
@@ -90,11 +96,18 @@ const QueryTicket =()=>{
                         variant="outlined"
                         color="secondary" type="text" className=" description-input" placeholder="Enter full  description"
                         autoComplete='new-description' value={formState. description}
-                        onChange={(e)=>dispatchForm({ description:e.target.value,isQueryingError:false})}></CustomerTextArea>
+                        onChange={(e)=>dispatchForm({ description:e.target.value,isQueryingError:false})}
+                    />
 
 
-                    <ColorButton variant="contained" style={{marginTop:"25px", color:"white"}}
-                    className="submit-btn" onClick={(e)=>OnSubmit(e)}>Submit Ticket</ColorButton>
+                    <ColorButton 
+                    variant="contained" 
+                    style={{marginTop:"25px", color:"white"}}
+                    className="submit-btn" 
+                    onClick={(e)=>OnSubmit(e)}
+                    >
+                        Submit Ticket
+                    </ColorButton>
 
                 </form>
            </CardContent>
