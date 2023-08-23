@@ -26,20 +26,20 @@ const HolidayPlanForm =()=>{
     return {...state,...action}
   },
     {  location:"",city: "",startDate: "",endDate:"",event:"",description:"",pictureLink:"",
-       priorityLevel:"",isDataCorrect:true,errorMessage:""}
+       priorityLevel:"",isRequestError:false, isRequestSuccessful:false,errorMessage:""}
     )
   const[Files, setFiles]=useState([])
+  
   //Extract data from form data and store data to Data state
   const StoreData = ()=>{
          const {startDate, location, endDate, event, city, description, priorityLevel}=HolidayPlanData;
          const fd = new FormData();
-         fd.append("holiday",new Blob([JSON.stringify({startDate, location, endDate, event, city, description, priorityLevel}, {'Content-Type':'application/json'})]));
+         fd.append("holiday",new Blob([JSON.stringify({startDate, location, endDate, event, city, description, priorityLevel},
+           {'Content-Type':'application/json'})]));
          Files.forEach(file=>fd.append("images",file));
       AddHolidayPlan(useAxiosPrivate,fd, DispatchHolidayPlanData)
   }
 
-
-  
    const isEmpty= (elementInputData)=>elementInputData.trim()==="";
 
    const setImages = (fileData)=>{
@@ -56,16 +56,21 @@ const HolidayPlanForm =()=>{
    const OnSubmit= (e)=>{
         e.preventDefault();
         const isDataValid  = ()=>{
-           return !( isEmpty(HolidayPlanData.location) && isEmpty(HolidayPlanData.city) &&
-            isEmpty(HolidayPlanData.startDate) && isEmpty(HolidayPlanData.endDate)&&
-            isEmpty(HolidayPlanData.description) &&( Files.length===null || isEmpty(HolidayPlanData.pictureLink))&&
-            isEmpty(HolidayPlanData.priorityLevel))
+           return !( 
+            isEmpty(HolidayPlanData.location)||
+            isEmpty(HolidayPlanData.city) ||
+            isEmpty(HolidayPlanData.startDate)||
+            isEmpty(HolidayPlanData.endDate)||
+            isEmpty(HolidayPlanData.description) || 
+            (Files.length===0 )||
+            isEmpty(HolidayPlanData.priorityLevel)
+          )
         }
 
         if(isDataValid()){
 
-           const store = async ()=>{
-                await StoreData()
+           const store =()=>{
+                StoreData()
            }
 
             store()
@@ -73,7 +78,7 @@ const HolidayPlanForm =()=>{
           
         }else{
 
-             DispatchHolidayPlanData({isDataCorrect:false, errorMessage:"All data is required"})
+             DispatchHolidayPlanData({isRequestError:true,isRequestSuccessful:false, errorMessage:"All data fields are required"})
         }
 
    }
@@ -98,8 +103,9 @@ const HolidayPlanForm =()=>{
                       </Stack>
               }
               titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
-              subheader={!HolidayPlanData.isDataCorrect &&HolidayPlanData.errorMessage}
-              subheaderTypographyProps={{align:"start" ,color:!HolidayPlanData.isDataCorrect?ERROR_COLOR:SUCCESS_COLOR}}
+
+              subheader={(HolidayPlanData.isRequestError || HolidayPlanData.isRequestSuccessful)&&HolidayPlanData.errorMessage}
+              subheaderTypographyProps={{align:"start" ,color:HolidayPlanData.isRequestError?ERROR_COLOR:HolidayPlanData.isRequestSuccessful&&SUCCESS_COLOR}}
               action={<CustomerTypography onClick={()=>{ setTimeout(()=>{
                  DispatchHolidayPlanData(
                    {
@@ -112,6 +118,8 @@ const HolidayPlanForm =()=>{
                      images: [],
                      pictureLink:"",
                      priorityLevel: "",
+                     isRequestSuccessful:false
+                     ,isRequestError:false
    
                    }
                  ); setImagePreview([])
@@ -131,7 +139,7 @@ const HolidayPlanForm =()=>{
                             name="location"
                             type="text"  placeholder="Enter location name" className="location-input"
                             value={HolidayPlanData.location}
-                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true, location:e.currentTarget.value})}
+                            onChange={(e)=>DispatchHolidayPlanData({isRequestError:false,isRequestSuccessful:false, location:e.currentTarget.value})}
 
                           />
 
@@ -142,14 +150,12 @@ const HolidayPlanForm =()=>{
                             variant="outlined"
                             name="city"
                             type="text"placeholder="Enter city " className="city" min={3}
-                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,city:e.currentTarget.value}) }
+                            onChange={(e)=>DispatchHolidayPlanData({isRequestError:false,isRequestSuccessful:false,city:e.currentTarget.value}) }
                             value={HolidayPlanData.city}
                             />
 
                         <CssTextField
                               required
-
-
                             id="demo-helper-text-aligned"
                             label="Start Date"
                             variant="outlined"
@@ -157,49 +163,42 @@ const HolidayPlanForm =()=>{
                              onClick={()=>setDateType1("date")}
                              onBlur={()=>{setDateType1("text"); }}
                             type={dateType1}   className="start-date"min={10}
-                            onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,startDate:event.currentTarget.value}) }
+                            onChange={event=>DispatchHolidayPlanData({isRequestError:false,isRequestSuccessful:false,startDate:event.currentTarget.value}) }
                             value={HolidayPlanData.startDate}
 
                             />
 
                         <CssTextField
-
                           required
-
                           id="demo-helper-text-aligned"
                           label="End Date"
                           variant="outlined"
                           name="endDate"
-
                            onClick={()=>setDateType("date")}
                            onBlur={()=>{setDateType("text"); }}
                            type={dateType}  className="end-date"min={10}
-                          onChange={event=>DispatchHolidayPlanData({isDataCorrect:true,endDate:event.currentTarget.value}) }
+                          onChange={event=>DispatchHolidayPlanData({isRequestError:false,isRequestSuccessful:false,endDate:event.currentTarget.value}) }
                           value={HolidayPlanData.endDate}
                           />
 
                         <CssTextField
 
                             required
-
                             id="demo-helper-text-aligned"
                             label="Event"
                             variant="outlined"
-
                             type="text" name="event" placeholder="Enter event" className="event"min={5}
-                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,event:e.currentTarget.value}) }
+                            onChange={(e)=>DispatchHolidayPlanData({isRequestError:false,isRequestSuccessful:false,event:e.currentTarget.value}) }
                             value={HolidayPlanData.event}
                           />
 
                         <CssTextField
-
                             required
                             id="demo-helper-text-aligned"
                             label="description"
                             variant="outlined"
-
                             type="text" name="description" placeholder="Enter description" className="description"min={3}
-                            onChange={(e)=>DispatchHolidayPlanData({isDataCorrect:true,description:e.currentTarget.value}) }
+                            onChange={(e)=>DispatchHolidayPlanData({isRequestError:false,isRequestSuccessful:false,description:e.currentTarget.value}) }
                             value={HolidayPlanData.description}
                           />
                           <ApploadFile setImages={setImages} margin="1rem 0rem" maxWidth={"100%"} />
@@ -240,7 +239,7 @@ const PriorityLevelComponent = ({HolidayPlanData, DispatchHolidayPlanData})=>{
           <RadioGroup  className='radio-group'
               aria-labelledby="demo-controlled-radio-buttons-group"
               name="controlled-radio-buttons-group"
-              onChange={(e)=>DispatchHolidayPlanData({priorityLevel:e.target.value})}
+              onChange={(e)=>DispatchHolidayPlanData({priorityLevel:e.target.value,isRequestError:false,isRequestSuccessful:false,})}
               value={HolidayPlanData.priorityLevel}
           >
               <div className='radio-group'style={{display:"flex"}}>

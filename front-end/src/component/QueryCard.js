@@ -11,7 +11,7 @@ import {CreateAuthContext} from '../context/CreateAuthContext';
 import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel } from '@mui/material';
 import CustomerTextArea from'../component/CustomerTextArea'
 import {SendQueryResponse,DeleteQuery} from '../utils/Query'
-import { ERROR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
+import { ERROR_COLOR, PRIMAR_COLOR, SECONDARY_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 
 
 const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
@@ -25,24 +25,34 @@ const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
             value={queryState.queryStatus}
             >
             <div className='radio-group'style={{display:"flex"}}>
-                <FormControlLabel disabled={disAbled} value="ACTIVE"  control={<Radio  style={{color:SECONDARY_COLOR}}/>} label="Active" />
+                <FormControlLabel disabled={disAbled} value="ACTIVE"  control={<Radio  style={{color:PRIMAR_COLOR}}/>} label="Active" />
+                <FormControlLabel disabled={disAbled} value="PROGRESS"  control={<Radio  style={{color:SECONDARY_COLOR}}/>} label="Progress" />
                 <FormControlLabel disabled={disAbled} value="SOLVED"  control={<Radio  style={{color:SUCCESS_COLOR}}/>} label="Solved" />
             </div>
         </RadioGroup>
     </FormControl>)
 }
-const AdjustableParagraph = ({message})=>{
-    const truncate = (input) =>input.length > 50 ? true : false;
-    const [showMore,setShowMore] =React.useState(true);
+const AdjustableParagraph = ({message=''})=>{
+    const truncate = (input) =>{
+        return (input?.length> 45 )? true : false;
+    }
+    const [showMore,setShowMore] =React.useState(truncate(message));
 
     return(
-        <Grid container wrap="nowrap" spacing={1}>
+        <Grid  container wrap="nowrap" spacing={1}>
             <Grid item xs zeroMinWidth>
              <CustomerTypography noWrap={showMore}>{message}</CustomerTypography>
             </Grid>
-            <Grid item xs={1}>
+            <Grid  sx={{
+                    color: (theme) =>
+                      theme.palette.mode === "light"
+                        ? theme.palette.grey[600]
+                        : theme.palette.grey[800],
+                  }}
+              item xs={1}>
                 { truncate(message)?
-                  showMore?<FaPlus onClick={()=>setShowMore(false)}/>:
+                  showMore?<FaPlus
+                  onClick={()=>setShowMore(false)}/>:
                   <FaMinus onClick={()=>setShowMore(true)}/>:
                   ""
                 }
@@ -68,12 +78,12 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
     
 
     React.useEffect(()=>{
-       if(queryState.isResponseSuccess &&  userLoginState.roles.find(role=>role.name==="USER")){
+       if(queryState.isResponseSuccess &&  userLoginState.roles?.find(role=>role.name==="USER")){
               setTimeout(()=>{
                     deleteQueryCard(index);
               }, 1000)
        }
-       if(queryState.isResponseSuccess && userLoginState.roles.find(role=>role.name==="ADMIN")){
+       if(queryState.isResponseSuccess && userLoginState.roles?.find(role=>role.name==="ADMIN")){
             dispatchQuery({querySentStatus:"Query response sent successfully"});
        }
 
@@ -89,7 +99,7 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
         let editResponse = {isResponseError : false,requestResponse:"",isResponseSuccess:false}
 
         if(userLoginState.roles.find(role=>role.name==="ADMIN")){
-            if(queryState.response.trim() ==="" || queryState.queryStatus.trim() ===""){
+            if(queryState.response?.trim() ==="" || queryState.queryStatus?.trim() ===""){
                dispatchQuery({isResponseError:true, requestResponse:"All fields are required"})
             }else{
 
@@ -136,7 +146,7 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
 
 
          <CustomerTypography gutterBottom variant="h7" component="div" align="center">
-            Date:{data.localDateTime&&JSON.stringify(data.localDateTime).substring(1,11)}
+            Date:{data.localDateTime&&JSON.stringify(data.localDateTime)?.substring(1,11)}
           </CustomerTypography>
           <CustomerTypography sx={{fontWeight: "bold"}}  gutterBottom variant="h7" component="div" align="center">
                Query Summary:
@@ -146,13 +156,11 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
            Query description:
           </CustomerTypography>
           <AdjustableParagraph message={queryDescription}/>
-          
           {
-
-             ( queryState.queryStatus==="ACTIVE" && userLoginState.roles.find(role=>role.name==="ADMIN") )?
+             ( queryState.queryStatus!=="SOLVED" && userLoginState.roles?.find(role=>role.name==="ADMIN") )?
               <CardActions>
                   <CustomerTextArea
-                        disabled={userLoginState.roles.find(role=>role.name==="USER") || (
+                        disabled={userLoginState.roles?.find(role=>role.name==="USER") || (
                         userLoginState.roles.find(role=>role.name==="ADMIN")&& queryState.queryStatus==="SOLVED") }
                         width ="100%" focused  minRows="2"  helpertext=""
                         required multiline={true}   maxRows="10"   variant="outlined"
@@ -165,22 +173,22 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
                   <CustomerTypography  sx={{fontWeight: "bold"}}   gutterBottom variant="h7" component="div" align="center">
                     Query Response:
                    </CustomerTypography>
-                   <AdjustableParagraph message={data.response}/>
+                   <AdjustableParagraph message={queryState.queryStatus==='ACTIVE'?'No response yet, sorry':data.response}/>
                   
                </>
 
           }
-          <CardActions sx={{display:userLoginState.roles.find(role=>role.name==="ADMIN")?"block":"flex"}}>
+          <CardActions sx={{display:userLoginState.roles?.find(role=>role.name==="ADMIN")?"block":"flex"}}>
 
-              <QueryStatusActions sx={{marginRight:"auto !important"}}  disAbled={userLoginState.roles.find(role=>role.name==="USER")} queryState={queryState} dispatchQuery={dispatchQuery} />
+              <QueryStatusActions sx={{marginRight:"auto !important"}}  disAbled={userLoginState.roles?.find(role=>role.name==="USER")} queryState={queryState} dispatchQuery={dispatchQuery} />
             {
 
-              userLoginState.roles.find(role=>role.name==="ADMIN")?
-              <Button   disabled={queryState.response.trim()===''?true:false} variant="outlined" size="small" color="primary" onClick={onSubmit}>
+              userLoginState.roles?.find(role=>role.name==="ADMIN")?
+              <Button   disabled={queryState.response?.trim()===''?true:false} variant="outlined" size="small" color="primary" onClick={onSubmit}>
                     Send Response
               </Button>
                :
-               userLoginState.roles.find(role=>role.name==="USER")&&
+               userLoginState.roles?.find(role=>role.name==="USER")&&
                <IconButton variant="outlined" size="small" className="delete-query" sx={{color:"red",marginLeft:"auto",maxWidth:"10%"}} onClick={onSubmit}>
                  {<FaTrash/>}
                 </IconButton>

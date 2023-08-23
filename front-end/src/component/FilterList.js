@@ -2,9 +2,9 @@ import * as React from 'react';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import {ListItemText,Checkbox, ListSubheader,TextField, InputAdornment} from '@mui/material';
+import {ListItemText,Checkbox, ListSubheader,TextField, InputAdornment, IconButton} from '@mui/material';
 import Select from '@mui/material/Select';
-import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from '@mui/icons-material/Clear'
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -17,15 +17,17 @@ const MenuProps = {
   },
 };
 
-export default function FilterList({Options=[],label="",name="name", selectOption=()=>{}}) {
+export default function FilterList({Options=[],label="",name="name", selectOption=()=>{}, filtered=false}) {
   const containsText = (option, searchText) => JSON.stringify(option[name]).toLowerCase().indexOf(searchText.toLowerCase()) > -1;
   const [searchText, setSearchText] = React.useState("");
-  const displayedOptions = React.useMemo(
-  () => Options.filter((option) => containsText(option, searchText)),
-  [searchText,Options]
-  );
+  const displayedOptions = React.useMemo(() => Options.filter((option) => containsText(option, searchText)),[searchText,Options,filtered]);
   const [selected, setSelected] = React.useState([]);
-
+  
+   React.useEffect(()=>{
+      let    flat =true;
+      if(!filtered)flat&&setSearchText('')
+      return ()=>{flat=true}
+   },[filtered])
   
   const isSelected = (element) => {
     return selected.map(option=>option[name]).indexOf(element[name]) !==-1;
@@ -71,14 +73,30 @@ export default function FilterList({Options=[],label="",name="name", selectOptio
         >
               <ListSubheader muiskiplisthighlight fullWidth sx={{boxShadow:"inherit !important;"}}>
                   <TextField
+                    sx={{ '& .MuiOutlinedInput-root': {'& fieldset': {
+                        borderRadius:"none",
+                    },
+                    
+                    '&:hover fieldset': {
+                        border:"none",
+                
+                    
+                    },
+                    '&.Mui-focused fieldset': {
+                        border:"none",
+                    }}
+                  
+                  }}
                     size="small"
                     autoFocus
-                    placeholder="Type to search..."
+                    placeholder={`Search by ${label}`}
                     fullWidth
+                    value={searchText}
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment sx ={{padding:"1rem",}} position="start">
-                          <SearchIcon />
+                      
+                      endAdornment: (
+                        <InputAdornment sx ={{padding:"1rem 0rem ",m:1}} position="start">
+                         <IconButton sx={{borderRadius:2}} onClick={()=>setSearchText('')}><ClearIcon  /></IconButton>
                         </InputAdornment>
                       )
                     }}

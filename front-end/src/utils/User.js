@@ -338,8 +338,6 @@ export const LogoutUser = (useAxiosPrivate,dispatchLogin) => {
             }
         ).catch(err =>
           {
-
-
              if(!err?.response.ok){
                   let errorMessage =null;
                   if(err.response.status===404){

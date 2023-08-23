@@ -1,18 +1,20 @@
 import { getErrorMessage } from "./Error";
 
-export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=>{
+export const SendQuery = async({summary,description},useAxiosPrivate)=>{
 
    const API = '/holiday-plan/api/user-query/query/save/';
    const querySummary = summary;
    const queryDescription =description;
-   useAxiosPrivate.post(API,{querySummary,queryDescription})                      
+   return useAxiosPrivate.post(API,{querySummary,queryDescription})                      
    .then(response =>
-       {
+       {  
+        
          if(response.ok || response.status===200){
-           dispatchQuery({
+           return{
                isRequestSuccessful:true,
-               querySentStatus:"Query  sent successfully."
-            });
+               message:"Query  sent successfully."
+               , isQueryingError:false
+            };
 
          }
        }
@@ -30,30 +32,29 @@ export const SendQuery = ({summary,description},useAxiosPrivate, dispatchQuery)=
              }
              else{
                   
-                   errorMessage  = err.response?.statusText;
+                   errorMessage  = getErrorMessage(err);
              }
-             dispatchQuery({errorMessage:errorMessage,
-                             isQueryingError:true, querySent:false})
+             return {message:errorMessage, isQueryingError:true, isRequestSuccessful:true};
         }
-        else dispatchQuery({errorMessage:"Internal server error",
-                                          isQueryingError:true, querySent:false})
+        else return{message:"Internal server error", isQueryingError:true, isRequestSuccessful:true};
 
      }
    )
 }
-export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=>{
+export const FetchQueries = async(useAxiosPrivate, controller,isAdmin=false,status='ACTIVE')=>{
    const OK_RESPONSES =[200,302, 201]
-  const API = roles.find(role=>role.name==="ADMIN")? "/holiday-plan/api/user-query/query/status/?queryStatus=ACTIVE":
+  const API = isAdmin? `/holiday-plan/api/user-query/query/status/?queryStatus=${status}`:
                           '/holiday-plan/api/user-query/query/user/logged-in/'
-
-  useAxiosPrivate.get(API, {signal:controller.signal})
+  
+  return useAxiosPrivate.get(API, {signal:controller.signal})
   .then(response =>
       {
         if(response.ok || OK_RESPONSES.includes(response.status)){
           
-        dispatchQuery({
+        return({
             type:"replace",
             payload:response.data,
+            message:"Fetched successful."
           });
 
         }
@@ -74,10 +75,10 @@ export const FetchQueries = (useAxiosPrivate, roles, dispatchQuery, controller)=
                  
               errorMessage  = getErrorMessage(err);
             }
-            dispatchQuery({type:"error",message:errorMessage})
+            return({type:"error",message:errorMessage})
 
        }
-       else dispatchQuery({type:"error",message:"Internal server error"});
+       else return({type:"error",message:"Internal server error"});
     }
   )
 
@@ -92,8 +93,6 @@ return useAxiosPrivate.patch(API,{username,queryId,response, queryStatus})
     .then(response =>
       {
         if(response.ok || response.status===200){
-          
-         
           editResponse.isResponseError=false;
           editResponse.isResponseSuccess =true;
           editResponse.requestResponse="Updated successfully";
@@ -103,8 +102,6 @@ return useAxiosPrivate.patch(API,{username,queryId,response, queryStatus})
       }
     ).catch(err =>
     {
-        
-       
         editResponse.isResponseError=true;
         editResponse.isResponseSuccess =false;
        if(!err?.response.ok){
@@ -117,7 +114,7 @@ return useAxiosPrivate.patch(API,{username,queryId,response, queryStatus})
             }
             else{
                  
-                  editResponse.requestResponse=err.response?.statusText;
+                  editResponse.requestResponse=getErrorMessage(err);
             }
        }
        else editResponse.requestResponse="Internal server error";
@@ -159,7 +156,7 @@ export const DeleteQuery= (useAxiosPrivate,queryId, dispatchQuery)=>{
             }
             else{
                  
-                  errorMessage  = err.response?.statusText;
+                  errorMessage  = getErrorMessage(err);
             }
              dispatchQuery({errorMessage:errorMessage,  isResponseError:true})
 

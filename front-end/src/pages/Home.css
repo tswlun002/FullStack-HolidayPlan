@@ -1,0 +1,14 @@
+.css-12yjm75-MuiInputBase-input-MuiOutlinedInput-input{
+            border-radius:"2rem";
+}
+.css-12yjm75-MuiInputBase-input-MuiOutlinedInput-input :focus{
+            border:"0.8px solid blueviolet";
+
+}
+.css-12yjm75-MuiInputBase-input-MuiOutlinedInput-input:hover{
+            border:"0.8px solid blueviolet";
+}
+
+.filter:hover,:focus{
+      border: none;
+}

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
+import {Box} from '@mui/material';
 import {Table,Grid} from '@mui/material';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import {Paper,TextField,InputAdornment} from '@mui/material';
+import {Paper,TextField,InputAdornment,IconButton} from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
 import { RolePermissionContext } from '../context/RolePermissionContext';
@@ -27,6 +27,7 @@ import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR, SUCCESS_COLOR } fro
 import SearchableSelect from './SearchableSelect';
 import SearchIcon from "@mui/icons-material/Search";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import ClearIcon from '@mui/icons-material/Clear';
 
 
 function descendingComparator(a, b, orderBy) {
@@ -38,7 +39,6 @@ function descendingComparator(a, b, orderBy) {
         }
         return 0;
 }
-
 function getComparator(order, orderBy) {
       return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
@@ -136,6 +136,7 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
         const { numSelected} = props;
+        const [searchText, setSearchText]= React.useState('');
         return (
         <Toolbar disableGutters sx={{background:SECONDARY_HEADER_COLOR,}} >
           <Typography
@@ -151,19 +152,52 @@ function EnhancedTableToolbar(props) {
                     autoFocus
                     placeholder="Type search name..."
                     fullWidth
-                    sx={{'&.Mui-focused fieldset':
-                    {border:"1px solid black"}}}
+                    value={searchText}
+                    sx={{
+                       
+                    borderRadius:"2rem",
+                    '& .MuiOutlinedInput-root': {'& fieldset': {
+                        borderRadius:"2rem",
+                    },
+                    
+                    '&:hover fieldset': {
+                        border:"0.8px solid black",
+                
+                    
+                    },
+                    '&.Mui-focused fieldset': {
+                        border:"0.8px solid black",
+                    }
+                
+                  }
+                    }}
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment sx ={{padding:"1rem",  '&.Mui-focused fieldset':
-                                                               {border:"1px solid black"}
+                        <InputAdornment sx ={{padding:"1rem",
                       
                         }} position="start">
                           <SearchIcon />
                         </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment sx ={{padding:"1rem 0rem"
+                      
+                        }} position="end">
+                         <IconButton 
+                                sx={{borderRadius:1, backgroundColor:'transparent'}}
+                                onClick={()=>{
+                                  props.setOpenFilter(false)
+                                  setSearchText('');
+                                }}
+                            >
+                                <ClearIcon/>
+                            </IconButton>
+                        </InputAdornment>
                       )
+                    
                     }}
-                    onChange={(e) => props.containsText(e.target.value)}
+                    
+                    onChange={(e) => {setSearchText(e.target.value);props.containsText(e.target.value);}}
                     onKeyDown={(e) => {
                       if (e.key !== "Escape") {
                         e.stopPropagation();
@@ -174,7 +208,9 @@ function EnhancedTableToolbar(props) {
              justifyContent="center" alignItems="center" sx={{ flexGrow: 1, display:'flex'}}
           >
 
-            <FilterAltIcon  sx={{color:"black", padding:{lg:"2rem 1rem",sm:"1rem 1rem"}}}onClick={()=>props.setOpenFilter(()=>!props.openFilter)}/>
+            { (!props.openFilter)&&
+              <FilterAltIcon  sx={{color:"black", padding:{lg:"2rem 1rem",sm:"1rem 1rem"}}}onClick={()=>props.setOpenFilter(true)}/>
+            }
             {props.BarItems.map((item, index) =>{
               
 
@@ -226,8 +262,6 @@ export default function EnhancedTable() {
         const [openFilter , setOpenFilter] = React.useState(false);
         const[filteredData, setFilteredData] = React.useState([])
         const[isFiltering , setIsFiltering] =React.useState(false);
-        
-        
 
         const setSelected =(role)=>{
             SetSelected(role);

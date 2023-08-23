@@ -48,7 +48,22 @@ const Profile = ()=> {
 
 
       const [dateType, setDateType]= React.useState("text");
+        
+      const isInvalid =()=>{
+        return (
+          profile.email.trim() === ""&& profile.newPassword.trim() === "" && profile.confirmNewPassword === ""&&
+          profile.firstname.trim() === ""&&profile.lastname.trim() === "" && profile.currentPassword.trim() === ""&&
+          profile.age.trim() === ""
+         )
 
+      }
+
+      const isUpdateField =()=>{
+        return (profile.email.trim() !== ""|| profile.firstname.trim() !== ""||
+               profile.lastname.trim() !== ""  ||profile.age.trim() !== "" ||
+               (profile.newPassword.trim() !== "" &&profile.confirmNewPassword !== "")
+       )
+      }
        
        const OnSubmit =(e)=>{
            e.preventDefault();
@@ -56,14 +71,15 @@ const Profile = ()=> {
               dispatchProfile({isRequestError:true, message:"new password a and confim password must be equal",isRequestSuccessful:false});
 
            }
-           else if(profile.email.trim() === ""&& profile.newPassword.trim() === "" &&  profile.firstname.trim() === ""&&
-             profile.lastname.trim() === "" &&profile.currentPassword.trim() === ""&&profile.age.trim() === "" 
-             ){
-
+           else if(isInvalid()){
                dispatchProfile({isRequestError:true, message:"At least one field  is required", isRequestSuccessful:false});
-           }else{
+           }
+           else if(!isUpdateField()){
+                dispatchProfile({isRequestError:true, message:"At least one editable field  is required", isRequestSuccessful:false});
+           }
+           else{
 
-              if(profile.currentPassword.trim()!==''){
+              if(isUpdateField()&&profile.currentPassword.trim()!==''){
                     UpdateUser(useAxiosPrivate ,profile, dispatchProfile);
               }
               else{

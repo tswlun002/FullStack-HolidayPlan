@@ -127,7 +127,7 @@ class QueryServiceTest {
     void findByQueryIdAndUsername(){
         var user =  (User)userAndQuery().get()[1];
         var query  =(UserQuery)userAndQuery().get()[0];
-        when(repository.findByusername(user.getUsername())).thenReturn(List.of(query));
+        when(repository.findByUsername(user.getUsername())).thenReturn(List.of(query));
         var actual  = service.findByUsername(user.getUsername());
         assertThat(actual).isEqualTo(List.of(query));
     }
