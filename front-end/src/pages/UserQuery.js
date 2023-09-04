@@ -17,7 +17,8 @@ const filterQuery=({queryData, searchText})=>{
     return queryData?.filter((query)=>{
        
         return (query.queryStatus?.indexOf(searchText?.toUpperCase())>-1)||
-               (query.querySummary?.toLowerCase().indexOf(searchText?.toLowerCase())>-1 )
+               (query.querySummary?.toLowerCase().indexOf(searchText?.toLowerCase())>-1 )||
+               (`${query.user?.firstname}  ${query.user?.lastname }`?.toLowerCase().indexOf(searchText?.toLowerCase())>-1)
             ;
     })  
 
@@ -84,9 +85,6 @@ const UserQuery =  ()=>{
         
         return  ()=>{
             isMounted=false; controller.abort(); 
-            setTimeout(()=>{
-                dispatchQuery({type:"loading", isRequestError:false, isRequestSuccessful:false, message:""});
-            },5000)
         }
     },[])
    const deleteQueryCard =(index)=>{
@@ -107,7 +105,7 @@ const UserQuery =  ()=>{
     })
     
     return (
-        <Grid container sx={{p:2}}spacing={2}    
+        <Grid container sx={{p:1}}spacing={2}    
         >   
         <Grid item sm={12}>
             <TextField
@@ -132,7 +130,7 @@ const UserQuery =  ()=>{
                 }}
                 size="small"
                 focus={isFilterOpen}
-                placeholder={`Filter ${isFilterOpen?'by status, summary':''}`}
+                placeholder={`Filter ${isFilterOpen?'by owner, status, summary':''}`}
                 value={searchText}
                 InputProps={{
                     startAdornment: (
@@ -177,7 +175,7 @@ const UserQuery =  ()=>{
                         align="center"
                         sx={{color:query.isRequestError?ERROR_COLOR:(query.data.length===0)?LOADING_COLOR:SUCCESS_COLOR,fontSize:{sm:"0.8rem",md:"1rem"}}}
                     >
-                        {(query.data.length===0)&&!(query.isRequestError||query.isRequestSuccessful)?"Loading ...":query.message}
+                        {(query.data?.length===0)&&!(query.isRequestError||query.isRequestSuccessful)?"Loading ...":query.message}
                     </CustomerTypography>
             }
             </Grid>
