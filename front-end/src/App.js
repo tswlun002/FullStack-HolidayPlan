@@ -51,7 +51,7 @@ const App=()=>{
            try{
               user =jwtDecode(action.payload?.access_token).user;
            }catch(e){
-             console.error(e);
+            // console.error(e);
            }
           return {
             ...state,
