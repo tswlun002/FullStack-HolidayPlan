@@ -25,7 +25,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: install back-end
-      run: mvn -B install --file my-app/pom.xml
+      run: mvn -B install --file back-end/pom.xml
     - name: build  back-end image
       run: docker-compose -f "docker-compose.yml"  -d --build tour-server
      # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
