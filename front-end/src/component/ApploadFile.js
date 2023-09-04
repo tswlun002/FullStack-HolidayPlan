@@ -7,7 +7,6 @@ import { Typography} from '@mui/material';
   const inputRef = useRef(null);
 
   const handleUploadClick = () => {
-    // 👇 We redirect the click event onto the hidden input element
     inputRef.current?.click();
   };
 
@@ -15,19 +14,14 @@ import { Typography} from '@mui/material';
     if (!e.target.files) {
       return;
     }
+  
     setFile([...e.target.files]);
     setImages([...e.target.files])
-
-    // 🚩 do the file upload here normally...
   };
-  //      <div>Upload a file:</div>
 
 
   return (
     <div>
-
-
-      {/* 👇 Our custom button to select and upload a file */}
       <Button  color="secondary" variant="outlined"  sx={{borderColor:"black", maxWidth:maxWidth, margin:margin}} onClick={handleUploadClick}>
        <Typography sx={{color:'black'}} fontSize="0.7rem">
         {file.length>0 ?'Loaded': 'Upload location images'}
