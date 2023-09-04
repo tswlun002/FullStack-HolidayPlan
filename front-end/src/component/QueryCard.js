@@ -34,7 +34,7 @@ const QueryStatusActions = ({queryState, dispatchQuery, disAbled})=>{
 }
 const AdjustableParagraph = ({message=''})=>{
     const truncate = (input) =>{
-        return (input?.length> 45 )? true : false;
+        return (input?.length> 35 )? true : false;
     }
     const [showMore,setShowMore] =React.useState(truncate(message));
 
@@ -120,7 +120,7 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
 
     return (
   
-    <Card key={data.id} sx={{ maxWidth: 400,  margin:"1%",
+    <Card key={data.id} sx={{ maxWidth: 350,  margin:{md:"1%",sm:0},
        paddingBottom:"1rem" ,display:"block", minWidth:"20rem"}}>
         <CardHeader 
             sx={{background:SECONDARY_HEADER_COLOR}}
@@ -179,20 +179,28 @@ const QueryCard = ({data, index,deleteQueryCard})=> {
 
           }
           <CardActions sx={{display:userLoginState.roles?.find(role=>role.name==="ADMIN")?"block":"flex"}}>
-
-              <QueryStatusActions sx={{marginRight:"auto !important"}}  disAbled={userLoginState.roles?.find(role=>role.name==="USER")} queryState={queryState} dispatchQuery={dispatchQuery} />
+          <Grid container spacing={1} >
+               <Grid item sm={12}>
+                    <QueryStatusActions sx={{marginRight:"auto !important"}}  disAbled={userLoginState.roles?.find(role=>role.name==="USER")} queryState={queryState} dispatchQuery={dispatchQuery} />
+              </Grid>
+              
             {
-
-              userLoginState.roles?.find(role=>role.name==="ADMIN")?
-              <Button   disabled={queryState.response?.trim()===''?true:false} variant="outlined" size="small" color="primary" onClick={onSubmit}>
-                    Send Response
-              </Button>
-               :
-               userLoginState.roles?.find(role=>role.name==="USER")&&
-               <IconButton variant="outlined" size="small" className="delete-query" sx={{color:"red",marginLeft:"auto",maxWidth:"10%"}} onClick={onSubmit}>
-                 {<FaTrash/>}
-                </IconButton>
+                userLoginState.roles?.find(role=>role.name==="ADMIN")?
+                <Grid item sm={12} >
+            
+                    <Button   disabled={queryState.response?.trim()===''?true:false} variant="outlined" size="small" color="primary" onClick={onSubmit}>
+                            Send Response
+                    </Button>
+            </Grid>
+            :
+            userLoginState.roles?.find(role=>role.name==="USER")&&
+            <Grid item sm={12} sx={{display:"flex",justifyContent:"end",alignItems:"end", minHeight:"1vh"}}>
+          
+                {<FaTrash onClick={onSubmit} style={{color:"red"}}/>}
+                
+            </Grid>
             }
+            </Grid>
           </CardActions >
 
     </CardContent>
