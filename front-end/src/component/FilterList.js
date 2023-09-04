@@ -2,7 +2,7 @@ import * as React from 'react';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import {ListItemText,Checkbox, ListSubheader,TextField, InputAdornment, IconButton} from '@mui/material';
+import {ListItemText,Checkbox, ListSubheader,TextField, InputAdornment, IconButton,Chip,Grid} from '@mui/material';
 import Select from '@mui/material/Select';
 import ClearIcon from '@mui/icons-material/Clear'
 
@@ -71,7 +71,7 @@ export default function FilterList({Options=[],label="",name="name", selectOptio
          
           inputProps={{ 'aria-label': 'Without label' }}
         >
-              <ListSubheader muiskiplisthighlight fullWidth sx={{boxShadow:"inherit !important;"}}>
+              <ListSubheader muiskiplisthighlight fullWidth sx={{boxShadow:"inherit !important;",  width:'100%'}}>
                   <TextField
                     sx={{ '& .MuiOutlinedInput-root': {'& fieldset': {
                         borderRadius:"none",
@@ -90,12 +90,12 @@ export default function FilterList({Options=[],label="",name="name", selectOptio
                     size="small"
                     autoFocus
                     placeholder={`Search by ${label}`}
-                    fullWidth
+                    width='100%'
                     value={searchText}
                     InputProps={{
                       
                       endAdornment: (
-                        <InputAdornment sx ={{padding:"1rem 0rem ",m:1}} position="start">
+                        <InputAdornment sx ={{padding:"1rem 0rem ",m:"1px 0px"}} position="start">
                          <IconButton sx={{borderRadius:2}} onClick={()=>setSearchText('')}><ClearIcon  /></IconButton>
                         </InputAdornment>
                       )
@@ -108,24 +108,39 @@ export default function FilterList({Options=[],label="",name="name", selectOptio
                     }}
                   />
               </ListSubheader>
-          
-              {
-               displayedOptions.map((option) => {
-                   const isItemSelected  = isSelected(option);
-                   const labelId = `enhanced-table-checkbox-${option[name]}`;
+              <Grid    spacing={2}>
+                  <Grid  item sm={12}>{
+                  
+                          displayedOptions.map((option) => {
+                              const isItemSelected  = isSelected(option);
+                              const labelId = `enhanced-table-checkbox-${option[name]}`;
 
-                  return(<MenuItem  value={option[name]} >
-                    <ListItemText  primary={option[name]} />
-                    <Checkbox 
-                      checked={isItemSelected} 
-                      onClick={()=>handleClick(option)}
-                      inputProps={{
-                        'aria-labelledby': labelId,
-                      }}
+                              return(
+                              <MenuItem  value={option[name]} sx={{width:'100%'}}>
+                                <ListItemText  primary={option[name]} />
+                                <Checkbox 
+                                  checked={isItemSelected} 
+                                  onClick={()=>handleClick(option)}
+                                  inputProps={{
+                                    'aria-labelledby': labelId,
+                                  }}
+                              />
+                              </MenuItem>
+                            )})
+                          }
+                </Grid>
+                <Grid sx={{display:"flex", justifyContent:"right", m:1}} item  sm={12}>
+                  <Chip
+                    label="Clear"
+                    onClick={()=>{setSelected([]);selectOption({[name]:[]})}}
+                    icon={<ClearIcon/>}
+                    
                   />
-                  </MenuItem>
-                )})
-              }
+                </Grid> 
+
+
+              </Grid>
+          
       
         </Select>
        
