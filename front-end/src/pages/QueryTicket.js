@@ -14,8 +14,7 @@ const QueryTicket =()=>{
     const initialState = {
               isQueryingError:false,
               isRequestSuccessful:false,
-              querySentStatus:"",
-              errorMessage:"",
+              message:"",
               summary: "",
               description: ""
     }
@@ -25,27 +24,26 @@ const QueryTicket =()=>{
      );
 
 
-    const OnSubmit = (e)=>{
+    const OnSubmit = async(e)=>{
         e.preventDefault();
+        
         if(formState.summary.trim() === ""|| formState.description.trim() === ""){
-            dispatchForm({isQueryingError:true, errorMessage:"Both summary and description are required"});
+            dispatchForm({isQueryingError:true,isRequestSuccessful:false, message:"Both summary and description are required"});
         }
         else if(!formState.isQueryingError){
-            SendQuery(formState,useAxiosPrivate, dispatchForm )
+            const results= await SendQuery(formState,useAxiosPrivate, dispatchForm )
+            
+            dispatchForm(results);
+            
+             
             ClearForm();
         }
 
         }
         const ClearForm= ()=>{
-            setTimeout(()=>{
-                dispatchForm(initialState)
-        })
+            setTimeout(()=>{dispatchForm(initialState)},3000)
         }
-       React.useEffect(()=>{
-             if(formState.isRequestSuccessful){
-                dispatchForm({querySentStatus:"Query sent successfully"});
-             }
-       },[formState.isRequestSuccessful])
+    
     return (
        <Box display="flex"
             justifyContent="center"
@@ -64,8 +62,10 @@ const QueryTicket =()=>{
                         Enter Query
                     </Typography>
                 }
-              subheader={formState.isQueryingError?formState.errorMessage:formState.isRequestSuccessful?formState.querySentStatus:""}
-              subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:formState.isRequestSuccessful?SUCCESS_COLOR:formState.isQueryingError&&ERROR_COLOR}}
+              subheader={       (formState.isQueryingError||formState.isRequestSuccessful)?formState.message:""}
+                                subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:formState.isRequestSuccessful?
+                                SUCCESS_COLOR:formState.isQueryingError&&ERROR_COLOR}
+                        }
               
           />
                <CardContent>

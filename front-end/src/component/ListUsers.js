@@ -171,10 +171,11 @@ EnhancedTableHead.propTypes = {
         rowCount: PropTypes.number.isRequired,
 };
 
-const Filters =({filters, getFilterField,setFilterObject})=>{
+const Filters =({filters, getFilterField,setFilterObject, filterIsChecked})=>{
 
   return filters.map((filter,index)=>
-   <FilterList 
+   <FilterList
+       filtered={filterIsChecked} 
        key={index} 
        label={filter.label} 
        name={filter.name}
@@ -213,7 +214,7 @@ function EnhancedTableToolbar(props) {
                   divider={<Divider orientation="vertical" flexItem />}   
              >
              
-              {Filters({filters:FILTERS, getFilterField:props.getFilterField, setFilterObject:props.setFilterObject})}
+              {Filters({filters:FILTERS, getFilterField:props.getFilterField, setFilterObject:props.setFilterObject,filterIsChecked:props.filterIsChecked})}
               <FormControlLabel  
                   sx={{width:"2.5rem"}} 
                   control={<Switch   checked={props.filterIsChecked} onChange={props.filter} inputProps={{ 'aria-label': 'controlled' }}/>}
@@ -270,7 +271,11 @@ function filterUsers(AllUsers=[], filtersObject={}){
   
    if(AllUsers.length===0) return AllUsers;
    return AllUsers.filter((user)=>{  
-         return filtersObject['fullname'].some((element)=>element===`${user['firstname']} ${user['lastname']}`) || 
+         return filtersObject['fullname'].some((element)=>{
+                  const names=element.split(" ");
+                   return names[0].trim()===user['firstname'] && names[1].trim()===user['lastname'];
+                 })
+                 || 
                 filtersObject['username'].some((element)=>element===user['username']) ||
                 filtersObject['age'].some((element)=>element===(user['age']&&JSON.stringify(user['age']).substring(1,11)));
    });
@@ -552,7 +557,6 @@ export default function ListUsers() {
               ),
             [users.data,filterObject.data,filterIsChecked,order, orderBy, page, rowsPerPage],
         );
-
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
         const getFilterField = (filter)=>{

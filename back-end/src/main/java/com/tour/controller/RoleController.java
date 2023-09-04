@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
-
+@RequestMapping("/holiday-plan/api/admin/role/")
 @RestController
 @AllArgsConstructor
 public class RoleController  {

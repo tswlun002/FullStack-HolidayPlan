@@ -51,7 +51,7 @@ const App=()=>{
            try{
               user =jwtDecode(action.payload?.access_token).user;
            }catch(e){
-             console.error(e);
+            // console.error(e);
            }
           return {
             ...state,
@@ -107,7 +107,7 @@ const App=()=>{
     }, [userLoginState])
 
     return (
-    <CreateAuthContext.Provider value={{userLoginState, dispatchLogin}}>
+    <CreateAuthContext.Provider value={{userLoginState, dispatchLogin, appData}}>
       <Routes>
         <Route path="/" element={<MainLayout appData={appData}/>}>  
           <Route index   element={<Login/>}/>

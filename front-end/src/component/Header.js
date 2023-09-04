@@ -20,6 +20,7 @@ function Header({appData}) {
   const{data}=appData;
   const theme =  useTheme();
   const tabletLaptop = useMediaQuery(theme.breakpoints.down('1053'));
+  const phoneTablet = useMediaQuery(theme.breakpoints.down('900'));
   const navigate = useNavigate();
   const [anchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -126,7 +127,7 @@ function Header({appData}) {
                                         my: 1,display: 'block' ,
                                         padding:"0rem 5rem",
                         
-                                        color:isActive?"orange":isPending?"green":"white",
+                                        color:isActive?"orange":isPending?"green":phoneTablet?"black":"white",
                         
                                         }
                                   }

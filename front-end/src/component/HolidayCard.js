@@ -11,9 +11,11 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
 import  {FaTrash,FaMapMarkerAlt, FaMinus, FaPlus} from 'react-icons/fa'
-import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel } from '@mui/material';
+import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel , Grid} from '@mui/material';
 import {DeleteHolidayPlan,UpdateHolidayPlan} from '../utils/HolidayPlan';
 import  UseAxiosPrivate from '../utils/UseAxiosPrivate';
+import RedoIcon from '@mui/icons-material/Redo';
+import {NavLink} from 'react-router-dom'
 
 
 
@@ -40,8 +42,8 @@ function ImageSlider(images) {
         return () => clearInterval(intervalId);
     }, []);
 
-     const type = images[index].imageType;
-     const IMG  = images[index].image;
+     const type = images[index]?.imageType;
+     const IMG  = images[index]?.image;
     return `data:${type};base64, ${IMG}`;
 
 }
@@ -110,7 +112,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
         </FormControl>)
   }
 
-
+  
 
 
   const handleExpandClick = () => {
@@ -133,10 +135,23 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
           <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
             <FaMapMarkerAlt/>
           </Avatar>
+          
+        }
+        action={
+          <NavLink 
+            to={{
+                pathname:"addHolidayPlan",
+               
+              }}
+              state={{holidayPlan:data}}
+              exact
+          >
+            <RedoIcon />
+          </NavLink>
         }
     
         title={`${data.location}, ${data.city}`}
-        subheader={`${data.startDate.substring(0,10)} to ${data.endDate.substring(0,10)}`}
+        subheader={`${data?.startDate?.substring(0,10)} to ${data?.endDate?.substring(0,10)}`}
       />
       {data.images?.length>0?
         <CardMedia sx={{backgroundSize:"cover",width:{sm:340,xs:330},height:194, backgroundRepeat: 'no-repeat'}} component="img" image={ ImageSlider(data.images)}/>:
@@ -145,7 +160,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
 
 
 
-      <CardContent spacing={2} sx={{lineHeight:"1rem",display:"flex"}}>
+      <CardContent spacing={1} sx={{lineHeight:"1rem",display:"flex"}}>
             <Typography paragraph color="text.secondary">
              Event: {data.event}
             </Typography>
@@ -169,13 +184,17 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
             </CardContent>
         </Collapse>
 
-      <CardActions spacing={2} sx={{display:"flex", justifyContent:"start",alignItems:"start"}}>
-        <PriorityComponent />
-          <IconButton sx={{justifyContent:"center",width:"3rem", alignItems:"center", maxWidth:"100%"}} variant="outlined"
-                                onClick={(e)=>handleDelete(e)}
-                                className="btn delete-btn" size="small" style={{color:"red"}}>{<FaTrash/>}
-          </IconButton>
-
+      <CardActions >
+        <Grid container spacing={1} >
+          <Grid item sm={10.5} sx={{display:"flex",justifyContent:"center", alignItems:"center", }}>
+                <PriorityComponent />
+          </Grid>
+          <Grid item sm={1.5} sx={{display:"flex",justifyContent:"end", alignItems:"end", minHeight:"1vh"}}>
+            <IconButton size='small' variant="outlined" onClick={(e)=>handleDelete(e)} className="btn delete-btn"  style={{color:"red"}}>
+              {<FaTrash/>}
+            </IconButton>
+          </Grid>
+        </Grid>
 
       </CardActions>
 

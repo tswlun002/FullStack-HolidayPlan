@@ -145,8 +145,8 @@ public class HolidayPlanService  implements  OnHolidayPlan{
     static<T>  List<T>  getDefaultValue(List<T> t){
         return  t==null?List.of():t;
     }
-    public  Set<HolidayPlan> filterHolidayPlan(String username, List<String> city, List<String>  location, List<Date> startDate,
-                                               List<Date>  endDate, List<String> event, List<Integer> priorityLevel){
+    public  Set<HolidayPlan> filterHolidayPlan(String username, List<String> city, List<String>  location,
+                                               List<Date> startDate,   List<Date>  endDate, List<String> event, List<Integer> priorityLevel){
         if(username==null|| username.trim().isEmpty())throw  new RuntimeException("Username is required");
         return  holidayPlanRepository.filterHolidayPlans(username,getDefaultValue(city),getDefaultValue(location),getDefaultValue(startDate),
                 getDefaultValue(endDate),getDefaultValue(event),getDefaultValue(priorityLevel));

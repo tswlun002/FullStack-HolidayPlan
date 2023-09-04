@@ -1,9 +1,9 @@
 .css-hip9hq-MuiPaper-root-MuiAppBar-root{
     background: linear-gradient(to right,rgba(145, 111, 179, 0.5),rgba(102, 51, 153, 0.85),rgba(77,26,127  , 0.90),rgba(155, 104, 207, 0.6))!important; ;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1) !important;
-    position: fixed !important;
-    top:0  !important;
-    z-index: 1 !important;
+    position: sticky !important;
+    z-index: 1;
+    top:0 !important;
     color:white!important;
 
 }

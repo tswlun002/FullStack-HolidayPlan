@@ -22,18 +22,10 @@ export const FetchHolidayPlan = (useAxiosPrivate, setData,controller) => {
        ).catch(err =>
          {
             if(!err?.response.ok){
-                 let errorMessage =null;
-                 if(err.response.status===404){
-                   errorMessage  =err.response.data.message;
-                 }
-                 else{
-                       errorMessage  = err.response.statusText;
-                 }
-                 setData({type: "error", message:errorMessage})
+             setData({type: "error", message:getErrorMessage(err)})
 
             }
-
-            else setData({type: "error", message: err.response.data.statusText});
+            else setData({type: "error", message: 'Internal server error'});
 
 
          }
@@ -61,20 +53,10 @@ export const FilterHolidayPlan = (useAxiosPrivate,username,filter, setData,contr
    ).catch(err =>
      {
         if(!err?.response.ok){
-             let errorMessage =null;
-             if(err.response.status===404){
-
-               errorMessage  =err.response.data.message;
-             }
-             else{
-                  
-                   errorMessage  = err.response.statusText;
-             }
-             setData({iRequestError:true, isResponseSuccess:false, message:errorMessage})
+             setData({iRequestError:true, isResponseSuccess:false, message:getErrorMessage(err)})
 
         }
-
-        else setData({iRequestError:true, isResponseSuccess:false, message: err.response.data.statusText});
+        else setData({iRequestError:true, isResponseSuccess:false, message:'Internal server error'});
 
 
      }
@@ -93,7 +75,8 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
        {
          if(response.ok || response.status===200){
            setData({
-               isDataCorrect:false,
+                isRequestSuccessful:true,
+               isRequestError:false,
                errorMessage:"Successfully added holiday"
             });
 
@@ -104,18 +87,9 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
      {
        
         if(!err?.response.ok){
-             let errorMessage =null;
-             if(err.response.status===404){
-               errorMessage  =getErrorMessage(err);
-             }
-             else{
-                   errorMessage  = getErrorMessage(err);
-             }
-             setData({isDataCorrect:false, errorMessage: errorMessage})
-
-
+             setData({isRequestSuccessful:false,isRequestError:true, errorMessage: getErrorMessage(err)});
         }
-        else setData({isDataCorrect:false,  errorMessage: err.response.data.statusText});
+        else setData({isRequestSuccessful:false, isRequestError:true,  errorMessage: 'internal server error'});
 
      }
    )
@@ -142,15 +116,8 @@ export const AddHolidayPlan = (useAxiosPrivate, Images,setData)=> {
         const results ={iRequestError:false, isResponseSuccess:false,message:"",responseMessage:""}
 
          if(!err?.response.ok){
-              let errorMessage =null;
-              if(err.response.status===404){
-                errorMessage  =getErrorMessage(err);
-              }
-              else{
-                    errorMessage  = getErrorMessage(err);
-              }
               results.iRequestError=true;
-              results.message=errorMessage;
+              results.message=getErrorMessage(err);
               
          }
 
@@ -184,19 +151,10 @@ export const UpdateHolidayPlan = (useAxiosPrivate,holidayPlanId, priority,setRes
      ).catch(err =>
        {
           if(!err?.response.ok){
-               let errorMessage =null;
-               if(err.response.status===404){
-                 errorMessage  =getErrorMessage(err);
-               }
-               else{
-                     errorMessage  = getErrorMessage(err);
-               }
-               setResponse({iRequestError:true, message: errorMessage})
-
+            setResponse({iRequestError:true, message: getErrorMessage(err)})
 
           }
-
-          else setResponse({iRequestError:true,  message: err.response.data.statusText});
+          else setResponse({iRequestError:true,  message:'Internal server error'});
 
 
        }

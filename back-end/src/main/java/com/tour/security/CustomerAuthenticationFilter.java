@@ -12,12 +12,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.buf.StringUtils;
+import org.aspectj.weaver.Utils;
+import org.checkerframework.common.value.qual.StringVal;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.NumberUtils;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,15 +36,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Builder
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticationFilter {
     private  final AuthenticationManager authenticationManager;
-
     private final JwtService jwtService;
     private final TokenService tokenService;
-
     private final CustomerUserDetailsService userDetailsService;
-
+    private  final Environment environment;
 
 
     @Override
@@ -63,9 +69,13 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         saveUserToken(user, refresh_token,REFRESH_TOKEN);
         Map<String,String> tokens = new HashMap<>();
         tokens.put("access_token",access_token);
-
         Cookie cookie = new Cookie("token", refresh_token);
-        cookie.setMaxAge(24 * 60 * 60); // expires in 7 days
+        var period = environment.getProperty("jwt.refresh.token.period");
+        System.out.println("*************************************"+period+"**************************");
+        if(period==null||!period.matches("[0-9]+"))throw  new IOException("Invalid cookies period");
+
+        int REFRESH_TOKEN_PERIOD= Integer.parseInt(period.trim());
+        cookie.setMaxAge(REFRESH_TOKEN_PERIOD); // expires in 7 days
         cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setPath("/"); // global cookie accessible everywhere
@@ -85,14 +95,8 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(),tokens);
     }
-
     private void saveUserToken(User user, String jwt, TokenType tokenType) {
         var token = Token.builder().user(user).token(jwt).tokenType(tokenType).expired(false).revoked(false).build();
         tokenService.save(token);
     }
-
-
-
-
-
 }

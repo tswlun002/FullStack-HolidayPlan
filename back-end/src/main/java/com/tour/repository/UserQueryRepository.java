@@ -20,7 +20,7 @@ public interface UserQueryRepository extends JpaRepository<UserQuery, Long> {
 
     @Query("select t from UserQuery t join fetch t.user u " +
             "where u.username=:username")
-    List<UserQuery> findByusername(String username);
+    List<UserQuery> findByUsername(String username);
 
     @Query("select t from UserQuery t join fetch t.user u " +
             "where  t.queryStatus=:queryStatus")

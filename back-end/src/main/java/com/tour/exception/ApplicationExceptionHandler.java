@@ -121,10 +121,9 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
     @ExceptionHandler(InvalidCredentials.class)
     public ResponseEntity<Object> InvalidCredentials(
             InvalidCredentials ex, WebRequest request) {
-
         ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
-        return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(details, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
     }
 
     @ExceptionHandler(value={ApplicationExpiredJwtException.class, ExpiredJwtException.class})

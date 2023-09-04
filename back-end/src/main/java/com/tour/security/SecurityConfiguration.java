@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -29,7 +30,8 @@ public class SecurityConfiguration {
     private  final  String[] SECURED_URLS_ADMIN = {"/holiday-plan/api/admin/**"};
     private  final  String[] SECURED_URLS_EDIT_USER = {"/holiday-plan/api/user/**"};
     private  final  String[] SECURED_URLS_EDIT_USER_HOLIDAY = {"/holiday-plan/api/holiday/**"};
-    private  final  String[]  AUTHENTICATE_PATH={"/holiday-plan/api/app-details/**","/holiday-plan/api/authenticate/**","/holiday-plan/api/logout/"};
+    private  final  String[]  AUTHENTICATE_PATH={"/holiday-plan/api/app-details/**","/holiday-plan/api/authenticate/**",
+            "/holiday-plan/api/logout/"};
     private  final  String[] SECURE_QUERY_END_POINT ={"/holiday-plan/api/user-query/**"};
     @Autowired @Lazy
     private  CustomerAuthenticationProvider authenticationProvider;
@@ -39,6 +41,7 @@ public class SecurityConfiguration {
     private final JwtService jwtService;
     private final TokenService tokenService;
    private  final  AuthenticationConfiguration authenticationConfiguration;
+   private  final Environment environment;
 
 
    @Bean
@@ -49,6 +52,7 @@ public class SecurityConfiguration {
                          authenticationManager(authenticationManager()).
                          userDetailsService(userDetailsService).
                          jwtService(jwtService).tokenService(tokenService).
+                         environment(environment).
                          build();
 
         customerAuthFilter.setFilterProcessesUrl("/holiday-plan/api/authenticate/user/login/");
@@ -57,8 +61,6 @@ public class SecurityConfiguration {
                .authorizeHttpRequests(auth -> auth
                        .requestMatchers(AUTHENTICATE_PATH).permitAll()
                        .requestMatchers(HttpMethod.POST,SECURED_URLS_EDIT_USER_HOLIDAY).permitAll()
-
-                       //.requestMatchers("/holiday-plan/api/admin/user/save/").permitAll()
                        .requestMatchers(SECURED_URLS_ADMIN).hasRole(Roles.ADMIN.name())
                        .requestMatchers(HttpMethod.DELETE,SECURED_URLS_EDIT_USER).hasAuthority(USER_WRITE.name())
                        .requestMatchers(HttpMethod.PUT,SECURED_URLS_EDIT_USER).hasAuthority(USER_WRITE.name())
@@ -82,7 +84,6 @@ public class SecurityConfiguration {
                 addLogoutHandler(logoutHandler)
                .logoutSuccessHandler(((request, response, authentication) -> {
                    // Cookie cookie = new Cookie("username", null);
-
                    for(var cookie :request.getCookies()) {
                        cookie.setAttribute("token",null);
                        cookie.setMaxAge(0);

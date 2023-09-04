@@ -97,6 +97,11 @@
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
             <version>62</version>
         </dependency>
+        <dependency>
+            <groupId>cn.minsin.core</groupId>
+            <artifactId>mutils-core</artifactId>
+            <version>4.0.1.RELEASE</version>
+        </dependency>
     </dependencies>
 
 	<build>

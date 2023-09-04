@@ -94,7 +94,7 @@ public class QueryService  implements OnUserQuery{
      */
     @Override
     public List<UserQuery> findByUsername(String username) {
-        return queryRepository.findByusername(username);
+        return queryRepository.findByUsername(username);
     }
 
     /**

@@ -1,0 +1,14 @@
+.App{
+            display: block  !important;
+}
+.App>div{
+            width: 50% !important;
+}
+.app-body{
+            margin-top: "1rem" !important;
+}
+@media only screen and (max-width:810px){
+            .app-body{
+                        margin-top: "2.5rem" !important;
+            }
+}

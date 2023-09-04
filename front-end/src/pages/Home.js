@@ -1,4 +1,4 @@
-import { Box, InputAdornment,Stack,FormControlLabel} from '@mui/material';
+import { Box,FormControlLabel,Grid} from '@mui/material';
 import { makeStyles} from  "@mui/styles"
 import Card from '../component/HolidayCard';
 import {  useReducer, useEffect, useContext, useState,useMemo} from "react"
@@ -8,13 +8,12 @@ import { FetchHolidayPlan, FilterHolidayPlan} from '../utils/HolidayPlan';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import ColorButton from '../component/ColorButton';
-import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
+import { ERROR_COLOR, LOADING_COLOR } from '../utils/Constant';
 import CustomerTypography from '../component/CustomerTypography';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterList from '../component/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
-import Divider from '@mui/material/Divider';
-import {Switch, IconButton} from '@mui/material';
+import {Switch, Chip} from '@mui/material';
 
 
 
@@ -49,7 +48,7 @@ const Home = ()=>{
   const[filterObject, setFilterObject] = useReducer((state, action)=>{return {...state, ...action}},FILTER_INIT_STATE);
 
   const deleteHolidayCard = (index)=>{
-        const isDataAvailable = cards.data.length>0?true:false;
+        const isDataAvailable = cards.data?.length>0?true:false;
         const data  = [...cards.data.slice(0, index), ...cards.data.slice(index+1)];
         dispatchCards({type:"deleteHoliday", payload:data, isDataAvailable:isDataAvailable});
 
@@ -128,50 +127,86 @@ const Home = ()=>{
   }
   
   //Creates filter component
-  const Filters =FILTERS.map((filter,index)=><FilterList key={index} label={filter.label} name={filter.name}Options={getFilterField(filter.name)} selectOption={setFilterObject}/>)
+  const Filters =FILTERS.map((filter,index)=>{
+     return <Grid item sx={{display:'flex', justifyContent:'start',alignItems:"start",minHeight:'5vh'}}>
+      <FilterList 
+              filtered={filterIsChecked} 
+              key={index} label={filter.label}
+               name={filter.name}Options={getFilterField(filter.name)}
+                selectOption={setFilterObject}
+    /></Grid>
+  })
   
   return (
     
-    <>
-        <AddMoreHolidayPlan isDataAvailable={cards.isResponseSuccess}  className="add-holiday-btn"/>
+    <Grid  spacing={1} sx={{p:2}}>
+        <Grid item sm={12}><AddMoreHolidayPlan isDataAvailable={cards.isResponseSuccess}  className="add-holiday-btn"/></Grid>
         
-           {  cards.isResponseSuccess&&<InputAdornment sx={{padding:"1.3rem"}} position="start">
-            {
-              !openFilter&& <IconButton  sx={{justifyContent:"center",width:"3rem",fontSize:"1rem", alignItems:"center", maxWidth:"100%"}} arial-label="filter"onClick={()=>setOpenFilter(()=>!openFilter)}><FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, }}/>{openFilter?"":"Filter"}</IconButton>
-            }
-             
-            </InputAdornment>
+           {  
+           cards.isResponseSuccess&&
+               <Grid container item spacing={0} sx={{display:"flex", justifyContent:"start", alignItems:"start",minHeight:"1vh"}} position="start">
+                  {
+                    !openFilter&& 
+                    <Grid item>
+                       <Chip
+                          icon={<FilterAltIcon/>}
+                          label="Filter"
+                          onClick={()=>setOpenFilter(()=>!openFilter)}
+                          
+                        />
+                     </Grid>
+                  }
+                  
+                
+                
+                  {
+                    openFilter&&
+                    <Grid container item spacing={0} sx={{width:"fit-content"}}>
+                       <Grid item sx={{display:'flex', justifyContent:'center',alignItems:"center",minHeight:'1vh'}}>
+                     
+                     <Chip
+                       icon={<ClearIcon/>}
+                       label="Close"
+                       onClick={clearFilter}
+                       
+                     />
+
+                   </Grid >
+                      {Filters}
+                      <Grid item sx={{display:"flex", justifyContent:"center", alignItems:"center",minHeight:"1vh"}}>
+                          <FormControlLabel  sx={{width:"2.5rem"}} control={<Switch   checked={filterIsChecked} onChange={filter}
+                          inputProps={{ 'aria-label': 'controlled' }}/>} label="Filter" />
+                      </Grid>
+                      
+                    </Grid>
+
+
+                     
+                    
+                  }
+          </Grid>
+          
           }
-          {
-              openFilter&&<Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={{ xs: 0.5, sm: 1, md: 2 }}
-              sx={{width:"100%"}}
-              useFlexGap flexWrap="wrap"
-              divider={<Divider orientation="vertical" flexItem />}
-             >
-              <ClearIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1.3rem 0rem"}}onClick={clearFilter}/>
-              {Filters}
-              <FormControlLabel  sx={{width:"2.5rem"}} control={<Switch   checked={filterIsChecked} onChange={filter} inputProps={{ 'aria-label': 'controlled' }}/>} label="Filter" />
-               
-            </Stack>
-          }
-   
-    <Box  
-          justifyContent={(cards.data.length===0)||cards.isRequestError?"center":"start"}
-          className={classes.containerBox0}
-          display={{xs:"block",sm:"flex"}}
-          minHeight="100vh"
-      >    {
+          
+         
+    <Grid item sm={12}>
+       {
             ( ((cards.data.length===0) && !(cards.iRequestError||cards.isResponseSuccess) ) || cards.iRequestError )&&
             <CustomerTypography sx={{color:cards.iRequestError?ERROR_COLOR:LOADING_COLOR,fontSize:{sm:"0.8rem",md:"1rem"}}}variant="h5" >
               {cards.iRequestError?cards.message:"Loading ..."}
             </CustomerTypography>
           }
+    </Grid>
+    <Grid item sm={12}
+          className={classes.containerBox0}
+          sx={{minHeight:"100vh", 
+          justifyContent:(cards.data.length===0)||cards.isRequestError?"center":"start",
+           display:{xs:"block",sm:"flex"}}}
+      >   
           {cards.isResponseSuccess&&CardsComponents}
-      </Box>
-    
-  </>
+    </Grid>  
+  </Grid>
+  
   )
 
 }

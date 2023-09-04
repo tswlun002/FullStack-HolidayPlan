@@ -24,7 +24,7 @@ public class AuthenticationService {
     private TokenService tokenService;
     private String getRefreshFromCookie(HttpServletRequest request)  {
         Cookie[] cookies = request.getCookies();
-        if (cookies == null || cookies.length==0)throw  new InvalidCredentials("Invalid credentials, try to re-log");
+        if (cookies == null || cookies.length==0)throw  new InvalidCredentials("Login session expired, re-log");
         var cookie=  cookies[0];
         if(cookie ==null ||!cookie.getName().equals("token")|| cookie.getValue()==null)  throw  new InvalidCredentials("Invalid credentials, try  to  re-log");
         return cookie.getValue();
