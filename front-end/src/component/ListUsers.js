@@ -557,7 +557,6 @@ export default function ListUsers() {
               ),
             [users.data,filterObject.data,filterIsChecked,order, orderBy, page, rowsPerPage],
         );
-
         const [anchorElUser, setAnchorElUser] = React.useState(null);
 
         const getFilterField = (filter)=>{
