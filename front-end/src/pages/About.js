@@ -55,7 +55,7 @@ export default function About({appData}){
                                   }} 
                                   variant={"h2"}
                                   >
-                                       {`Why ${data.name} ?`}
+                                       {`Why ${data?.name} ?`}
                                   </Typography>
                               }
                               position="bottom"
@@ -74,7 +74,7 @@ export default function About({appData}){
                                   }} 
                                   variant={"h2"}
                                   >
-                                      {small?'':`Why ${data.name} ?`}
+                                      {small?'':`Why ${data?.name} ?`}
                                   </Typography>
                                     }
                               
@@ -86,7 +86,7 @@ export default function About({appData}){
                                 textTransform: "none",fontWeight: 500, fontFamily: `Poppins, sans-serif`,lineHeight:small?'2':"2.5rem"}}
                                 align="start" 
                                 variant={"body"}
-                                > {`${data.name}, ${data.about}`}
+                                > {`${data?.name}, ${data?.about}`}
                                 </Typography>
                               </CardContent>
                             </Card>
@@ -110,10 +110,10 @@ export default function About({appData}){
                             </Typography>
                              
                             <Grid item sx={{display:"block"}}>
-                                 <ContactButton  isSmall={small}message={data.phone} label={'telephone'} Icon={LocalPhoneIcon}/>
+                                 <ContactButton  isSmall={small}message={data?.phone} label={'telephone'} Icon={LocalPhoneIcon}/>
                               </Grid>
                               <Grid item sx={{display:"block"}}>
-                                  <ContactButton isSmall={small} message={data.email} label={'telephone'} Icon={EmailIcon}/>
+                                  <ContactButton isSmall={small} message={data?.email} label={'telephone'} Icon={EmailIcon}/>
                               </Grid>
                               <Grid item sx={{display:"block"}}>
                                 <ContactButton  isSmall={small} message={ADDRESS} label={'telephone'} Icon={FaMapMarkerAlt}/>
