@@ -351,9 +351,7 @@ export const LogoutUser = (useAxiosPrivate,dispatchLogin) => {
 
                         errorMessage  = getErrorMessage(err)
                   }
-                 /* setError({errorMessage:errorMessage,
-                                  isLoginError:true})*/
-                 alert(errorMessage)
+               
              }
 
           }
