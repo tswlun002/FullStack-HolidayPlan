@@ -1,4 +1,4 @@
-import { Box, InputAdornment,Stack,FormControlLabel,Grid} from '@mui/material';
+import { Box,FormControlLabel,Grid} from '@mui/material';
 import { makeStyles} from  "@mui/styles"
 import Card from '../component/HolidayCard';
 import {  useReducer, useEffect, useContext, useState,useMemo} from "react"
@@ -8,13 +8,12 @@ import { FetchHolidayPlan, FilterHolidayPlan} from '../utils/HolidayPlan';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UsePrivateAxios from '../utils/UseAxiosPrivate'
 import ColorButton from '../component/ColorButton';
-import { ERROR_COLOR, LOADING_COLOR, SECONDARY_HEADER_COLOR } from '../utils/Constant';
+import { ERROR_COLOR, LOADING_COLOR } from '../utils/Constant';
 import CustomerTypography from '../component/CustomerTypography';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterList from '../component/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
-import Divider from '@mui/material/Divider';
-import {Switch, IconButton} from '@mui/material';
+import {Switch, Chip} from '@mui/material';
 
 
 
@@ -149,34 +148,36 @@ const Home = ()=>{
                   {
                     !openFilter&& 
                     <Grid item>
-                        <IconButton 
-                          sx={{justifyContent:"center",borderRadius:1,width:"3rem",
-                          fontSize:"1rem", alignItems:"center", maxWidth:"100%"}} 
-                          arial-label="filter"
-                          onClick={()=>setOpenFilter(()=>!openFilter)}>
-                            
-                            <FilterAltIcon  sx={{color:SECONDARY_HEADER_COLOR, }}/>{openFilter?"":"Filter"}
-                        </IconButton>
-                    </Grid>
+                       <Chip
+                          icon={<FilterAltIcon/>}
+                          label="Filter"
+                          onClick={()=>setOpenFilter(()=>!openFilter)}
+                          
+                        />
+                     </Grid>
                   }
                   
                 
                 
                   {
                     openFilter&&
-                    <Grid container item>
-                      <Grid item >
-                        <ClearIcon  sx={{color:SECONDARY_HEADER_COLOR, padding:"1.3rem 0rem"}}onClick={clearFilter}/>
-                        <Divider orientation="vertical"  variant="middle" flexItem />
+                    <Grid container item spacing={0} sx={{width:"fit-content"}}>
+                       <Grid item sx={{display:'flex', justifyContent:'center',alignItems:"center",minHeight:'1vh'}}>
+                     
+                     <Chip
+                       icon={<ClearIcon/>}
+                       label="Close"
+                       onClick={clearFilter}
+                       
+                     />
 
-                      </Grid>
+                   </Grid >
                       {Filters}
-
-                      <Grid item>
-                          <Divider orientation="vertical"  variant="middle" flexItem />
+                      <Grid item sx={{display:"flex", justifyContent:"center", alignItems:"center",minHeight:"1vh"}}>
                           <FormControlLabel  sx={{width:"2.5rem"}} control={<Switch   checked={filterIsChecked} onChange={filter}
                           inputProps={{ 'aria-label': 'controlled' }}/>} label="Filter" />
                       </Grid>
+                      
                     </Grid>
 
 
@@ -198,7 +199,7 @@ const Home = ()=>{
     </Grid>
     <Grid item sm={12}
           className={classes.containerBox0}
-          sx={{minHeight:{md:"100vh",sm:0}, 
+          sx={{minHeight:"100vh", 
           justifyContent:(cards.data.length===0)||cards.isRequestError?"center":"start",
            display:{xs:"block",sm:"flex"}}}
       >   
