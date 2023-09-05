@@ -2,3 +2,4 @@ back-end/target
 .idea
 *.txt
 /front-end/public/logo.png
+.env
