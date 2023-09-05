@@ -1,5 +1,5 @@
 
-name: CI/CD HolidayPlan
+name: server CI/CD 
 
 on:
   push:
