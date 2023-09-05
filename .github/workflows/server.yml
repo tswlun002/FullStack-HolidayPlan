@@ -41,7 +41,6 @@ jobs:
       SERVER_SERVICE: ${{secrets.SERVER_SERVICE}}
       DATABASE_TAG: ${{secrets.DATABASE_TAG}}
       SERVER_TAG: ${{secrets.SERVER_TAG}}
-      CLIENT_TAG: ${{secrets.CLIENT_TAG}}
       DATABASE_PORT: ${{secrets.DATABASE_PORT}}
       SERVER_PORT: ${{secrets.SERVER_PORT}}
       BASE_URL: ${{secrets.BASE_URL}}
