@@ -25,8 +25,8 @@ jobs:
       run: |
          docker images
          docker login -u  ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_PASSWORD}} docker.io
-         docker tag tour-back-end:${{secrets.SERVER_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour/tour-back-end:${{secrets.SERVER_TAG}}
-         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour/tour-back-end:${{secrets.SERVER_TAG}}
+         docker tag tour-back-end:${{secrets.SERVER_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end_v${{secrets.SERVER_TAG}}
+         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end_v${{secrets.SERVER_TAG}}
      # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     env:
       TOUR_USER: ${{secrets.TOUR_USER}}
