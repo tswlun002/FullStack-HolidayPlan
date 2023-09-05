@@ -11,7 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
 import  {FaTrash,FaMapMarkerAlt, FaMinus, FaPlus} from 'react-icons/fa'
-import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel , Grid} from '@mui/material';
+import { FormControl,RadioGroup, FormControlLabel,Radio,FormLabel , Grid,Tooltip} from '@mui/material';
 import {DeleteHolidayPlan,UpdateHolidayPlan} from '../utils/HolidayPlan';
 import  UseAxiosPrivate from '../utils/UseAxiosPrivate';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -138,6 +138,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
           
         }
         action={
+          <Tooltip title="Duplicate Holiday">
           <NavLink 
             to={{
                 pathname:"addHolidayPlan",
@@ -147,7 +148,7 @@ export default function HolidayCard({data,index,deleteHolidayCard,updateHolidayC
               exact
           >
             <RedoIcon />
-          </NavLink>
+          </NavLink></Tooltip>
         }
     
         title={`${data.location}, ${data.city}`}
