@@ -67,7 +67,7 @@ jobs:
       mvn --batch-mode  --update-snapshots verify
       cd ..
    - name: copy target directory
-     run: mkdir staging && cp back-end/target/*.jar staging
+     run: mkdir staging && cp target/*.jar staging
    - uses: actions/upload-artifact@v3
      with: 
       name: Package
