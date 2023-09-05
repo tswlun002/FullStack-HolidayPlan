@@ -5,8 +5,39 @@ on:
   push:
     branches: [ "main" ]
 jobs:
-  build:
-
+  check:
+    name: Check files
+    outputs:
+      run_job: ${{ steps.check_files.outputs.run_job }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: check modified files
+        id: check_files
+        run: |
+          echo "=============== list modified files ==============="
+          git diff --name-only HEAD^ HEAD
+          
+          echo "========== check paths of modified files =========="
+          git diff --name-only HEAD^ HEAD &gt; files.txt
+          while IFS= read -r file
+          do
+            echo $file
+            if [[ $file != back-end/* ]]; then
+              echo "This modified file is not under the 'db' folder."
+              echo "::set-output name=run_job::false"
+              break
+            else
+              echo "::set-output name=run_job::true"
+            fi
+          done &lt; files.txt
+  server:
+    name: Job for 'back-end' folder
+    needs: check
+    if: needs.check.outputs.run_job == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -20,27 +51,29 @@ jobs:
     - name: install back-end
       run: mvn -B  install --file back-end/pom.xml
     - name: build  back-end image
-      run: docker compose build  tour-server
-    - name: Login to Docker Hub and push
+      run: docker compose build  
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{secrets.DOCKERHUB_PASSWORD}}
+    - name: push to Docker Hub
       run: |
-         docker images
-         docker login -u  ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_PASSWORD}} docker.io
          docker tag tour-back-end:${{secrets.SERVER_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end_v${{secrets.SERVER_TAG}}
          docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end_v${{secrets.SERVER_TAG}}
-     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
+         docker tag tour-front-end:${{secrets.CLIENT_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
+         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
     env:
       TOUR_USER: ${{secrets.TOUR_USER}}
       PASSWORD: ${{secrets.PASSWORD}}
       DATABASE_NAME: ${{secrets.DATABASE_NAME}}
       DATABASE_SERVICE: ${{secrets.DATABASE_SERVICE}}
       SERVER_SERVICE: ${{secrets.SERVER_SERVICE}}
-      CLIENT_SERVICE: ${{secrets.CLIENT_SERVICE}}
       DATABASE_TAG: ${{secrets.DATABASE_TAG}}
       SERVER_TAG: ${{secrets.SERVER_TAG}}
       CLIENT_TAG: ${{secrets.CLIENT_TAG}}
       DATABASE_PORT: ${{secrets.DATABASE_PORT}}
       SERVER_PORT: ${{secrets.SERVER_PORT}}
-      CLIENT_PORT: ${{secrets.CLIENT_PORT}}
       BASE_URL: ${{secrets.BASE_URL}}
       JWT_SIGNING_KEY: ${{secrets.JWT_SIGNING_KEY}}
       JWT_ACCESS_TOKEN_PERIOD: ${{secrets.JWT_ACCESS_TOKEN_PERIOD}}
@@ -57,6 +90,31 @@ jobs:
       SOCIALS: ${{secrets.SOCIALS}}
       NAME: ${{secrets.NAME}}
       APP: ${{secrets.APP}}
+  client:
+    name: Job for 'front-end' folder
+    needs: check
+    if: needs.check.outputs.run_job == 'false'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: build  back-end image
+      run: docker compose build  
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{secrets.DOCKERHUB_PASSWORD}}
+    - name: push to Docker Hub
+      run: |
+         docker tag tour-front-end:${{secrets.CLIENT_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
+         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
+    env:
+      SERVER_SERVICE: ${{secrets.SERVER_SERVICE}}
+      CLIENT_SERVICE: ${{secrets.CLIENT_SERVICE}}
+      CLIENT_TAG: ${{secrets.CLIENT_TAG}}
+      CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+     
 
   
 
