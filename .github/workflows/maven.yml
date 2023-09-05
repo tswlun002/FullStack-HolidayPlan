@@ -58,7 +58,7 @@ jobs:
    steps: 
    - uses: actions/checkout@v3
    - name: copy target directory
-     run: mkdir staging && cp back-end/target/* staging
+     run: mkdir staging && cp target/* staging
    - uses: actions/upload-artifact@v3
      with: 
       name: Package
