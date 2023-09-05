@@ -17,7 +17,7 @@ Generate jar file using Maven, [more info, click here](https://www.jetbrains.com
 ### After generating the jar file, run the commands below start the app:
 ```
 $ make config    # config docker compose
-$ make run       # run the docker compose
+$ make run       # run the docker compose for database, server and client container
 
 $ make run-client # run only the front-end docker compose part
 $ make run-server  # run only the back-end docker compose part
@@ -36,7 +36,6 @@ $ make clean     #clean container and txt file
   ```
   username: tour01@tour.com
   password: 123456
-  Or can check latest update credentials on .env file
   ```
 ### FUNCTIONS OF THE APP
 - ADMIN FUNCTIONS
