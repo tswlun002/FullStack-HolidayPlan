@@ -3,42 +3,12 @@ name: CI/CD HolidayPlan
 
 on:
   push:
+    paths:
+    - "back-end/**"
     branches: [ "main" ]
 jobs:
-  check:
-    name: Check files
-    outputs:
-      run_job: ${{ steps.check_files.outputs.run_job }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-      - name: check modified files
-        id: check_files
-        run: |
-          echo "=============== list modified files ==============="
-          git diff --name-only HEAD^ HEAD
-          
-          echo "========== check paths of modified files =========="
-          git diff --name-only HEAD^ HEAD &git; files.txt
-          while IFS= read -r file
-          do
-            echo $file
-            if [[ $file == back-end/* ]]; then
-               echo "::set-output name=run_job::server"
-            elif [[ $file == front-end/* ]]; then
-              echo "::set-output name=run_job::client"
-            else
-              echo "This modified file is not under the 'front-end' folder."
-              echo "::set-output name=run_job::none"
-              break
-            fi
-          done &lt; files.txt
   server:
     name: Job for 'back-end' folder
-    needs: check
     if: needs.check.outputs.run_job == 'true'
     runs-on: ubuntu-latest
 
@@ -92,30 +62,7 @@ jobs:
       SOCIALS: ${{secrets.SOCIALS}}
       NAME: ${{secrets.NAME}}
       APP: ${{secrets.APP}}
-  client:
-    name: Job for 'front-end' folder
-    needs: check
-    if: needs.check.outputs.run_job == 'false'
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    - name: build  back-end image
-      run: docker compose build ${{secrets.CLIENT_SERVICE}}
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{secrets.DOCKERHUB_PASSWORD}}
-    - name: push to Docker Hub
-      run: |
-         docker tag tour-front-end:${{secrets.CLIENT_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
-         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
-    env:
-      SERVER_SERVICE: ${{secrets.SERVER_SERVICE}}
-      CLIENT_SERVICE: ${{secrets.CLIENT_SERVICE}}
-      CLIENT_TAG: ${{secrets.CLIENT_TAG}}
-      CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+ 
      
 
   
