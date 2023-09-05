@@ -1,5 +1,5 @@
 
-#  FullStack-HolidayPlan
+#  [Holiday-Plan-App](http://localhost:3000)
 Allow user to add their holiday plan, 
 and query if they have a question(s) related to the site.
 Admins can respond to user questions.
@@ -26,5 +26,36 @@ $ make clean     #clean container and txt file
 ```
 ### OPEN following the link on your browser after running the above command successfully
 [Holiday-Plan-App](http://localhost:3000)
-After, the user can register and login
+
+### LOGINS
+- LOGIN AS USER
+  - Need to register first
+  - After successful registered, you can use credintials to login
+- LOGIN AS ADMIN
+  -  Use following defaulted admin credentials
+  ```
+  username: tour01@tour.com
+  password: 123456
+  Or can check latest update credentials on .env file
+  ```
+### FUNCTIONS OF THE APP
+- ADMIN FUNCTIONS
+  - Login using default user details
+  - Respond to user query
+  - Manage users like Add user, update user details(except password), delete user  and add or delete roles and permissions to user
+  - Manage roles like add role, update role, delete role and add or delete permissions to role
+  - Manage permission like add and delete permissions
+  - Update their profile/account detail except emails
+  - logout 
+- USER FUNCTIONS
+  -  Register itself
+  -  Login
+  -  Add or delete Holiday plan card
+  -  Update Holiday plan card priority
+  -  Submit query
+  -  Can see their queries
+  -  Can delete their query at any query state(active or solved)
+  -  Update their account details
+  -  Logout
+   
 

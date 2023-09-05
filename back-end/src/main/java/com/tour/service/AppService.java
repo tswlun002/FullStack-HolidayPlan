@@ -87,6 +87,7 @@ public class AppService {
 
         AppDTO ltDTO = null;
         try{
+            app =app.replace("\n", "");
             ltDTO= new ObjectMapper().readValue(app, AppDTO.class);
         }catch (Exception e){
             CatchException.catchException(e);
