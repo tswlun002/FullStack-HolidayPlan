@@ -20,7 +20,7 @@ jobs:
     - name: install back-end
       run: mvn -B  package --file back-end/pom.xml
     - name: build  back-end image
-      run: docker compose build -d tour-server
+      run: docker compose build  tour-server
  
      # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
