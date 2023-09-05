@@ -28,7 +28,7 @@ services:
         - APP=${APP}
         - ADDRESS=${ADDRESS}
         - SOCIALS=${SOCIALS}
-    image: tswlun002/tour-back-end:${SERVER_TAG}
+    image: tour-back-end:${SERVER_TAG}
     container_name: ${SERVER_SERVICE}
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
@@ -53,7 +53,7 @@ services:
     build:
       context: ./front-end
     container_name: ${CLIENT_SERVICE}
-    image: tswlun002/tour-front-end:${CLIENT_TAG}
+    image: tour-front-end:${CLIENT_TAG}
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
     expose:
