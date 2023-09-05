@@ -33,8 +33,6 @@ jobs:
       run: |
          docker tag tour-back-end:${{secrets.SERVER_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end_v${{secrets.SERVER_TAG}}
          docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end_v${{secrets.SERVER_TAG}}
-         docker tag tour-front-end:${{secrets.CLIENT_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
-         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
     env:
       TOUR_USER: ${{secrets.TOUR_USER}}
       PASSWORD: ${{secrets.PASSWORD}}
