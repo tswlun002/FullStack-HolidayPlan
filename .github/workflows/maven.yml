@@ -28,7 +28,10 @@ jobs:
           password: ${{secrets.DOCKERHUB_PASSWORD}}
     - name: Build and push
       run: |
-        docker push tswlun002/tour:tour-back-end
+         pwd
+         ls -lrt
+         docker images
+         docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-back-end
      # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     env:
       TOUR_USER: ${{secrets.TOUR_USER}}
