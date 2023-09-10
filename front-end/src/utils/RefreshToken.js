@@ -8,7 +8,7 @@ const UseRefreshToken = ()=>{
     const refresh = async() =>{
 
         const response = await  axios.get(
-            '/holiday-plan/api/authenticate/token/refresh/',
+            '/holiday-plan/api/authenticate/accessToken/refresh/',
             {
                 withCredentials:true,
 
