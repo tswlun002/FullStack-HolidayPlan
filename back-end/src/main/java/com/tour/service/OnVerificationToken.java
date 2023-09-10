@@ -11,6 +11,7 @@ public interface OnVerificationToken {
     boolean   saveToken(VerificationToken token);
 
     Optional<VerificationToken> findByToken(String token);
+    Optional<VerificationToken> findByUserId(Long userId);
 
     boolean deleteToken(String token);
 

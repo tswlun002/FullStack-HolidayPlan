@@ -10,4 +10,7 @@ import java.util.Optional;
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken , Long> {
     @Query("select vt from VerificationToken vt inner join fetch vt.user where vt.token=:token")
     Optional<VerificationToken> findByToken(String token);
+
+    @Query("select vt from VerificationToken vt inner join fetch vt.user u where u.id=:userId")
+    Optional<VerificationToken> findByUserId(Long userId);
 }

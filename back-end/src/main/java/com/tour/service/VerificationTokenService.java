@@ -50,6 +50,11 @@ public class VerificationTokenService implements  OnVerificationToken {
         return repository.findByToken(token);
     }
 
+    @Override
+    public Optional<VerificationToken> findByUserId(Long userId) {
+        return repository.findByUserId(userId);
+    }
+
     /**
      * Delete verification token
      * @param token is the token to delete
