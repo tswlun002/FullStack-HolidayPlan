@@ -21,7 +21,7 @@ public class App {
     @Column(name = "app_name")
     private String name;
     @Lob
-    @Column(columnDefinition ="LONGBLOB")
+    @Column(length = 16777215 )
     private byte[] logo;
     @Column(name = "app_logo_format",nullable = false)
     private String logoExtension;
