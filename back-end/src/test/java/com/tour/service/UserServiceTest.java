@@ -1,8 +1,10 @@
 package com.tour.service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.RegisterUserRequest;
 import com.tour.dto.UserEvent;
-import com.tour.exception.*;
+import com.tour.exception.AppInternalException;
+import com.tour.exception.DuplicateException;
+import com.tour.exception.NotFoundException;
+import com.tour.exception.NullException;
 import com.tour.model.Permission;
 import com.tour.model.Role;
 import com.tour.model.User;
@@ -16,19 +18,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
+
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import static com.tour.utils.Permissions.*;
 import static com.tour.utils.Roles.ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

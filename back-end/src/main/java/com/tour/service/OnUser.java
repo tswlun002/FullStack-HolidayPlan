@@ -5,8 +5,6 @@ import com.tour.model.User;
 import com.tour.utils.VerificationURL;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public interface OnUser {
 
