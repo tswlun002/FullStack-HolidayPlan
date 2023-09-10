@@ -60,3 +60,10 @@ jobs:
       SOCIALS: ${{secrets.SOCIALS}}
       NAME: ${{secrets.NAME}}
       APP: ${{secrets.APP}}
+      MAIL_HOST: ${{secrets.MAIL_HOST}}
+      MAIL_USERNAME: ${{secrets.MAIL_USERNAME}}
+      MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
+      MAIL_PROTOCOL: ${{secrets.MAIL_PROTOCOL}}
+      MAIL_PORT: ${{secrets.MAIL_PORT}}
+      VERIFICATION_EXPIRE_TIME: ${{secrets.VERIFICATION_EXPIRE_TIME}}
+      CONTENT: ${{secrets.CONTENT}}
