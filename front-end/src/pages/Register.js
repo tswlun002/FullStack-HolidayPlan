@@ -14,7 +14,6 @@ const Register =()=>{
     const [dateType, setDateType]= useState("text");
     const INIT_STATE ={firstname:"",lastname:"",email:"",password:"",confirmPassword:"",userType:"USER",age:"",
      registered:false, isRegisterError:false, errorMessage: ''}
-    //Login registered values
     const[register, dispatchRegister] = useReducer((state, action)=>{
         return {...state,...action }
     },INIT_STATE)
@@ -77,7 +76,7 @@ const Register =()=>{
                                     Register
                                 </Typography>
                             }
-                        subheader={ register.isRegisterError?register.errorMessage:register.registered&&'Successful registered'}
+                        subheader={ register.isRegisterError?register.errorMessage:register.registered&&'Successful registered, check your emails and verify'}
                         subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:register.isRegisterError?ERROR_COLOR:SUCCESS_COLOR}}
                         
                     />
