@@ -1,9 +1,8 @@
 package com.tour.security;
 
 import com.tour.service.JwtService;
-import com.tour.service.TokenService;
+import com.tour.service.AccessTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -30,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private  CustomerUserDetailsService userDetailsService;
     @Autowired
-    private  TokenService tokenService;
+    private AccessTokenService accessTokenService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         if( request.getServletPath().equals("/holiday-plan/api/authenticate/user/login")||
@@ -41,19 +39,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         String username ;
-        if (authHeader == null || !authHeader.startsWith(TokenAlgorithm.Bearer.getName()+" ")){
+        if (authHeader == null || !authHeader.startsWith(AccessTokenAlgorithm.Bearer.getName()+" ")){
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(TokenAlgorithm.Bearer.name().length()).trim();
+        jwt = authHeader.substring(AccessTokenAlgorithm.Bearer.name().length()).trim();
         try {
             username = jwtService.extractUsername(jwt);
             //if user is present and is not authenticated
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 CustomerUserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                var isTokenValid = this.tokenService.findByToken(jwt).map(token1 ->
+                var isTokenValid = this.accessTokenService.findByToken(jwt).map(token1 ->
                         !token1.isExpired() && !token1.isRevoked()).orElse(false);
-                //if the token on the header and database is still valid, update security holder context
+                //if the accessToken on the header and database is still valid, update security holder context
                 if(jwtService.isTokenValid(jwt,userDetails.user()) && isTokenValid){
                     var authenticationToken =
                             new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());

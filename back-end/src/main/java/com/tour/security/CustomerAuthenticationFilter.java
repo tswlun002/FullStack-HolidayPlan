@@ -1,22 +1,18 @@
 package com.tour.security;
 
-import com.tour.model.Token;
+import com.tour.model.AccessToken;
 import com.tour.model.User;
 import com.tour.service.JwtService;
-import com.tour.service.TokenService;
+import com.tour.service.AccessTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.buf.StringUtils;
-import org.aspectj.weaver.Utils;
-import org.checkerframework.common.value.qual.StringVal;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.util.NumberUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,12 +30,12 @@ import static com.tour.security.TokenType.REFRESH_TOKEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Builder
-
+@Slf4j
 @RequiredArgsConstructor
 public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticationFilter {
     private  final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final TokenService tokenService;
+    private final AccessTokenService accessTokenService;
     private final CustomerUserDetailsService userDetailsService;
     private  final Environment environment;
 
@@ -63,16 +58,16 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         var user = userDetailsService.loadUserByUsername(username).user();
         var access_token  = jwtService.generateAccessToken(user);
         var refresh_token = jwtService.generateRefreshToken(user);
-        tokenService.revokeAllUserToken(user,REFRESH_TOKEN);
-        tokenService.revokeAllUserToken(user, ACCESS_TOKEN);
+        accessTokenService.revokeAllUserToken(user,REFRESH_TOKEN);
+        accessTokenService.revokeAllUserToken(user, ACCESS_TOKEN);
         saveUserToken(user,access_token, ACCESS_TOKEN);
         saveUserToken(user, refresh_token,REFRESH_TOKEN);
         Map<String,String> tokens = new HashMap<>();
         tokens.put("access_token",access_token);
-        Cookie cookie = new Cookie("token", refresh_token);
-        var period = environment.getProperty("jwt.refresh.token.period");
-        System.out.println("*************************************"+period+"**************************");
-        if(period==null||!period.matches("[0-9]+"))throw  new IOException("Invalid cookies period");
+        Cookie cookie = new Cookie("accessToken", refresh_token);
+        var period = environment.getProperty("jwt.refresh.accessToken.period");
+        log.info("Refresh access token is: {}", period);
+        if(period==null||!period.matches("[0-9]+"))throw  new RuntimeException("Invalid cookies period");
 
         int REFRESH_TOKEN_PERIOD= Integer.parseInt(period.trim());
         cookie.setMaxAge(REFRESH_TOKEN_PERIOD); // expires in 7 days
@@ -96,7 +91,7 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         new ObjectMapper().writeValue(response.getOutputStream(),tokens);
     }
     private void saveUserToken(User user, String jwt, TokenType tokenType) {
-        var token = Token.builder().user(user).token(jwt).tokenType(tokenType).expired(false).revoked(false).build();
-        tokenService.save(token);
+        var token = AccessToken.builder().user(user).token(jwt).tokenType(tokenType).expired(false).revoked(false).build();
+        accessTokenService.save(token);
     }
 }

@@ -3,9 +3,9 @@ package com.tour.service;
 import com.tour.exception.DuplicateException;
 import com.tour.exception.NotFoundException;
 import com.tour.exception.NullException;
-import com.tour.model.Token;
+import com.tour.model.AccessToken;
 import com.tour.model.User;
-import com.tour.repository.TokenRepository;
+import com.tour.repository.AccessTokenRepository;
 import com.tour.security.TokenType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,25 +26,25 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TokenServiceTest {
-     @Mock private TokenRepository repository;
-     @InjectMocks private  TokenService service;
+class AccessAccessTokenServiceTest {
+     @Mock private AccessTokenRepository repository;
+     @InjectMocks private AccessTokenService service;
 
     @BeforeEach
     void setUp() {
-        service = new TokenService(repository);
+        service = new AccessTokenService(repository);
     }
     @Test
     void saveToken() {
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("31c99GfJ222pS8WJdGZgiM8sJPFSSbl2D55pFj2r3X2wYz87cY").expired(false).
+        var token = AccessToken.builder().token("31c99GfJ222pS8WJdGZgiM8sJPFSSbl2D55pFj2r3X2wYz87cY").expired(false).
                 tokenType(REFRESH_TOKEN).revoked(false).user(user).build();
         when(repository.findByTokenName(token.getToken())).thenReturn(Optional.empty());
         service.save(token);
         verify(repository,times(1)).findByTokenName(token.getToken());
-        ArgumentCaptor<Token> captor = ArgumentCaptor.forClass(Token.class);
+        ArgumentCaptor<AccessToken> captor = ArgumentCaptor.forClass(AccessToken.class);
         verify(repository,times(1)).save(captor.capture());
         assertThat(captor.getValue()).isEqualTo(token);
     }
@@ -55,21 +55,21 @@ class TokenServiceTest {
         verify(repository,times(0)).findByTokenName(anyString());
         verify(repository,times(0)).save(any());
         assertThat(actual).isExactlyInstanceOf(NullException.class);
-        assertThat(actual.getMessage()).isEqualTo("Token is not invalid");
+        assertThat(actual.getMessage()).isEqualTo("AccessToken is not invalid");
     }
     @Test
     void saveDuplicateToken() {
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(ACCESS_TOKEN).revoked(false).user(user).build();
         when(repository.findByTokenName(token.getToken())).thenReturn(Optional.of(token));
         var actual  = assertThrows(DuplicateException.class, ()->service.save(token));
         verify(repository,times(1)).findByTokenName(token.getToken());
         verify(repository,times(0)).save(any());
         assertThat(actual).isExactlyInstanceOf(DuplicateException.class);
-        assertThat(actual.getMessage()).isEqualTo("Token already exists");
+        assertThat(actual.getMessage()).isEqualTo("AccessToken already exists");
     }
 
     @Test
@@ -77,7 +77,7 @@ class TokenServiceTest {
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(ACCESS_TOKEN).revoked(false).user(user).build();
         when(repository.findByTokenName(token.getToken())).thenReturn(Optional.of(token));
         var actual  =service.findByToken(token.getToken());
@@ -90,13 +90,13 @@ class TokenServiceTest {
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(ACCESS_TOKEN).revoked(false).user(user).build();
         when(repository.findByTokenName(token.getToken())).thenReturn(Optional.empty());
         var actual  = assertThrows(NotFoundException.class, ()->service.findByToken(token.getToken()));
         verify(repository, times(1)).findByTokenName(token.getToken());
         assertThat(actual).isExactlyInstanceOf(NotFoundException.class);
-        assertThat(actual.getMessage()).isEqualTo("Token is not found");
+        assertThat(actual.getMessage()).isEqualTo("AccessToken is not found");
     }
 
     @ParameterizedTest
@@ -105,7 +105,7 @@ class TokenServiceTest {
         var user  = User.builder().id(1L).username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(TokenType.valueOf(type)).revoked(false).user(user).build();
         when(repository.findValidTokenByUser(user.getId(),TokenType.valueOf(type))).thenReturn(List.of(token));
         var actual  =service.findByAllValidToken(user,TokenType.valueOf(type));
@@ -118,9 +118,9 @@ class TokenServiceTest {
         var user  = User.builder().id(1L).username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var accessToken = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var accessToken = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(ACCESS_TOKEN).revoked(false).user(user).build();
-        var refreshToken = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var refreshToken = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(REFRESH_TOKEN).revoked(false).user(user).build();
         when(repository.findAllTokenByUser(user.getId(),ACCESS_TOKEN)).thenReturn(List.of(accessToken));
         when(repository.findAllTokenByUser(user.getId(),REFRESH_TOKEN)).thenReturn(List.of(refreshToken));
@@ -139,7 +139,7 @@ class TokenServiceTest {
         var user  = User.builder().id(1L).username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(false).
                 tokenType(TokenType.valueOf(type)).revoked(false).user(user).build();
         when(repository.findByTokenName(token.getToken())).thenReturn(Optional.of(token));
         var actual  =service.revokeToken(token);
@@ -154,7 +154,7 @@ class TokenServiceTest {
         var user  = User.builder().id(1L).username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(true).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(true).
                 tokenType(TokenType.valueOf(type)).revoked(true).user(user).build();
         when(repository.findByTokenName(token.getToken())).thenReturn(Optional.of(token));
         var actual  =service.revokeToken(token);
@@ -171,7 +171,7 @@ class TokenServiceTest {
         var user  = User.builder().id(1L).username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
-        var token = Token.builder().token("77HJ59l7DF2v4U529XZ217").expired(true).
+        var token = AccessToken.builder().token("77HJ59l7DF2v4U529XZ217").expired(true).
                 tokenType(tokenType).revoked(true).user(user).build();
         when(repository.findValidTokenByUser(user.getId(),tokenType)).thenReturn(List.of(token));
         var actual  =service.revokeAllUserToken(user,tokenType);

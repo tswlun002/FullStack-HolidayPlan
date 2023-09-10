@@ -7,14 +7,13 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.checkerframework.common.aliasing.qual.Unique;
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
 @Entity
-@Table(name = "Token")
+@Table(name = "AccessToken")
 @RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +21,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @ToString
-public class Token {
+public class AccessToken {
     @Id
     @GenericGenerator(name="cmrSeq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
@@ -31,11 +30,11 @@ public class Token {
     @GeneratedValue(generator = "sequence_ID")
     @Column(name = "id", nullable = false)
     private Long id;
-    @Size(min = 50, message="Token must be at least 50 characters")
-    @NotBlank(message = "Token is required. Token must be at least 50 characters")
-    @NotEmpty(message = "Token is required. Token must be at least 50 characters")
+    @Size(min = 50, message="AccessToken must be at least 50 characters")
+    @NotBlank(message = "AccessToken is required. AccessToken must be at least 50 characters")
+    @NotEmpty(message = "AccessToken is required. AccessToken must be at least 50 characters")
     @NonNull
-    @Column(unique = true, nullable = false,length = 1536, name = "token")
+    @Column(unique = true, nullable = false,length = 1536, name = "accessToken")
     @Unique
     private String token;
     @NonNull
@@ -53,9 +52,9 @@ public class Token {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Token token1)) return false;
-        return isRevoked() == token1.isRevoked() && isExpired() == token1.isExpired() && Objects.equals(getToken(),
-                token1.getToken()) && getTokenType() == token1.getTokenType();
+        if (!(o instanceof AccessToken accessToken1)) return false;
+        return isRevoked() == accessToken1.isRevoked() && isExpired() == accessToken1.isExpired() && Objects.equals(getToken(),
+                accessToken1.getToken()) && getTokenType() == accessToken1.getTokenType();
     }
 
     @Override

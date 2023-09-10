@@ -1,6 +1,6 @@
 package com.tour.repository;
 
-import com.tour.model.Token;
+import com.tour.model.AccessToken;
 import com.tour.model.User;
 import com.tour.security.TokenType;
 import org.junit.jupiter.api.*;
@@ -16,26 +16,26 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DataJpaTest
-class TokenRepositoryTest {
+class AccessAccessTokenRepositoryTest {
 
-    @Autowired private TokenRepository repository;
+    @Autowired private AccessTokenRepository repository;
     @Autowired private  UserRepository userRepository;
 
     boolean userFlag;
 
     @ParameterizedTest
     @MethodSource("getArgs")
-    void findValidTokenByValidUserId(Token token) {
-        var user = token.getUser();
-        saveToken(user, token);
+    void findValidTokenByValidUserId(AccessToken accessToken) {
+        var user = accessToken.getUser();
+        saveToken(user, accessToken);
         userFlag = user.getFirstname().equals("Lunga");
         var actual = repository.findValidTokenByUser(user.getId(), userFlag ?
         TokenType.ACCESS_TOKEN : TokenType.REFRESH_TOKEN);
         Assertions.assertFalse(actual.isEmpty());
         Assertions.assertEquals(1, actual.size());
         Assertions.assertEquals(userFlag ? TokenType.ACCESS_TOKEN : TokenType.REFRESH_TOKEN,
-        token.getTokenType());
-        var isValid = token.isExpired() && token.isRevoked();
+        accessToken.getTokenType());
+        var isValid = accessToken.isExpired() && accessToken.isRevoked();
         assertFalse(isValid);
         deleteToken();
 
@@ -43,11 +43,11 @@ class TokenRepositoryTest {
 
     @ParameterizedTest
     @MethodSource("getArgs")
-    void findValidTokenByValidUserIdWhenUserTokenIsInvalid(Token token) {
-        token.setExpired(true);
-        token.setRevoked(true);
-        var user = token.getUser();
-        saveToken(user, token);
+    void findValidTokenByValidUserIdWhenUserTokenIsInvalid(AccessToken accessToken) {
+        accessToken.setExpired(true);
+        accessToken.setRevoked(true);
+        var user = accessToken.getUser();
+        saveToken(user, accessToken);
         userFlag = user.getFirstname().equals("Lunga");
         var actual = repository.findValidTokenByUser(user.getId(),userFlag?
                 TokenType.ACCESS_TOKEN:TokenType.REFRESH_TOKEN);
@@ -58,10 +58,10 @@ class TokenRepositoryTest {
 
     @ParameterizedTest
     @MethodSource("getArgs")
-    void findAllTokenByUserWhenTokenAreValid(Token token) {
+    void findAllTokenByUserWhenTokenAreValid(AccessToken accessToken) {
 
-        var user = token.getUser();
-        saveToken(user, token);
+        var user = accessToken.getUser();
+        saveToken(user, accessToken);
         userFlag = user.getFirstname().equals("Lunga");
         var actual = repository.findAllTokenByUser(user.getId(),userFlag?
                 TokenType.ACCESS_TOKEN:TokenType.REFRESH_TOKEN);
@@ -77,11 +77,11 @@ class TokenRepositoryTest {
     }
     @ParameterizedTest
     @MethodSource("getArgs")
-    void findAllTokenByUserWhenTokenAreInValid(Token token) {
-        token.setExpired(true);
-        token.setRevoked(true);
-        var user = token.getUser();
-        saveToken(user, token);
+    void findAllTokenByUserWhenTokenAreInValid(AccessToken accessToken) {
+        accessToken.setExpired(true);
+        accessToken.setRevoked(true);
+        var user = accessToken.getUser();
+        saveToken(user, accessToken);
         userFlag = user.getFirstname().equals("Lunga");
         var actual = repository.findAllTokenByUser(user.getId(),userFlag?
                 TokenType.ACCESS_TOKEN:TokenType.REFRESH_TOKEN);
@@ -90,24 +90,24 @@ class TokenRepositoryTest {
         var token_out  = actual.get(0);
         Assertions.assertEquals(userFlag?TokenType.ACCESS_TOKEN:TokenType.REFRESH_TOKEN,
                 token_out.getTokenType());
-        var isInvalid  = token_out.isExpired() && token.isRevoked();
+        var isInvalid  = token_out.isExpired() && accessToken.isRevoked();
         assertTrue(isInvalid);
         deleteToken();
     }
 
     @ParameterizedTest
     @MethodSource("getArgs")
-    void findByTokenByValidName(Token token) {
-            saveToken(token.getUser(), token);
-            var actual  = repository.findByTokenName(token.getToken());
+    void findByTokenByValidName(AccessToken accessToken) {
+            saveToken(accessToken.getUser(), accessToken);
+            var actual  = repository.findByTokenName(accessToken.getToken());
             assertTrue(actual.isPresent());
-            assertEquals(token, actual.get());
+            assertEquals(accessToken, actual.get());
             deleteToken();
     }
     @ParameterizedTest
     @MethodSource("getArgs")
-    void findByTokenByInValidName(Token token) {
-        saveToken(token.getUser(), token);
+    void findByTokenByInValidName(AccessToken accessToken) {
+        saveToken(accessToken.getUser(), accessToken);
         String [] names ={"tata","toko","mama"};
         Arrays.stream(names).forEach(name->{
             var actual  = repository.findByTokenName(name);
@@ -123,19 +123,19 @@ class TokenRepositoryTest {
        var user2 =User.builder().age(new java.util.Date(Date.valueOf("1999-08-08").getTime())).firstname("Sakhe").
                 lastname("Nombombo").password("123456").username("sakhe01@gmail.com").build();
 
-        var token_1  = Token.builder().token("38782F413F4428472B4B6250645367566B5970404E635266556A586E32723575").
+        var token_1  = AccessToken.builder().token("38782F413F4428472B4B6250645367566B5970404E635266556A586E32723575").
                 tokenType(TokenType.ACCESS_TOKEN).user(user1).
                 expired(false).revoked(false).build();
-        var token_2  = Token.builder().token("404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970").
+        var token_2  = AccessToken.builder().token("404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970").
                 tokenType(TokenType.REFRESH_TOKEN).user(user2).
                 expired(false).revoked(false).build();
 
         return  Stream.of(Arguments.of(token_1), Arguments.of(token_2));
     }
-    void saveToken(User user, Token token){
+    void saveToken(User user, AccessToken accessToken){
         user= userRepository.save(user);
-        token.setUser(user);
-        repository.save(token);
+        accessToken.setUser(user);
+        repository.save(accessToken);
     }
     void deleteToken(){
         repository.deleteAll();
