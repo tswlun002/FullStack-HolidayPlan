@@ -2,6 +2,7 @@ package com.tour.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.EditUserRequest;
+import com.tour.dto.RegisterEvent;
 import com.tour.dto.RegisterUserRequest;
 import com.tour.dto.UserEvent;
 import com.tour.exception.CatchException;
@@ -13,9 +14,11 @@ import com.tour.model.Role;
 import com.tour.model.User;
 import com.tour.repository.UserRepository;
 import com.tour.utils.Roles;
+import com.tour.utils.VerificationURL;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,10 +27,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements OnUser {
@@ -61,6 +65,7 @@ public class UserService implements OnUser {
      */
     @PostConstruct
     protected void saveDefaultUser(){
+        boolean saved = false;
         try{
             if(userRepository.count()==0){
                 var userDTO = getDefaultUser();
@@ -72,34 +77,51 @@ public class UserService implements OnUser {
                         age(userDTO.age())
                         .roles(Set.of(role)).build();
                 userRepository.save(user);
+                saved=true;
             }
         }catch (Exception e){
             CatchException.catchException(e);
+        }
+        if(saved){
+
+           log.info("Defaulted user is saved successfully");
+        }
+        else{
+            log.info("Defaulted user is  not saved");
         }
     }
     /**
      * Save user
      * @param user is the user to be saved
+     * @param  url is the VerificationURL
      * @Return true if the is saved
      * @Return  false if the user is not saved
      * @throws  NullPointerException is the user to be saved is null
      */
 
     @Override
-    public boolean saveUser(@Validated User user)
+    public boolean saveUser(@Validated RegisterUserRequest user,  VerificationURL url)
     {
         if(user ==null) throw  new NullException("User is invalid");
-        if(getUser(user.getUsername())!=null) throw  new DuplicateException("User exists with username");
+        if(getUser(user.username())!=null) throw  new DuplicateException("User exists with username");
         boolean saved = false;
+        User user1 =null;
         try {
-            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+             user1  = User.builder().firstname(user.firstname()).lastname(user.lastname())
+                    .age(user.age()).username(user.username()).
+                    password(new BCryptPasswordEncoder().encode(user.password()))
+                    .roles(new HashSet<>()).build();
+
             var role  = onRole.getRole(Roles.USER.name());
             if(role==null) throw  new NotFoundException("Role is not found");
-            user.getRoles().add(role);
-            userRepository.save(user);
+            user1.getRoles().add(role);
+            user1= userRepository.save(user1);
             saved=true;
         }catch(Exception e){
             CatchException.catchException(e);
+        }
+        if(saved){
+            publisher.publishEvent(new RegisterEvent(user1,url.toString()));
         }
         return saved;
     }
@@ -374,6 +396,21 @@ public class UserService implements OnUser {
             CatchException.catchException(e);
         }
         return added;
+    }
+
+    @Override
+    public boolean verifyUser(User user) {
+        if(user==null)throw  new NullException("User is invalid");
+        var isVerified=false;
+        try{
+            user.setEnabled(true);
+            userRepository.save(user);
+            isVerified=true;
+        }
+        catch (Exception e){
+            CatchException.catchException(e);
+        }
+        return  isVerified;
     }
 
     /**

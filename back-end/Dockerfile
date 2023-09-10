@@ -7,6 +7,13 @@ ARG JWT_REFRESH_TOKEN_PERIOD
 ARG APP
 ARG ADDRESS
 ARG SOCIALS
+ARG MAIL_HOST
+ARG MAIL_USERNAME
+ARG MAIL_PASSWORD
+ARG MAIL_PROTOCOL
+ARG MAIL_PORT
+ARG VERIFICATION_EXPIRE_TIME
+ARG MAIL_DETAILS
 FROM maven:3.8.3-openjdk-17
 LABEL authors="l.tsewu"
 WORKDIR /opt
@@ -19,15 +26,29 @@ ARG JWT_REFRESH_TOKEN_PERIOD
 ARG APP
 ARG ADDRESS
 ARG SOCIALS
+ARG MAIL_HOST
+ARG MAIL_USERNAME
+ARG MAIL_PASSWORD
+ARG MAIL_PROTOCOL
+ARG MAIL_PORT
+ARG VERIFICATION_EXPIRE_TIME
+ARG MAIL_DETAILS
 ENV jwt.signing.key=${JWT_SIGNING_KEY}
 ENV role.default.names=${DEFAULT_ROLE}
 ENV permission.default.names=${DEFAULT_PERMISSIONS}
 ENV user.default.user=${DEFAULT_USER}
-ENV jwt.access.token.period=${JWT_ACCESS_TOKEN_PERIOD}
-ENV jwt.refresh.token.period=${JWT_REFRESH_TOKEN_PERIOD}
+ENV jwt.access.accessToken.period=${JWT_ACCESS_TOKEN_PERIOD}
+ENV jwt.refresh.accessToken.period=${JWT_REFRESH_TOKEN_PERIOD}
 ENV app.details=${APP}
 ENV app.address=${ADDRESS}
 ENV app.socials=${SOCIALS}
+ENV mail.host=${MAIL_HOST}
+ENV mail.password=${MAIL_PASSWORD}
+ENV mail.username=${MAIL_USERNAME}
+ENV mail.protocol=${MAIL_PROTOCOL}
+ENV mail.port=${MAIL_PORT}
+ENV verification.expire.time=${VERIFICATION_EXPIRE_TIME}
+ENV host.registration.mail=${MAIL_DETAILS}
 COPY target/*.jar /opt/app.jar
 ENTRYPOINT exec java $JAVA_OPTS -jar app.jar
 

@@ -41,6 +41,8 @@ public class User{
      @Column(nullable = false)
     private  String password;
 
+     private boolean  isEnabled = false;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "User_Role",

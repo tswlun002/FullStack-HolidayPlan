@@ -1,12 +1,16 @@
 package com.tour.service;
 
-import com.tour.model.*;
+import com.tour.dto.RegisterUserRequest;
+import com.tour.model.User;
+import com.tour.utils.VerificationURL;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public interface OnUser {
 
-    boolean saveUser(User user);
+    boolean saveUser(RegisterUserRequest requester, VerificationURL url);
 
     User getUser(String username);
 
@@ -16,8 +20,9 @@ public interface OnUser {
     boolean deleteRoleFromUser(String username, String roleName);
     User getLoginedUser();
     boolean addNewRoleToUser( String username,String roleName);
-
-
     boolean deletePermissionFromUser(String username, String userPermission) ;
     boolean addPermissionToUser(String username, String permissionName) ;
+
+    boolean verifyUser(User user);
+
 }

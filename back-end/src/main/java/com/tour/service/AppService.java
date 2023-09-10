@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AppService {
+public class AppService implements OnApp{
     private final AppRepository repository;
     private final Environment environment;
     private final SocialNetworkRepository socialNetworkRepository;
@@ -118,11 +118,13 @@ public class AppService {
      * @return LT Holiday-Plan if exits
      * @throws  NotFoundException if no LT Holiday-Plan  is found
      */
+    @Override
     public Optional<App> findByName(String name){
         var ltHoliday = repository.findByName(name);
         if(ltHoliday.isEmpty()) throw  new NotFoundException("LT Holiday-Plan not found");
         return ltHoliday;
     }
+    @Override
     public  Set<SocialNetwork> getSocial(String name){
         return  socialNetworkRepository.findSocial(name);
     }

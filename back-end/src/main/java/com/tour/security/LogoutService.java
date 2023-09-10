@@ -1,8 +1,7 @@
 package com.tour.security;
 
 import com.tour.exception.InvalidCredentials;
-import com.tour.service.TokenService;
-import jakarta.servlet.http.Cookie;
+import com.tour.service.AccessTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LogoutService implements LogoutHandler {
     @Autowired
-    private  TokenService tokenService;
+    private AccessTokenService accessTokenService;
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
@@ -25,10 +24,10 @@ public class LogoutService implements LogoutHandler {
         final  String jwt  ;
         if(authHeader==null || !authHeader.startsWith("Bearer ")) throw  new InvalidCredentials("Invalid user credentials");
         jwt=authHeader.substring(7);
-        var  dbToken = tokenService.findByToken(jwt).orElse(null);
+        var  dbToken = accessTokenService.findByToken(jwt).orElse(null);
         if(dbToken ==null)throw  new InvalidCredentials("Invalid user credentials");
 
-        if(tokenService.revokeToken(dbToken)) SecurityContextHolder.clearContext();
+        if(accessTokenService.revokeToken(dbToken)) SecurityContextHolder.clearContext();
 
     }
 

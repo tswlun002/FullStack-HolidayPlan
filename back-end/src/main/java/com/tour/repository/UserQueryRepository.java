@@ -25,8 +25,7 @@ public interface UserQueryRepository extends JpaRepository<UserQuery, Long> {
     @Query("select t from UserQuery t join fetch t.user u " +
             "where  t.queryStatus=:queryStatus")
     List<UserQuery> findAllUserQueryByQueryStatus(QueryStatus queryStatus);
-    @Query("select t from Token t join fetch t.user " +
-            "where t.token=:token")
+    @Query("select t from UserQuery t join fetch t.user ")
     List<UserQuery> findByAllQuery();
 
     @Query("select t from UserQuery t join fetch t.user u " +
