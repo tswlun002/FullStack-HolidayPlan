@@ -20,7 +20,7 @@ const Login =()=>{
     const theme =  useTheme();
     const isSmall = useMediaQuery(theme.breakpoints.down('916'));
     const useAxiosPrivate = UseAxiosPrivate();
-    const INITI_STATE = {   email: "",password: "", isLoginError:false,message: '', isLoginSuccessful:false,data:{}}
+    const INITI_STATE = {   email: "",password: "",isLoading:false, isLoginError:false,message: '', isLoginSuccessful:false,data:{}}
     const APP_NAME = appData?.data?.name||""
     const HEADING ="OH!"
     const MESSAGE =`THE PLACES YOU'LL GO ... book them  here, at ${APP_NAME}`
@@ -29,15 +29,20 @@ const Login =()=>{
     const OnSubmit = async(e)=>{
         e.preventDefault(); 
         if(formState.email.trim() === ""|| formState.password.trim() === ""){
-            dispatchForm({isLoginError:true, message:"Both password and email are required",isLoginSuccessful:false});
+            dispatchForm({isLoginError:true,isLoading:false, message:"Both password and email are required",isLoginSuccessful:false});
         }
         else if(!formState.isLoginError){
+            dispatchLogin({  isLoading:true});
             let data = await LogInUser(formState,useAxiosPrivate);
+            dispatchLogin({  isLoading:false});
             if(data.isLoginSuccessful){
                 dispatchLogin(data)
             }else dispatchForm(data);
             ClearForm();
         }
+
+    }
+    const resetPassword =()=>{
 
     }
     const ClearForm= ()=>{
@@ -102,7 +107,7 @@ const Login =()=>{
                                     value={formState.email} 
                                     onChange={(e)=>{
                                     
-                                        dispatchForm({email:e.target.value,isLoginError:false,message:'',isLoginSuccessful:false})}}></CssTextField>
+                                        dispatchForm({email:e.target.value,isLoginError:false,isLoading:false,message:'',isLoginSuccessful:false})}}></CssTextField>
                             
                                 <CssTextField 
                                     required
@@ -112,19 +117,25 @@ const Login =()=>{
                                     variant="outlined"
                                     color="secondary" type="password" className="password-input" placeholder="password" 
                                     autoComplete='new-password' value={formState.password}
-                                onChange={(e)=>{
+                                    onChange={(e)=>{
                                     
-                                    dispatchForm({password:e.target.value,isLoginError:false,message:'',isLoginSuccessful:false})
-                                }}></CssTextField>
-
-
+                                    dispatchForm({password:e.target.value,isLoginError:false,isLoading:false,message:'',isLoginSuccessful:false})}}
+                                />
+                                   <div style={{display:"flex", justifyContent:"end", minHeight:"fit-content", alignItems:"center" ,padding:"1rem"}} >
+                                      <Link to="/password-reset-request"  onClick={resetPassword}className="login-link" >
+                                            Forgot password?
+                                      </Link>
+                                  </div>
                                 <ColorButton variant="contained" style={{marginTop:"30px", color:"white"}}
-                                className="submit-btn" onClick={(e)=>OnSubmit(e)}>Login</ColorButton>
+                                className="submit-btn" onClick={(e)=>OnSubmit(e)}>
+                                     {(formState.isLoading)?"Signing ...":"Login"}
+                                </ColorButton>
 
 
                             </form>
                         </CardContent>
                         <CardActions sx={{display:"flex", justifyContent:"center",}}>
+                            
                             <div className="login-nav">
                                 <Link   to="/register" className="login-link" >Not registered?, click to register </Link>
                             </div>
