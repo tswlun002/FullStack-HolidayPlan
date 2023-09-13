@@ -20,6 +20,7 @@ import Users from './pages/Users';
 import EditUserForm from './component/EditUserForm';
 import About from './pages/About';
 import FetchAppData from "./utils/AppInfoApi";
+import ResetPassword from './pages/ResetPassword';
 
 const initialState = {
   isAuthenticated: false,
@@ -111,6 +112,7 @@ const App=()=>{
       <Routes>
         <Route path="/" element={<MainLayout appData={appData}/>}>  
           <Route index   element={<Login/>}/>
+          <Route path="password-reset-request" element={<ResetPassword/>}/>
           <Route path="register" element={<Register />}/>
           <Route path="about" element={<About appData={appData}/>}/>
 
