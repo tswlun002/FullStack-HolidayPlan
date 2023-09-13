@@ -1,10 +1,7 @@
 package com.tour.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tour.dto.EditUserRequest;
-import com.tour.dto.RegisterEvent;
-import com.tour.dto.RegisterUserRequest;
-import com.tour.dto.UserEvent;
+import com.tour.dto.*;
 import com.tour.exception.CatchException;
 import com.tour.exception.DuplicateException;
 import com.tour.exception.NotFoundException;
@@ -17,6 +14,7 @@ import com.tour.utils.Roles;
 import com.tour.utils.VerificationURL;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -240,6 +239,8 @@ public class UserService implements OnUser {
     private interface  StringIsValid{
         boolean isValid(String value);
     }
+    StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));
+
 
     /**
      * Update user details: firstname, lastname, username and password
@@ -253,7 +254,6 @@ public class UserService implements OnUser {
         var user1 = getUser(user.currentUsername());
         if (user1 == null) throw new NotFoundException("User is not found");
 
-        StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));
 
         if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
         if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
@@ -411,6 +411,34 @@ public class UserService implements OnUser {
             CatchException.catchException(e);
         }
         return  isVerified;
+    }
+
+    @Override
+    public void resetPassword(String username, VerificationURL url) {
+        var user = getUser(username);
+        if(user==null)throw  new NotFoundException("User is not found with given email.");
+        publisher.publishEvent( new PasswordResetEvent(user,url));
+    }
+
+    @Override
+    public boolean resetPassword(@NonNull PasswordResetRequest passwordResetRequest) {
+        if(!Objects.equals(passwordResetRequest.getConfirmPassword(), passwordResetRequest.getNewPassword()))
+            throw  new NullException("Passwords are not the same");
+        var user = getUser(passwordResetRequest.getUsername());
+        if(user==null)throw  new NotFoundException("User is not found");
+
+        if(isValid.isValid(passwordResetRequest.getNewPassword()) )
+            user.setPassword(new BCryptPasswordEncoder().encode(passwordResetRequest.getNewPassword()));
+
+        var isUpdated =false;
+        try{
+            userRepository.save(user);
+            isUpdated=true;
+        }catch (Exception e){
+            CatchException.catchException(e);
+        }
+
+        return isUpdated;
     }
 
     /**
