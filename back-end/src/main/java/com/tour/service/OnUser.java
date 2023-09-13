@@ -1,5 +1,6 @@
 package com.tour.service;
 
+import com.tour.dto.PasswordResetRequest;
 import com.tour.dto.RegisterUserRequest;
 import com.tour.model.User;
 import com.tour.utils.VerificationURL;
@@ -22,5 +23,6 @@ public interface OnUser {
     boolean addPermissionToUser(String username, String permissionName) ;
 
     boolean verifyUser(User user);
-
+    void resetPassword(String username, VerificationURL url);
+    boolean resetPassword(PasswordResetRequest passwordResetRequest);
 }
