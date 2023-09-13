@@ -1,5 +1,6 @@
 package com.tour.service;
 
+import com.tour.model.User;
 import com.tour.model.VerificationToken;
 import com.tour.utils.VerificationURL;
 import org.springframework.stereotype.Service;
@@ -8,7 +9,7 @@ import java.util.Optional;
 public interface OnVerificationToken {
 
 
-    boolean   saveToken(VerificationToken token);
+    VerificationToken   saveToken(User user);
 
     Optional<VerificationToken> findByToken(String token);
     Optional<VerificationToken> findByUserId(Long userId);
