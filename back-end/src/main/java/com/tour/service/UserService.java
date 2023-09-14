@@ -1,9 +1,7 @@
 package com.tour.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tour.dto.EditUserRequest;
-import com.tour.dto.RegisterUserRequest;
-import com.tour.dto.UserEvent;
+import com.tour.dto.*;
 import com.tour.exception.CatchException;
 import com.tour.exception.DuplicateException;
 import com.tour.exception.NotFoundException;
@@ -13,9 +11,12 @@ import com.tour.model.Role;
 import com.tour.model.User;
 import com.tour.repository.UserRepository;
 import com.tour.utils.Roles;
+import com.tour.utils.VerificationURL;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,10 +25,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService implements OnUser {
@@ -61,6 +64,7 @@ public class UserService implements OnUser {
      */
     @PostConstruct
     protected void saveDefaultUser(){
+        boolean saved = false;
         try{
             if(userRepository.count()==0){
                 var userDTO = getDefaultUser();
@@ -72,34 +76,51 @@ public class UserService implements OnUser {
                         age(userDTO.age())
                         .roles(Set.of(role)).build();
                 userRepository.save(user);
+                saved=true;
             }
         }catch (Exception e){
             CatchException.catchException(e);
+        }
+        if(saved){
+
+           log.info("Defaulted user is saved successfully");
+        }
+        else{
+            log.info("Defaulted user is  not saved");
         }
     }
     /**
      * Save user
      * @param user is the user to be saved
+     * @param  url is the VerificationURL
      * @Return true if the is saved
      * @Return  false if the user is not saved
      * @throws  NullPointerException is the user to be saved is null
      */
 
     @Override
-    public boolean saveUser(@Validated User user)
+    public boolean saveUser(@Validated RegisterUserRequest user,  VerificationURL url)
     {
         if(user ==null) throw  new NullException("User is invalid");
-        if(getUser(user.getUsername())!=null) throw  new DuplicateException("User exists with username");
+        if(getUser(user.username())!=null) throw  new DuplicateException("User exists with username");
         boolean saved = false;
+        User user1 =null;
         try {
-            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+             user1  = User.builder().firstname(user.firstname()).lastname(user.lastname())
+                    .age(user.age()).username(user.username()).
+                    password(new BCryptPasswordEncoder().encode(user.password()))
+                    .roles(new HashSet<>()).build();
+
             var role  = onRole.getRole(Roles.USER.name());
             if(role==null) throw  new NotFoundException("Role is not found");
-            user.getRoles().add(role);
-            userRepository.save(user);
+            user1.getRoles().add(role);
+            user1= userRepository.save(user1);
             saved=true;
         }catch(Exception e){
             CatchException.catchException(e);
+        }
+        if(saved){
+            publisher.publishEvent(new RegisterEvent(user1,url.toString()));
         }
         return saved;
     }
@@ -218,6 +239,8 @@ public class UserService implements OnUser {
     private interface  StringIsValid{
         boolean isValid(String value);
     }
+    StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));
+
 
     /**
      * Update user details: firstname, lastname, username and password
@@ -231,7 +254,6 @@ public class UserService implements OnUser {
         var user1 = getUser(user.currentUsername());
         if (user1 == null) throw new NotFoundException("User is not found");
 
-        StringIsValid isValid = (String value)->(value != null && StringUtils.isNotEmpty(value.trim()) && StringUtils.isNotBlank(value.trim()));
 
         if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
         if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
@@ -374,6 +396,49 @@ public class UserService implements OnUser {
             CatchException.catchException(e);
         }
         return added;
+    }
+
+    @Override
+    public boolean verifyUser(User user) {
+        if(user==null)throw  new NullException("User is invalid");
+        var isVerified=false;
+        try{
+            user.setEnabled(true);
+            userRepository.save(user);
+            isVerified=true;
+        }
+        catch (Exception e){
+            CatchException.catchException(e);
+        }
+        return  isVerified;
+    }
+
+    @Override
+    public void resetPassword(String username, VerificationURL url) {
+        var user = getUser(username);
+        if(user==null)throw  new NotFoundException("User is not found with given email.");
+        publisher.publishEvent( new PasswordResetEvent(user,url));
+    }
+
+    @Override
+    public boolean resetPassword(@NonNull PasswordResetRequest passwordResetRequest) {
+        if(!Objects.equals(passwordResetRequest.getConfirmPassword(), passwordResetRequest.getNewPassword()))
+            throw  new NullException("Passwords are not the same");
+        var user = getUser(passwordResetRequest.getUsername());
+        if(user==null)throw  new NotFoundException("User is not found");
+
+        if(isValid.isValid(passwordResetRequest.getNewPassword()) )
+            user.setPassword(new BCryptPasswordEncoder().encode(passwordResetRequest.getNewPassword()));
+
+        var isUpdated =false;
+        try{
+            userRepository.save(user);
+            isUpdated=true;
+        }catch (Exception e){
+            CatchException.catchException(e);
+        }
+
+        return isUpdated;
     }
 
     /**

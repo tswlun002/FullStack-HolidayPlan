@@ -1,17 +1,12 @@
 package com.tour.controller;
-
-import com.tour.dto.RegisterUserRequest;
 import com.tour.dto.UserResponseToAdmin;
 import com.tour.exception.NotFoundException;
 import com.tour.model.User;
 import com.tour.service.UserService;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,17 +16,6 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserService userService;
-    @PostMapping(value="save/",consumes = {"application/json"})
-    public ResponseEntity<Boolean> saveAdmin(@RequestBody @Validated @NonNull RegisterUserRequest request){
-
-            var user  = User.builder().firstname(request.firstname()).lastname(request.lastname())
-                    .age(request.age()).username(request.username()).password(request.password())
-                   .roles(new HashSet<>()).build();
-        var    saved= userService.saveUser(user) ;
-        return saved?
-                new ResponseEntity<>(true, HttpStatus.OK) :
-                new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
-    }
     @GetMapping(path="users/")
     public ResponseEntity<Set<UserResponseToAdmin>> getAllUsersByAdmin(){
         var users = userService.getUsers()

@@ -1,11 +1,11 @@
 package com.tour.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -40,6 +40,8 @@ public class User{
      @NonNull
      @Column(nullable = false)
     private  String password;
+
+     private boolean  isEnabled = false;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

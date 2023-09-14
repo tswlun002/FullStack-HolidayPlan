@@ -1,4 +1,5 @@
 package com.tour.service;
+import com.tour.dto.RegisterUserRequest;
 import com.tour.dto.UserEvent;
 import com.tour.exception.AppInternalException;
 import com.tour.exception.DuplicateException;
@@ -8,6 +9,8 @@ import com.tour.model.Permission;
 import com.tour.model.Role;
 import com.tour.model.User;
 import com.tour.repository.UserRepository;
+import com.tour.utils.VerificationURL;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,19 +18,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
+
 import java.sql.Date;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import static com.tour.utils.Permissions.*;
 import static com.tour.utils.Roles.ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +44,10 @@ class UserServiceTest {
      @InjectMocks UserService service;
      @Mock
      private Environment environment;
+
+     @Mock
+     private HttpServletRequest servletRequest;
+     private  final VerificationURL  url = new VerificationURL("/HolidayPlan/api/authenticate",8080,"/");
 
     @BeforeEach
     void setUp() {
@@ -68,22 +76,18 @@ class UserServiceTest {
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
+        var userDTO =getRequester(user);
         when(repository.getUser(user.getUsername())).thenReturn(null);
         when(roleObj.getRole(anyString())).thenReturn(role);
-        var actual =service.saveUser(user);
+        var actual =service.saveUser(userDTO, url );
         verify(repository,times(1)).getUser(user.getUsername());
-        verify(repository, times(1)).save(user);
-        var roles = user.getRoles();
-        var permissions_out  = ((Role)roles.toArray()[0]).
-                getPermissions().stream().sorted(Comparator.comparing(Permission::getName)).toList();
-        assertTrue(actual);
-        assertThat(roles.size()).isEqualTo(1);
-        assertThat(permissions_out.size()).isEqualTo(permissions.size());
+        verify(repository, times(1)).save(any());
+        assertThat(actual).isEqualTo(true);
 
     }
     @Test
     void saveNullUser(){
-        var actual =assertThrows(NullException.class,()->service.saveUser(null));
+        var actual =assertThrows(NullException.class,()->service.saveUser(null,url));
         assertEquals("User is invalid",actual.getMessage());
         verify(repository, times(0)).getUser(anyString());
         verify(repository, times(0)).save(any());
@@ -93,8 +97,9 @@ class UserServiceTest {
         var user  = User.builder().username("tsewu_1@gmail.com").
                 firstname("Lunga").lastname("Tsewu").age(Date.valueOf("1998-02-09"))
                 .password("123456").build();
+        var userDTO =getRequester(user);
         when(repository.getUser("tsewu_1@gmail.com")).thenReturn(user);
-        var actual =assertThrows(DuplicateException.class,()->service.saveUser(user));
+        var actual =assertThrows(DuplicateException.class,()->service.saveUser(userDTO,url));
         assertEquals("User exists with username",actual.getMessage());
         verify(repository, times(1)).getUser(anyString());
         verify(repository, times(0)).save(any());
@@ -338,6 +343,12 @@ class UserServiceTest {
         verify(publisher, times(1)).publishEvent(new UserEvent(user));
 
         assertThat(actual).isEqualTo(true);
+    }
+
+    private RegisterUserRequest getRequester(User user ) {
+        return new RegisterUserRequest(user.getFirstname(),user.getLastname(),user.getUsername(),
+                    user.getAge(),user.getPassword(),"USER");
+
     }
 
 }

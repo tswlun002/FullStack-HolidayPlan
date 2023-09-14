@@ -4,7 +4,7 @@ import axios from "./Axios"
  * @param {*} user is the user to be registered
  */
  const getErrorMessage = (response)=>{
-      return response.response.data?.error_message?
+      return response.response?.data?.error_message?
       response.response.data.error_message:response.response.data?.message?
       response.response.data.message :response.response.statusText;
 
@@ -13,7 +13,8 @@ export const RegisterUser = ({firstname,lastname,email,password,age,userType},di
 
    //dispatchRegister({registered:true})
   const username=email.replace('/','-');
-   const API = '/holiday-plan/api/authenticate/user/save/';
+   const API = '/holiday-plan/api/authenticate/register';
+   dispatchRegister({isLoading:true})
    axios.post(API,{firstname,lastname,username,password,age, usertype:userType})
    .then(response =>
        {
@@ -21,6 +22,7 @@ export const RegisterUser = ({firstname,lastname,email,password,age,userType},di
            dispatchRegister({
                registered : true,
                isRegisterError:false,
+               isLoading:false
             });
    
          }
@@ -32,24 +34,61 @@ export const RegisterUser = ({firstname,lastname,email,password,age,userType},di
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-              
-               errorMessage = getErrorMessage(err);
-               errorMessage  =errorMessage?errorMessage:"Invalid credentials";
-             }
-             else if(err.response.status===401){
-                  errorMessage  ="Denied access";
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+               }
+               else if(err.response.status===401){
+                    errorMessage  =getErrorMessage(err)||"Denied access";
              }
              else{
                    
                    errorMessage  = getErrorMessage(err);
              }
-             dispatchRegister({errorMessage:errorMessage,isRegisterError:true,registered:false})
-        }else dispatchRegister({errorMessage:"Server Error", isRegisterError:true,registered:false})
+             dispatchRegister({errorMessage:errorMessage,isRegisterError:true,  isLoading:false,registered:false})
+        }else dispatchRegister({errorMessage:"Server Error", isRegisterError:true,  isLoading:false,registered:false})
  
      }
    )
 }
+export const resetPassword=(username,useAxiosPrivate,dispatchResponse)=>{
+   const API = `/holiday-plan/api/authenticate/password-reset-request?email=${username}`;
+   dispatchResponse({  isLoading:true});
+     axios.get(API)
+     .then(response =>
+         {
+           if(response.ok || response.status===200){
+              console.log(response);
+             dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true,
+             message:response.data.message});
 
+           }
+
+         }
+     ).catch(err =>
+       {
+          if(!err?.response.ok && err.name!=="AbortErr"){
+               let errorMessage =null;
+               if(err.response.status===404){
+
+                 errorMessage  =getErrorMessage(err)||"Invalid credentials";
+               }
+               else if(err.response.status===401){
+                    errorMessage  =getErrorMessage(err)||"Denied access";
+               }
+               else{
+
+                     errorMessage  = getErrorMessage(err);
+               }
+               dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:errorMessage})
+          }else dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+       }
+     )
+
+}
+export const RegisterAdmin = ({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister) => {
+    RegisterUser({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister);
+ }
 export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
 
 
@@ -78,11 +117,11 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
         if(!err?.response.ok && err.name!=="AbortErr"){
              let errorMessage =null;
              if(err.response.status===404){
-              
-               errorMessage  ="Invalid credentials";
+
+               errorMessage  =getErrorMessage(err)||"Invalid credentials";
              }
              else if(err.response.status===401){
-                  errorMessage  ="Denied access";
+                  errorMessage  =getErrorMessage(err)||"Denied access";
              }
              else{
                    
@@ -125,11 +164,10 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
-            
-               errorMessage  ="Invalid credentials";
+              errorMessage  =getErrorMessage(err)||"Invalid credentials";
              }
              else if(err.response.status===401){
-                  errorMessage  ="Denied access";
+                  errorMessage  =getErrorMessage(err)||"Denied access";
              }
              else{
                   
@@ -168,10 +206,10 @@ export const DeleteUser = (useAxiosPrivate,password,email,dispatchAccount) => {
               let errorMessage =null;
               if(err.response.status===404){
             
-                errorMessage  ="Invalid credentials";
-              }
-              else if(err.response.status===401){
-                  errorMessage  ="Denied access";
+                 errorMessage  =getErrorMessage(err)||"Invalid credentials";
+                            }
+                            else if(err.response.status===401){
+                                 errorMessage  =getErrorMessage(err)||"Denied access";
               }
               else{
                   
@@ -184,49 +222,7 @@ export const DeleteUser = (useAxiosPrivate,password,email,dispatchAccount) => {
    )
 }
 
-export const RegisterAdmin = ({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister) => {
-  const username=email.replace('/','-');
-   const API = '/holiday-plan/api/admin/user/save/';
-   useAxiosPrivate.post(API,{firstname,lastname,username,password, age,usertype:userType})
-   .then(response =>
-       {
-         if(response.ok || response.status===200){
-           
-           
- 
-           dispatchRegister({
-               registered : true,
-               requestResponseMessage:"Employee is added successfully."
-            });
-   
-         }
-       }
-   ).catch(err => 
-     {
-        
-       
-        if(!err?.response.ok){
-             let errorMessage =null;
-             if(err.response.status===404){
-              
-               errorMessage  ="Invalid credentials";
-             }
-             else if(err.response.status===401){
-                  errorMessage  ="Denied access";
-             }
-             else{
-                   
-                   errorMessage  = getErrorMessage(err);
-             }
-             dispatchRegister({errorMessage:errorMessage,
-                             isLoginError:true})
-        }
-        else dispatchRegister({errorMessage:"Server Error",
-          isLoginError:true})
- 
-     }
-   )
-}
+
 
 /**
  * 
@@ -262,10 +258,10 @@ export const LogInUser = ({email, password},controller) => {
             let errorMessage =null;
             if(err.response.status===404){
              
-              errorMessage  ="Invalid credentials";
+             errorMessage  =getErrorMessage(err)||"Invalid credentials";
             }
             else if(err.response.status===401){
-                 errorMessage  ="Denied access";
+                 errorMessage  =getErrorMessage(err)||"Denied access";
             }
             else{
                   
@@ -281,46 +277,6 @@ export const LogInUser = ({email, password},controller) => {
     }
   )
 }
-
-
-
-export const UserInformation = (refresh_token,dispatchUserInformation,useAxiosPrivate) => {
-  
-  const API= '/holiday-plan/api/user/my-details/';
-    useAxiosPrivate.get(API)
-    .then(response =>
-        {
-          if(response.ok || response.status===200){
-
-            dispatchUserInformation({
-                payload:response.data
-             });
-
-          }
-        }
-    ).catch(err =>
-      {
-
-         if(!err?.response.ok){
-              let errorMessage =null;
-              if(err.response.status===404){
-
-                errorMessage  ="Invalid credentials";
-              }
-              else if(err.response.status===401){
-                   errorMessage  ="Denied access";
-              }
-              else{
-
-                    errorMessage  = getErrorMessage(err);
-              }
-
-             alert(errorMessage)
-         }
-
-      }
-    )
-  }
 
 
 export const LogoutUser = (useAxiosPrivate,dispatchLogin) => {
@@ -342,10 +298,10 @@ export const LogoutUser = (useAxiosPrivate,dispatchLogin) => {
                   let errorMessage =null;
                   if(err.response.status===404){
 
-                    errorMessage  ="Invalid credentials";
-                  }
-                  else if(err.response.status===401){
-                       errorMessage  ="Denied access";
+                    errorMessage  =getErrorMessage(err)||"Invalid credentials";
+                   }
+                   else if(err.response.status===401){
+                        errorMessage  =getErrorMessage(err)||"Denied access";
                   }
                   else{
 

@@ -1,7 +1,7 @@
 package com.tour.security;
 
 import com.tour.service.JwtService;
-import com.tour.service.TokenService;
+import com.tour.service.AccessTokenService;
 import com.tour.utils.Roles;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private  final  LogoutService logoutHandler;
     private final JwtService jwtService;
-    private final TokenService tokenService;
+    private final AccessTokenService accessTokenService;
    private  final  AuthenticationConfiguration authenticationConfiguration;
    private  final Environment environment;
 
@@ -51,7 +51,7 @@ public class SecurityConfiguration {
                  CustomerAuthenticationFilter.builder().
                          authenticationManager(authenticationManager()).
                          userDetailsService(userDetailsService).
-                         jwtService(jwtService).tokenService(tokenService).
+                         jwtService(jwtService).accessTokenService(accessTokenService).
                          environment(environment).
                          build();
 
@@ -85,7 +85,7 @@ public class SecurityConfiguration {
                .logoutSuccessHandler(((request, response, authentication) -> {
                    // Cookie cookie = new Cookie("username", null);
                    for(var cookie :request.getCookies()) {
-                       cookie.setAttribute("token",null);
+                       cookie.setAttribute("accessToken",null);
                        cookie.setMaxAge(0);
                        cookie.setSecure(true);
                        cookie.setHttpOnly(true);

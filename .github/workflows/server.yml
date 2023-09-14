@@ -59,3 +59,21 @@ jobs:
       SOCIALS: ${{secrets.SOCIALS}}
       NAME: ${{secrets.NAME}}
       APP: ${{secrets.APP}}
+      MAIL_HOST: ${{secrets.MAIL_HOST}}
+      MAIL_USERNAME: ${{secrets.MAIL_USERNAME}}
+      MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
+      MAIL_PROTOCOL: ${{secrets.MAIL_PROTOCOL}}
+      MAIL_PORT: ${{secrets.MAIL_PORT}}
+      VERIFICATION_EXPIRE_TIME: ${{secrets.VERIFICATION_EXPIRE_TIME}}
+      REGISTER_CONTENT: ${{secrets.REGISTER_CONTENT}}
+      MAIL_REGISTER_DETAILS: ${{secrets.MAIL_REGISTER_DETAILS}}
+      PASSWORD_EXPIRATION: ${{{secrets.PASSWORD_EXPIRATION}}
+      PASSWORD_RESET_CONTENT: ${{secrets.PASSWORD_RESET_CONTENT}}
+      MAIL_PASSWORD_DETAILS: ${{secrets.MAIL_PASSWORD_DETAILS}}
+      spring.mail.host: ${{secrets.MAIL_HOST}}
+      spring.mail.username: ${{secrets.MAIL_USERNAME}}
+      spring.mail.password:  ${{secrets.MAIL_PASSWORD}}
+      spring.mail.properties.mail.transport.protocol: ${{secrets.MAIL_PROTOCOL}}
+      host.registration.mail: ${{secrets.MAIL_REGISTER_DETAILS}}
+      password.reset.expire.time: ${{secrets.VERIFICATION_EXPIRE_TIME}}
+      host.password.reset.mail: ${{secrets.MAIL_PASSWORD_DETAILS}}

@@ -26,7 +26,7 @@ public class HolidayLocationImages {
     @Column(name = "id", nullable = false)
     private Long id;
     @Lob
-    @Column(columnDefinition = "LONGBLOB")
+    @Column(length = 16777215 )
     private byte[] image ;
     @JsonIgnore
     @ToString.Exclude

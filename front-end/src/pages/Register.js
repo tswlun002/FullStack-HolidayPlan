@@ -13,8 +13,7 @@ import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
 const Register =()=>{
     const [dateType, setDateType]= useState("text");
     const INIT_STATE ={firstname:"",lastname:"",email:"",password:"",confirmPassword:"",userType:"USER",age:"",
-     registered:false, isRegisterError:false, errorMessage: ''}
-    //Login registered values
+     registered:false, isRegisterError:false,   isLoading:false,errorMessage: ''}
     const[register, dispatchRegister] = useReducer((state, action)=>{
         return {...state,...action }
     },INIT_STATE)
@@ -37,10 +36,10 @@ const Register =()=>{
             
             }else
             {
-                dispatchRegister({errorMessage:"Password don not match", isRegisterError:true,registered:false});
+                dispatchRegister({errorMessage:"Password don not match",   isLoading:false,isRegisterError:true,registered:false});
             }
         }else {
-            dispatchRegister({errorMessage:"All fields with * are required", isRegisterError:true,registered:false});
+            dispatchRegister({errorMessage:"All fields with * are required",  isLoading:false, isRegisterError:true,registered:false});
 
         }
     }
@@ -77,7 +76,7 @@ const Register =()=>{
                                     Register
                                 </Typography>
                             }
-                        subheader={ register.isRegisterError?register.errorMessage:register.registered&&'Successful registered'}
+                        subheader={ register.isRegisterError?register.errorMessage:register.registered&&'Successful registered, check your emails and verify'}
                         subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",color:register.isRegisterError?ERROR_COLOR:SUCCESS_COLOR}}
                         
                     />
@@ -91,13 +90,13 @@ const Register =()=>{
                             helpertext=""id="demo-helper-text-aligned"label="Firstname"
                             type="text" className="firstname-input" placeholder="enter firstname"
                              value={register.firstname}
-                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isRegisterError:false,registered:false})}/>
+                            onChange={(e)=>dispatchRegister({firstname:e.target.value,  isLoading:false,isRegisterError:false,registered:false})}/>
                         <CssTextField 
                             required
                             variant="outlined"
                             helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
                          type="text" className="lastname-input" placeholder="enter lastname" value={register.lastname}
-                        onChange={(e)=>dispatchRegister({lastname:e.target.value ,isRegisterError:false,registered:false})}></CssTextField>
+                        onChange={(e)=>dispatchRegister({lastname:e.target.value ,  isLoading:false,isRegisterError:false,registered:false})}></CssTextField>
                         
                         <CssTextField 
                            required
@@ -106,7 +105,7 @@ const Register =()=>{
                             id="demo-helper-text-aligned"
                             label="Email"
                         type="text" className="email-input" placeholder="enter email" value={register.email} 
-                         onChange={(e)=>dispatchRegister({email:e.target.value,isRegisterError:false,registered:false })}></CssTextField>
+                         onChange={(e)=>dispatchRegister({email:e.target.value,  isLoading:false,isRegisterError:false,registered:false })}></CssTextField>
                        <CssTextField
                           required
                           variant="outlined"
@@ -116,7 +115,7 @@ const Register =()=>{
                           onClick={()=>setDateType("date")}
                           onBlur={()=>{setDateType("text");}}
                           type={dateType} className="age-input" placeholder="enter date of birth" value={register.age}
-                          onChange={(e)=>dispatchRegister({age:e.target.value,isRegisterError:false,registered:false})}
+                          onChange={(e)=>dispatchRegister({age:e.target.value,  isLoading:false,isRegisterError:false,registered:false})}
                        />
 
                         <CssTextField 
@@ -127,7 +126,7 @@ const Register =()=>{
                             label="password"
                             color="secondary" 
                         type="password" autoComplete='new-password' className="password-input" placeholder="password" value={register.password}
-                        onChange={(e)=>dispatchRegister({password:e.target.value, isRegisterError:false,registered:false})}></CssTextField>
+                        onChange={(e)=>dispatchRegister({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}></CssTextField>
                 
                         <CssTextField 
                              required
@@ -137,10 +136,12 @@ const Register =()=>{
                             label="confirm-password"
                             color="secondary"
                             type="password" autoComplete='new-password' className="password-input" placeholder="confirm password" value={register.confirmPassword}
-                            onChange={(e)=>dispatchRegister({confirmPassword:e.target.value, isRegisterError:false,registered:false})}
+                            onChange={(e)=>dispatchRegister({confirmPassword:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
                         />
 
-                        <ColorButton variant='contained' style={{marginTop:"15px",color:"white"}} className="submit-btn" onClick={(e)=>{OnSubmit(e)}}>Submit</ColorButton>
+                        <ColorButton variant='contained' style={{marginTop:"15px",color:"white"}} className="submit-btn" onClick={(e)=>{OnSubmit(e)}}>
+                          {(register.isLoading)?"saving...":"registering"}
+                        </ColorButton>
 
                     </form>
                     </CardContent>

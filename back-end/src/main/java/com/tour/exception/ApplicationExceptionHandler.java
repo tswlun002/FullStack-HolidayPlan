@@ -45,7 +45,6 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
                                                                          @NonNull HttpHeaders headers,
                                                                          @NonNull HttpStatusCode status,
                                                                          @NonNull WebRequest request) {
-        //pageNotFoundLogger.warn(ex.getMessage());
         ErrorDetails details = ErrorDetails.builder().message(ex.getMethod()+":"+ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.METHOD_NOT_ALLOWED);
@@ -76,6 +75,14 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
               .date(LocalDateTime.now()).build();
       return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
   }
+    @ExceptionHandler(InvalidToken.class)
+    public ResponseEntity<Object> invalidToken(
+            InvalidToken ex, WebRequest request) {
+
+        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+                .date(LocalDateTime.now()).build();
+        return new ResponseEntity<>(details, HttpStatus.NOT_ACCEPTABLE);
+    }
 
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<Object> DuplicateException(

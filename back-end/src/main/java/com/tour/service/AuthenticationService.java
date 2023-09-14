@@ -3,7 +3,7 @@ package com.tour.service;
 import com.tour.exception.CatchException;
 import com.tour.exception.InvalidCredentials;
 import com.tour.exception.NotFoundException;
-import com.tour.model.Token;
+import com.tour.model.AccessToken;
 import com.tour.model.User;
 
 import jakarta.servlet.http.Cookie;
@@ -21,12 +21,12 @@ public class AuthenticationService {
     private  UserService userService;
 
     @Autowired
-    private TokenService tokenService;
+    private AccessTokenService accessTokenService;
     private String getRefreshFromCookie(HttpServletRequest request)  {
         Cookie[] cookies = request.getCookies();
         if (cookies == null || cookies.length==0)throw  new InvalidCredentials("Login session expired, re-log");
         var cookie=  cookies[0];
-        if(cookie ==null ||!cookie.getName().equals("token")|| cookie.getValue()==null)  throw  new InvalidCredentials("Invalid credentials, try  to  re-log");
+        if(cookie ==null ||!cookie.getName().equals("accessToken")|| cookie.getValue()==null)  throw  new InvalidCredentials("Invalid credentials, try  to  re-log");
         return cookie.getValue();
     }
     public String refreshToken(HttpServletRequest request){
@@ -42,7 +42,7 @@ public class AuthenticationService {
            User user = userService.getUser(username);
            if (user == null) throw new NotFoundException("User not found");
            access_token = jwtService.generateAccessToken(user);
-           if(!tokenService.revokeAllUserToken(user, ACCESS_TOKEN)) throw  new RuntimeException("Not all token are revoked");
+           if(!accessTokenService.revokeAllUserToken(user, ACCESS_TOKEN)) throw  new RuntimeException("Not all accessToken are revoked");
            saveUserToken(user,access_token);
 
        }catch (Exception e){
@@ -53,8 +53,8 @@ public class AuthenticationService {
     }
 
     private void saveUserToken(User user, String jwt) {
-        var token = Token.builder().user(user).token(jwt).tokenType(ACCESS_TOKEN).expired(false).revoked(false).build();
-        tokenService.save(token);
+        var token = AccessToken.builder().user(user).token(jwt).tokenType(ACCESS_TOKEN).expired(false).revoked(false).build();
+        accessTokenService.save(token);
     }
 
 

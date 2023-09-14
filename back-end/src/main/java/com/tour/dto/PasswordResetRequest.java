@@ -1,0 +1,29 @@
+package com.tour.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
+@Setter
+public class PasswordResetRequest{
+    String token;
+    @Email String username;
+    @NotBlank(message = "password is required")
+    @NotEmpty(message = "password is required")
+    @Size(min = 5, max = 1000, message = "password must contain 3 to 50 characters.")
+    String newPassword;
+    @NotBlank(message = "password is required")
+    @NotEmpty(message = "password is required")
+    @Size(min = 5, max = 1000, message = "password must contain 3 to 50 characters.")
+    String confirmPassword;
+
+
+
+}

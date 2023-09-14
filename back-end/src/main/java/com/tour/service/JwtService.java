@@ -1,6 +1,7 @@
 package com.tour.service;
+
 import com.tour.dto.UserResponseToAdmin;
-import com.tour.exception.*;
+import com.tour.exception.NullException;
 import com.tour.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -9,9 +10,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.security.Key;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,12 +21,12 @@ import java.util.function.Function;
 public class JwtService {
     @Value("${jwt.signing.key}")
     private String SECRET_KEY;
-    @Value("${jwt.refresh.token.period}")
+    @Value("${jwt.refresh.accessToken.period}")
     private double REFRESH_TOKEN_PERIOD;
-    @Value("${jwt.access.token.period}")
+    @Value("${jwt.access.accessToken.period}")
     private double ACCESS_TOKEN_PERIOD;
     public String extractUsername(String token) {
-        if(token==null || token.isEmpty())throw new NullException("Token is invalid");
+        if(token==null || token.isEmpty())throw new NullException("AccessToken is invalid");
 
         return extractClaim(token, Claims::getSubject);
     }

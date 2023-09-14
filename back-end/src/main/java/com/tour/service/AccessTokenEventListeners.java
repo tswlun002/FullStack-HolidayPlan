@@ -5,10 +5,10 @@ import lombok.NonNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 @Service
-public record TokenEventListeners(TokenService tokenService){
+public record AccessTokenEventListeners(AccessTokenService accessTokenService){
    @EventListener
    public  void deleteUser(@NonNull UserEvent event){
-       tokenService.deleteAllToken(event.user());
+       accessTokenService.deleteAllToken(event.user());
    }
 
 }

@@ -7,19 +7,15 @@ import {RegisterAdmin } from '../utils/User';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import { PRIMAR_COLOR } from "../utils/Constant";
 
-
-
-
 const RegisterAdminForm =()=>{
 
       const useAxiosPrivate  =UseAxiosPrivate();
       const [dateType, setDateType]= useState("text");
-    //Login registered values
     const[register, dispatchRegister] = useReducer((state, action)=>{
         return {...state,...action,
         }
     },{firstname:"",lastname:"",email:"",password:"",confirmPassword:"",userType:"ADMIN",age:"", registered:false,
-    isLoginError:false, errorMessage: null,  requestResponseMessage:""})
+    isRegisterError:false, errorMessage: null,  requestResponseMessage:""})
 
     const isValid =()=>{
  
@@ -49,10 +45,10 @@ const RegisterAdminForm =()=>{
 
             }else
             {
-                dispatchRegister({errorMessage:"Password don not match", isLoginError:true});
+                dispatchRegister({errorMessage:"Password don not match", isRegisterError:true});
             }
         }else {
-            dispatchRegister({errorMessage:"All fields with * are required ", isLoginError:true});
+            dispatchRegister({errorMessage:"All fields with * are required ", isRegisterError:true});
 
         }
     }
@@ -80,8 +76,8 @@ const RegisterAdminForm =()=>{
                             </Typography>
                         }
                         titleTypographyProps={{align:"center",color:"rgb(143, 88, 175)"}}
-                        subheader={register.isLoginError?register.errorMessage:register.registered?register.requestResponseMessage:""}
-                        subheaderTypographyProps={{align:"start" ,color:register.isLoginError?"red":"green"}}
+                        subheader={register.isRegisterError?register.errorMessage:register.registered?register.requestResponseMessage:""}
+                        subheaderTypographyProps={{align:"start" ,color:register.isRegisterError?"red":"green"}}
                     />
                     <CardContent>
                     <form className="register-inputs" autoComplete="off">
@@ -92,14 +88,14 @@ const RegisterAdminForm =()=>{
                             helpertext=""id="demo-helper-text-aligned"label="Firstname"
                             type="text" className="firstname-input" placeholder="enter firstname"
                              value={register.firstname}
-                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isLoginError:false,registered:false})}
+                            onChange={(e)=>dispatchRegister({firstname:e.target.value,isRegisterError:false,registered:false})}
                         />
                         <CssTextField
                             required
                             variant="outlined"
                             helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
                             type="text" className="lastname-input" placeholder="enter lastname" value={register.lastname}
-                            onChange={(e)=>dispatchRegister({lastname:e.target.value ,isLoginError:false,registered:false})}
+                            onChange={(e)=>dispatchRegister({lastname:e.target.value ,isRegisterError:false,registered:false})}
                         />
 
                         <CssTextField
@@ -109,7 +105,7 @@ const RegisterAdminForm =()=>{
                             id="demo-helper-text-aligned"
                             label="Email"
                             type="text" className="email-input" placeholder="enter email" value={register.email}
-                            onChange={(e)=>dispatchRegister({email:e.target.value,isLoginError:false,registered:false })}
+                            onChange={(e)=>dispatchRegister({email:e.target.value,isRegisterError:false,registered:false })}
                          />
                        <CssTextField
                           required
@@ -120,7 +116,7 @@ const RegisterAdminForm =()=>{
                           onClick={()=>setDateType("date")}
                           onBlur={()=>{setDateType("text");}}
                           type={dateType} className="age-input" placeholder="enter date of birth" value={register.age}
-                          onChange={(e)=>dispatchRegister({age:e.target.value,isLoginError:false,registered:false})}
+                          onChange={(e)=>dispatchRegister({age:e.target.value,isRegisterError:false,registered:false})}
                        />
 
                         <CssTextField
@@ -131,7 +127,7 @@ const RegisterAdminForm =()=>{
                             label="password"
                             color="secondary"
                             type="password" autoComplete='new-password' className="password-input" placeholder="password" value={register.password}
-                            onChange={(e)=>dispatchRegister({password:e.target.value, isLoginError:false, registered:false})}
+                            onChange={(e)=>dispatchRegister({password:e.target.value, isRegisterError:false, registered:false})}
                         />
 
                         <CssTextField
@@ -142,7 +138,7 @@ const RegisterAdminForm =()=>{
                             label="confirm-password"
                             color="secondary"
                             type="password" autoComplete='new-password' className="password-input" placeholder="confirm password" value={register.confirmPassword}
-                            onChange={(e)=>dispatchRegister({confirmPassword:e.target.value, isLoginError:false})}
+                            onChange={(e)=>dispatchRegister({confirmPassword:e.target.value, isRegisterError:false})}
                         />
 
                         <ColorButton variant='contained' style={{marginTop:"15px",color:"white"}} className="submit-btn" onClick={(e)=>{OnSubmit(e)}}>Register</ColorButton>

@@ -19,7 +19,7 @@ public class CustomerAuthenticationProvider implements AuthenticationProvider {
         String username  = authentication.getName();
         String password = authentication.getCredentials().toString();
         CustomerUserDetails user = userDetailsService.loadUserByUsername(username);
-
+        if(!user.isEnabled()) throw  new BadCredentialsException("Account is not verified, check your email and verify account");
         return checkPassword(user,password);
     }
 

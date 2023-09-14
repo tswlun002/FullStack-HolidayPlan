@@ -3,4 +3,5 @@ back-end/target
 *.txt
 /front-end/public/logo.png
 .env
+*.env
 
