@@ -17,4 +17,5 @@ public interface OnPasswordReset {
     boolean verify(PasswordResetRequest passwordResetRequest, VerificationURL url);
 
     Optional<PasswordResetToken> findByUserId(Long id);
+    Optional<PasswordResetToken> findByUsername(String username);
 }

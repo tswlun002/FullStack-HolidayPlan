@@ -68,8 +68,11 @@ public class PasswordResetService implements OnPasswordReset {
         var token = findByToken(passwordResetRequest.getToken()).orElseThrow(
                 ()-> new InvalidToken("Password reset  is invalid")
         );
-        if(! token.getToken().equals(passwordResetRequest.getToken()))
-            throw  new InvalidToken("Password reset is invalid ");
+        var userToken = findByUsername(passwordResetRequest.getUsername()).orElseThrow(
+                ()-> new InvalidToken("Password reset  is invalid ")
+        );
+        if(! userToken.getToken().equals(passwordResetRequest.getToken().trim()))
+            throw  new InvalidToken("Password reset is invalid for the given username");
 
         if(token.getVerified()) throw  new InvalidToken("Already verified, you can login");
 
@@ -94,6 +97,10 @@ public class PasswordResetService implements OnPasswordReset {
 
 
         return isVerified;
+    }
+  @Override
+  public Optional<PasswordResetToken> findByUsername(String username) {
+        return repository.findByUsername(username);
     }
 
     @Override

@@ -12,4 +12,6 @@ public interface PasswordResetTokenRepository extends JpaRepository<PasswordRese
 
     @Query("select vt from PasswordResetToken vt inner join fetch vt.user u where u.id=:userId")
     Optional<PasswordResetToken> findByUserId(Long userId);
+    @Query("select vt from PasswordResetToken vt inner join fetch vt.user u where u.username=:username")
+    Optional<PasswordResetToken> findByUsername(String username);
 }
