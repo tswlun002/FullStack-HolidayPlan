@@ -100,9 +100,11 @@ public class AuthenticationController {
     }
     @GetMapping(value = "reset-password", produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    public   ModelAndView resetPassword(@RequestParam("token") String token,
+    public   ModelAndView resetPassword(@RequestParam(value = "token", required = false) String token,
+                                  @RequestParam(value = "error", required = false ) String error,
                                   Model model){
         model.addAttribute("token",token);
+        model.addAttribute("error",error);
         model.addAttribute("passwordResetRequest", PasswordResetRequest.builder().token(token).build());
         var map = new HashMap<String, Model>();
         map.put("reset-password",model);
@@ -110,15 +112,16 @@ public class AuthenticationController {
 
     }
     @PostMapping(value = "reset-password")
-    public  ResponseEntity<String> resetPassword(@Valid PasswordResetRequest  passwordResetRequest,
+    public  String  resetPassword(@Valid PasswordResetRequest  passwordResetRequest,
                                                  BindingResult bindingResult, Model model,
                                                  HttpServletRequest request){
-
         boolean resetPasswordToken = passwordResetService.verify(passwordResetRequest,
                 new VerificationURL(request.getServerName(), request.getServerPort(), request.getContextPath()) );
-        return resetPasswordToken&& userService.resetPassword(passwordResetRequest)?
-                new ResponseEntity<>("Password was changed successfully.", OK):
-                new ResponseEntity<>("Failed to reset password", NOT_ACCEPTABLE);
+        var response =resetPasswordToken&& userService.resetPassword(passwordResetRequest)?
+                "success":"not_acceptable";
+        model.addAttribute("error",response);
+
+        return "redirect:/reset-password?error="+response;
 
     }
 

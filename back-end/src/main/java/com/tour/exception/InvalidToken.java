@@ -2,7 +2,7 @@ package com.tour.exception;
 
 
 
-public class InvalidToken extends RuntimeException {
+public class InvalidToken extends NullException {
 
     /**
      * Constructs a new runtime exception with the specified detail message.

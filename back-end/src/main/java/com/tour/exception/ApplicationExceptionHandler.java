@@ -77,7 +77,7 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
   }
     @ExceptionHandler(InvalidToken.class)
     public ResponseEntity<Object> invalidToken(
-            NotFoundException ex, WebRequest request) {
+            InvalidToken ex, WebRequest request) {
 
         ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
