@@ -48,6 +48,8 @@ $ make clean     #clean container and txt file
   - logout 
 - USER FUNCTIONS
   -  Register itself
+  -  Get email verification
+  -  Reset Password and get email to reset password
   -  Login
   -  Add or delete Holiday plan card
   -  Update Holiday plan card priority
