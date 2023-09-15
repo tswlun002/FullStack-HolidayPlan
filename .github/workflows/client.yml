@@ -22,7 +22,49 @@ jobs:
          docker tag tour-front-end:${{secrets.CLIENT_TAG}} ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
          docker push ${{secrets.DOCKERHUB_USERNAME}}/tour:tour-front-end_v${{secrets.CLIENT_TAG}}
     env:
+      TOUR_USER: ${{secrets.TOUR_USER}}
+      PASSWORD: ${{secrets.PASSWORD}}
+      DATABASE_NAME: ${{secrets.DATABASE_NAME}}
+      DATABASE_SERVICE: ${{secrets.DATABASE_SERVICE}}
       SERVER_SERVICE: ${{secrets.SERVER_SERVICE}}
       CLIENT_SERVICE: ${{secrets.CLIENT_SERVICE}}
       CLIENT_TAG: ${{secrets.CLIENT_TAG}}
       CLIENT_PORT: ${{secrets.CLIENT_PORT}}
+      DATABASE_TAG: ${{secrets.DATABASE_TAG}}
+      SERVER_TAG: ${{secrets.SERVER_TAG}}
+      DATABASE_PORT: ${{secrets.DATABASE_PORT}}
+      SERVER_PORT: ${{secrets.SERVER_PORT}}
+      BASE_URL: ${{secrets.BASE_URL}}
+      JWT_SIGNING_KEY: ${{secrets.JWT_SIGNING_KEY}}
+      JWT_ACCESS_TOKEN_PERIOD: ${{secrets.JWT_ACCESS_TOKEN_PERIOD}}
+      JWT_REFRESH_TOKEN_PERIOD: ${{secrets.JWT_REFRESH_TOKEN_PERIOD}}
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      DEFAULT_ROLE: ${{secrets.DEFAULT_ROLE}}
+      DEFAULT_PERMISSIONS: ${{secrets.DEFAULT_PERMISSIONS}}
+      EMAIL: ${{secrets.EMAIL}}
+      TOUR_MANAGER: ${{secrets.TOUR_MANAGER}}
+      LOGO: ${{secrets.LOGO}}
+      ABOUT: ${{secrets.ABOUT}}
+      PHONE: ${{secrets.PHONE}}
+      ADDRESS: ${{secrets.ADDRESS}}
+      SOCIALS: ${{secrets.SOCIALS}}
+      NAME: ${{secrets.NAME}}
+      APP: ${{secrets.APP}}
+      MAIL_HOST: ${{secrets.MAIL_HOST}}
+      MAIL_USERNAME: ${{secrets.MAIL_USERNAME}}
+      MAIL_PASSWORD: ${{secrets.MAIL_PASSWORD}}
+      MAIL_PROTOCOL: ${{secrets.MAIL_PROTOCOL}}
+      MAIL_PORT: ${{secrets.MAIL_PORT}}
+      VERIFICATION_EXPIRE_TIME: ${{secrets.VERIFICATION_EXPIRE_TIME}}
+      REGISTER_CONTENT: ${{secrets.REGISTER_CONTENT}}
+      MAIL_REGISTER_DETAILS: ${{secrets.MAIL_REGISTER_DETAILS}}
+      PASSWORD_EXPIRATION: ${{secrets.PASSWORD_EXPIRATION}}
+      PASSWORD_RESET_CONTENT: ${{secrets.PASSWORD_RESET_CONTENT}}
+      MAIL_PASSWORD_DETAILS: ${{secrets.MAIL_PASSWORD_DETAILS}}
+      spring.mail.host: ${{secrets.MAIL_HOST}}
+      spring.mail.username: ${{secrets.MAIL_USERNAME}}
+      spring.mail.password:  ${{secrets.MAIL_PASSWORD}}
+      spring.mail.properties.mail.transport.protocol: ${{secrets.MAIL_PROTOCOL}}
+      host.registration.mail: ${{secrets.MAIL_REGISTER_DETAILS}}
+      password.reset.expire.time: ${{secrets.VERIFICATION_EXPIRE_TIME}}
+      host.password.reset.mail: ${{secrets.MAIL_PASSWORD_DETAILS}}
