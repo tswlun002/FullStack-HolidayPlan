@@ -39,6 +39,9 @@ jobs:
       DATABASE_NAME: ${{secrets.DATABASE_NAME}}
       DATABASE_SERVICE: ${{secrets.DATABASE_SERVICE}}
       SERVER_SERVICE: ${{secrets.SERVER_SERVICE}}
+      CLIENT_SERVICE: ${{secrets.CLIENT_SERVICE}}
+      CLIENT_TAG: ${{secrets.CLIENT_TAG}}
+      CLIENT_PORT: ${{secrets.CLIENT_PORT}}
       DATABASE_TAG: ${{secrets.DATABASE_TAG}}
       SERVER_TAG: ${{secrets.SERVER_TAG}}
       DATABASE_PORT: ${{secrets.DATABASE_PORT}}
