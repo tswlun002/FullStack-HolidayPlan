@@ -9,7 +9,7 @@ on:
 jobs:
   server:
     name: Job for 'back-end' folder
-    if: needs.check.outputs.run_job == 'true'
+ 
     runs-on: ubuntu-latest
 
     steps:
