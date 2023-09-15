@@ -121,7 +121,7 @@ public class AuthenticationController {
                 "success":"not_acceptable";
         model.addAttribute("error",response);
 
-        return "redirect:/reset-password?error="+response;
+        return "redirect:/reset-password?"+response;
 
     }
 
