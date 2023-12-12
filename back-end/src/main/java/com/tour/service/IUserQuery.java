@@ -6,7 +6,7 @@ import com.tour.model.UserQuery;
 
 import java.util.List;
 
-public interface OnUserQuery {
+public interface IUserQuery {
 
     List<UserQuery> findByUsername(String username);
 

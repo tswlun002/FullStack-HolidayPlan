@@ -1,13 +1,14 @@
 package com.tour.service;
 
-import com.tour.dto.PasswordResetRequest;
-import com.tour.dto.RegisterUserRequest;
+import com.tour.dto.*;
 import com.tour.model.User;
 import com.tour.utils.VerificationURL;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
-public interface OnUser {
+public interface IUser {
 
     boolean saveUser(RegisterUserRequest requester, VerificationURL url);
 
@@ -23,6 +24,16 @@ public interface OnUser {
     boolean addPermissionToUser(String username, String permissionName) ;
 
     boolean verifyUser(User user);
-    void resetPassword(String username, VerificationURL url);
+    void resetPassword(String username);
     boolean resetPassword(PasswordResetRequest passwordResetRequest);
+
+
+
+    boolean updateUserSecurityData(EditUserSecurityData edit);
+
+    void resetUsername(String currentUsername, String username,  Map<Integer, String> answers);
+
+    boolean saveSecurityQuestions(UserSecurityQuestionAnswerDTO securityQuestionDTO);
+
+    boolean checkSecurityEnabled(String username);
 }

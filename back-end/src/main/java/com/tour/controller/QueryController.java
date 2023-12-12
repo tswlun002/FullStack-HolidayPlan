@@ -6,7 +6,7 @@ import com.tour.exception.CatchException;
 import com.tour.exception.NotFoundException;
 import com.tour.model.QueryStatus;
 import com.tour.model.UserQuery;
-import com.tour.service.OnUser;
+import com.tour.service.IUser;
 import com.tour.service.QueryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class QueryController {
 
 
     private final QueryService queryService;
-    private final OnUser onUser;
+    private final IUser iUser;
 
     @PostMapping(value = "query/save/")
     public  ResponseEntity<Boolean>saveQuery(@RequestBody @Validated QueryRequest queryRequest){
@@ -31,7 +31,7 @@ public class QueryController {
         try {
                 userQuery=UserQuery.builder().queryDescription(queryRequest.queryDescription()).
                     querySummary(queryRequest.querySummary()).queryStatus(QueryStatus.ACTIVE).
-                    localDateTime(LocalDateTime.now()).user(onUser.getLoginedUser()).build();
+                    localDateTime(LocalDateTime.now()).user(iUser.getLoginedUser()).build();
         }catch (Exception e){
             CatchException.catchException(e);
         }

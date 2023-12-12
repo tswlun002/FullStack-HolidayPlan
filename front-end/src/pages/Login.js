@@ -1,6 +1,6 @@
 import {  Link } from "react-router-dom";
 import './Login.css'
-import {Typography,Box,Card,CardContent,CardActions, CardHeader,Paper,Grid}  from '@mui/material';
+import {Typography,Box,Card,CardContent,CardActions, CardHeader,Paper,Grid,IconButton}  from '@mui/material';
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
 import { LogInUser} from '../utils/User';
@@ -12,6 +12,9 @@ import WelcomeMessage from "../component/WelcomeMessage";
 import {  ERROR_COLOR, PRIMAR_COLOR } from "../utils/Constant";
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@material-ui/core';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import InputAdornment from '@mui/material/InputAdornment';
 
 
 
@@ -20,7 +23,7 @@ const Login =()=>{
     const theme =  useTheme();
     const isSmall = useMediaQuery(theme.breakpoints.down('916'));
     const useAxiosPrivate = UseAxiosPrivate();
-    const INITI_STATE = {   email: "",password: "",isLoading:false, isLoginError:false,message: '', isLoginSuccessful:false,data:{}}
+    const INITI_STATE = {   email: "",password: "",passwordVisible:false,isLoading:false, isLoginError:false,message: '', isLoginSuccessful:false,data:{}}
     const APP_NAME = appData?.data?.name||""
     const HEADING ="OH!"
     const MESSAGE =`THE PLACES YOU'LL GO ... book them  here, at ${APP_NAME}`
@@ -115,11 +118,24 @@ const Login =()=>{
                                     id="demo-helper-text-aligned"
                                     label="password"
                                     variant="outlined"
-                                    color="secondary" type="password" className="password-input" placeholder="password" 
+                                    color="secondary" 
+                                    type={formState.passwordVisible?"text":"password"} 
+                                    className="password-input" placeholder="password" 
                                     autoComplete='new-password' value={formState.password}
                                     onChange={(e)=>{
                                     
                                     dispatchForm({password:e.target.value,isLoginError:false,isLoading:false,message:'',isLoginSuccessful:false})}}
+                                    InputProps={{
+                                        endAdornment: (
+                                          <InputAdornment   sx={{padding:"0.1rem",}} position="end">
+                                            <IconButton 
+                                              onClick={()=>dispatchForm({passwordVisible:!formState.passwordVisible})} 
+                                           >
+                                            {formState.passwordVisible?<VisibilityIcon/>:<VisibilityOffIcon/>}
+                                            </IconButton>
+                                          </InputAdornment>
+                                        )
+                                      }}
                                 />
                                    <div style={{display:"flex", justifyContent:"end", minHeight:"fit-content", alignItems:"center" ,padding:"1rem"}} >
                                       <Link to="/password-reset-request"  onClick={resetPassword}className="login-link" >

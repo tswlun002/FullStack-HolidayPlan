@@ -3,7 +3,6 @@ package com.tour.service;
 import com.tour.dto.RegisterEvent;
 import com.tour.exception.CatchException;
 import com.tour.exception.InvalidToken;
-import com.tour.exception.NullException;
 import com.tour.model.User;
 import com.tour.model.VerificationToken;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +16,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class RegisterEventListener extends Email {
-    private  final  OnVerificationToken onVerificationToken;
+    private  final IVerificationToken iVerificationToken;
     private  final  JavaMailSender  mailSender;
-    private  final  OnUser onUser;
+    private  final IUser iUser;
 
     private User user;
     @Value("${verification.expire.time:15}")
@@ -39,7 +38,7 @@ public class RegisterEventListener extends Email {
         if(user==null) throw new InvalidToken("User is invalid");
 
 
-        var verificationToken= onVerificationToken.saveToken(user);
+        var verificationToken= iVerificationToken.saveToken(user);
 
        if(verificationToken !=null) {
            sendMail( event.url()+"authenticate/verify-mail?token=",verificationToken);
@@ -64,16 +63,16 @@ public class RegisterEventListener extends Email {
                     mailSender,
                     getEmail(EMAIL_DETAILS),
                     token.getUser().getUsername(),
-                    url,
-                    token.getToken(),
+                    "    <a class=\"button\" href=\""+url+token.getToken()+"\">Verify email</a>"
+                    ,
                     EXPIRATION
             );
 
         }catch (Exception e){
 
             var username =token.getUser().getUsername();
-            var deleted =onVerificationToken.deleteToken(token.getToken());
-            if(deleted)onUser.deleteUser(username);
+            var deleted = iVerificationToken.deleteToken(token.getToken());
+            if(deleted) iUser.deleteUser(username);
             CatchException.catchException(e);
         }
     }

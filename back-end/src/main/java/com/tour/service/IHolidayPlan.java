@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public interface OnHolidayPlan {
+public interface IHolidayPlan {
   boolean saveHolidayPlan(HolidayPlaDTO dto, List<Part> images);
   Set<HolidayPlan> getHolidayPlans();
 

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Builder
@@ -67,7 +68,7 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
                 .date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
-  @ExceptionHandler(NotFoundException.class)
+  @ExceptionHandler({NotFoundException.class, NoSuchElementException.class})
   public ResponseEntity<Object> NotFoundException(
           NotFoundException ex, WebRequest request) {
 

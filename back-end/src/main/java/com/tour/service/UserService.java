@@ -2,13 +2,8 @@ package com.tour.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.*;
-import com.tour.exception.CatchException;
-import com.tour.exception.DuplicateException;
-import com.tour.exception.NotFoundException;
-import com.tour.exception.NullException;
-import com.tour.model.Permission;
-import com.tour.model.Role;
-import com.tour.model.User;
+import com.tour.exception.*;
+import com.tour.model.*;
 import com.tour.repository.UserRepository;
 import com.tour.utils.Roles;
 import com.tour.utils.VerificationURL;
@@ -25,20 +20,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserService implements OnUser {
+public class UserService implements IUser {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher publisher;
-    private  final  OnRole onRole;
-    private  final  OnPermission onPermission;
+    private  final IRole iRole;
+    private  final IPermission iPermission;
     private final Environment environment;
+    private  final ISecurityDataChange securityDataChangeService;
+    private  final ISecurityQuestionAnswer iSecurityQuestionAnswer;
+
 
     /**
      * Retrieve the defaulted user
@@ -68,7 +63,7 @@ public class UserService implements OnUser {
         try{
             if(userRepository.count()==0){
                 var userDTO = getDefaultUser();
-                var role = onRole.getRole(userDTO.usertype().toUpperCase());
+                var role = iRole.getRole(userDTO.usertype().toUpperCase());
                 if(role == null) throw new NotFoundException("Role is not found.");
                 var user =User.builder().firstname(userDTO.firstname()).lastname(userDTO.lastname())
                         .username(userDTO.username()).
@@ -111,7 +106,7 @@ public class UserService implements OnUser {
                     password(new BCryptPasswordEncoder().encode(user.password()))
                     .roles(new HashSet<>()).build();
 
-            var role  = onRole.getRole(Roles.USER.name());
+            var role  = iRole.getRole(Roles.USER.name());
             if(role==null) throw  new NotFoundException("Role is not found");
             user1.getRoles().add(role);
             user1= userRepository.save(user1);
@@ -249,21 +244,17 @@ public class UserService implements OnUser {
      * @throws  NullException all new details are null
      * @throws  NotFoundException if the user is not found
      */
-    public Optional<User> updateUserDetails(EditUserRequest user) {
+    public boolean updateUserDetails(EditUserNoneSecurityData user) {
         if (user == null) throw new NullPointerException("User is invalid");
         var user1 = getUser(user.currentUsername());
         if (user1 == null) throw new NotFoundException("User is not found");
-
-
         if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
         if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
-        if(isValid.isValid(user.username()) ) user1.setUsername(user.username());
         if(user.age()!=null &&isValid.isValid(user.age().toString()))user1.setAge(user.age());
-        if(isValid.isValid(user.newPassword()) ) user1.setPassword(new BCryptPasswordEncoder().encode(user.newPassword()));
-        User updatedUser =null;
+        var updatedUser =false;
         try {
-            updatedUser =
-                    userRepository.save(user1);
+            userRepository.save(user1);
+            updatedUser =true;
         }
          catch (DataIntegrityViolationException e){
             CatchException.catchException(new DuplicateException("User with email already exist"));
@@ -271,7 +262,7 @@ public class UserService implements OnUser {
         catch (Exception e){
             CatchException.catchException(e);
         }
-        return Optional.ofNullable(updatedUser);
+        return updatedUser;
     }
 
     /**
@@ -287,7 +278,7 @@ public class UserService implements OnUser {
     public boolean addNewRoleToUser(String username, String  roleName)  {
         var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found");
-        Role role = onRole.getRole(roleName);
+        Role role = iRole.getRole(roleName);
         if(role==null )throw  new NotFoundException("Role is not found");
         if(user.getRoles().contains(role))throw  new DuplicateException(String.format("User already have Role:%s",role.getName()));
         boolean added =false;
@@ -385,7 +376,7 @@ public class UserService implements OnUser {
     public boolean addPermissionToUser( String username,String permissionName)  {
         var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found");
-        var permission = onPermission.getPermission(permissionName);
+        var permission = iPermission.getPermission(permissionName);
         if(permission==null )throw  new NotFoundException("Permission is not found");
         boolean added =false;
         if(user.getPermissions().contains(permission))throw  new DuplicateException(String.format("User already have Role:%s",permission.getName()));
@@ -398,6 +389,12 @@ public class UserService implements OnUser {
         return added;
     }
 
+    /**
+     * Verifies user account
+     * @param user is the user to verify
+     * @throws  NullException if the user to verify is null
+     * @return true when verified successfully otherwise false
+     */
     @Override
     public boolean verifyUser(User user) {
         if(user==null)throw  new NullException("User is invalid");
@@ -414,21 +411,26 @@ public class UserService implements OnUser {
     }
 
     @Override
-    public void resetPassword(String username, VerificationURL url) {
+    public void resetPassword(String username) {
         var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found with given email.");
-        publisher.publishEvent( new PasswordResetEvent(user,url));
+        publisher.publishEvent( new SecurityChangeDataEvent(user, user.getUsername()));
     }
 
     @Override
     public boolean resetPassword(@NonNull PasswordResetRequest passwordResetRequest) {
-        if(!Objects.equals(passwordResetRequest.getConfirmPassword(), passwordResetRequest.getNewPassword()))
-            throw  new NullException("Passwords are not the same");
-        var user = getUser(passwordResetRequest.getUsername());
+        if(!Objects.equals(passwordResetRequest.confirmPassword(), passwordResetRequest.newPassword()))
+            throw  new NullException("Passwords are not the same.");
+        var user = getUser(passwordResetRequest.username());
         if(user==null)throw  new NotFoundException("User is not found");
+        if(!securityDataChangeService.verify(
+                passwordResetRequest.OTP(), passwordResetRequest.username(),
+                new SecurityChangeDataEvent(user, passwordResetRequest.username()))){
+            throw  new InvalidToken("Failed to verify OTP");
+        }
 
-        if(isValid.isValid(passwordResetRequest.getNewPassword()) )
-            user.setPassword(new BCryptPasswordEncoder().encode(passwordResetRequest.getNewPassword()));
+        if(isValid.isValid(passwordResetRequest.newPassword()) )
+            user.setPassword(new BCryptPasswordEncoder().encode(passwordResetRequest.newPassword()));
 
         var isUpdated =false;
         try{
@@ -440,6 +442,70 @@ public class UserService implements OnUser {
 
         return isUpdated;
     }
+
+
+
+    @Override
+    public boolean updateUserSecurityData(EditUserSecurityData edit) {
+
+        if (edit == null) throw new NullPointerException("Invalid edit details");
+
+        var user1 = getUser(edit.currentUsername());
+        if (user1 == null) throw new NotFoundException("User is not found");
+        if(! securityDataChangeService.verify(edit.OTP(), edit.currentUsername(),
+                new SecurityChangeDataEvent(user1,edit.currentUsername()))){
+
+            throw  new InvalidToken("Failed to verify  OTP");
+        }
+        if(!isValid.isValid(edit.username()) && !isValid.isValid(edit.newPassword()) )
+            throw  new NullException("No new data to update");
+        if(isValid.isValid(edit.username()) ) user1.setUsername(edit.username());
+        if(isValid.isValid(edit.newPassword()) ) user1.setPassword(new BCryptPasswordEncoder().encode(edit.newPassword()));
+        var updatedUser =false;
+        try {
+            userRepository.save(user1);
+            updatedUser =true;
+        }
+        catch (DataIntegrityViolationException e){
+            CatchException.catchException(new DuplicateException("User with email already exist"));
+        }
+        catch (Exception e){
+            CatchException.catchException(e);
+        }
+        return updatedUser;
+    }
+
+    @Override
+    public void resetUsername(String currentUsername, String username, Map<Integer, String> answers) {
+        var user = getUser(currentUsername);
+        if(user==null)throw  new NotFoundException("User is not found with given email.");
+        if(checkSecurityEnabled(user.getUsername())){
+             if(!iSecurityQuestionAnswer
+                     .checkAnswers(currentUsername,answers
+                             )){
+                 throw  new InvalidCredentials("Incorrect security answers to security questions");
+             }
+        }
+        publisher.publishEvent( new SecurityChangeDataEvent(user,username));
+    }
+
+    @Override
+    public boolean saveSecurityQuestions(UserSecurityQuestionAnswerDTO securityQuestionDTO) {
+        var user = getUser(securityQuestionDTO.username());
+        if(user==null)throw  new NotFoundException("User is not found");
+        var isSaved =false;
+        isSaved= iSecurityQuestionAnswer.save(new SecurityQuestionAnswerDTO(  securityQuestionDTO.answer(),
+                user,securityQuestionDTO.number()));
+
+
+        return isSaved ;
+    }
+
+    @Override
+    public boolean checkSecurityEnabled(String username) {
+        return !iSecurityQuestionAnswer.findByUsername(username).isEmpty();
+    }
+
 
     /**
      * Delete permission from user

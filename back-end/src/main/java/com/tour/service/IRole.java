@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 @Service
-public interface OnRole {
+public interface IRole {
     String[] getNamesDefaultRoles();
     void saveRole(Role role);
     Role getRole(long id);

@@ -50,15 +50,50 @@ export const RegisterUser = ({firstname,lastname,email,password,age,userType},di
      }
    )
 }
-export const resetPassword=(username,useAxiosPrivate,dispatchResponse)=>{
+export const resetPassword=({username,OTP,newPassword,confirmPassword},dispatchResponse)=>{
+  const API = `/holiday-plan/api/authenticate/reset-password`;
+  dispatchResponse({  isLoading:true});
+    axios.post(API,{username,OTP,newPassword,confirmPassword})
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+          
+            dispatchResponse({isRequestError:false,passwordResetSucceful:true,  isLoading:false,isRequestSuccessful:true,
+            message:response.data});
+
+          }
+
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+      }
+    )
+
+}
+export const resetPasswordRequest=(username,dispatchResponse)=>{
    const API = `/holiday-plan/api/authenticate/password-reset-request?email=${username}`;
    dispatchResponse({  isLoading:true});
      axios.get(API)
      .then(response =>
          {
            if(response.ok || response.status===200){
-              console.log(response);
-             dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true,
+             dispatchResponse({isRequestError:false,passwordResetSucceful:true,  isLoading:false,isRequestSuccessful:true,
              message:response.data.message});
 
            }
@@ -79,11 +114,200 @@ export const resetPassword=(username,useAxiosPrivate,dispatchResponse)=>{
 
                      errorMessage  = getErrorMessage(err);
                }
-               dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:errorMessage})
-          }else dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+               dispatchResponse({isRequestError:true, passwordResetSucceful:false,
+               isLoading:false,isRequestSuccessful:false, message:errorMessage})
+          }else dispatchResponse({isRequestError:true,passwordResetSucceful:false,
+          isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
 
        }
      )
+
+}
+
+export const requestSecuirityChangePassword=({useAxiosPrivate,username='',dispatchResponse=()=>{}})=>{
+
+  const API = `/holiday-plan/api/user/update/password-change-request?username=${username}`;
+   dispatchResponse({  isLoading:true});
+    useAxiosPrivate.post(API)
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({
+              isRequestError:false,isPasswordUpdateRequestSuccessful:true,  
+              isLoading:false,isRequestSuccessful:true,
+              message:response.data
+            });
+
+          }
+
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true, passwordResetSucceful:false,
+               isLoading:false,isRequestSuccessful:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,passwordResetSucceful:false,
+          isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+      }
+    )
+
+}
+export const requestSecuirityChangeEmail=({useAxiosPrivate, currentUsername='',userAnswers=[{username:'', answer:'', number:0}],
+                                dispatchResponse=()=>{}})=>{
+  const API = `/holiday-plan/api/user/update/username-change-request?currentUsername=${currentUsername}`;
+   dispatchResponse({  isLoading:true});
+    useAxiosPrivate.post(API,{userAnswers:userAnswers})
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({
+              isRequestError:false,isEmailUpdateRequestSuccessful:true,  
+              isLoading:false,isRequestSuccessful:true,
+              message:response.data
+            });
+
+          }
+
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true, passwordResetSucceful:false,
+               isLoading:false,isRequestSuccessful:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,passwordResetSucceful:false,
+          isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+      }
+    )
+
+}
+
+export const changeSecuirity=( useAxiosPrivate,{currentUsername,username, password,currentPassword, OTP},dispatchResponse)=>{
+  const API = '/holiday-plan/api/user/update/security';
+  dispatchResponse({  isLoading:true});
+    useAxiosPrivate.patch(API,{username, newPassword:password, OTP,currentPassword,currentUsername})
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({isRequestError:false,isPasswordOrEmailChangeRequestSuccessful:true,  
+              isLoading:false,isRequestSuccessful:true,
+            message:response.data});
+
+          }
+
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true, passwordResetSucceful:false, isLoading:false,isRequestSuccessful:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,passwordResetSucceful:false,  isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+      }
+    )
+
+}
+export const ActivateSecuirityQuestions= ( useAxiosPrivate,answers=[{username:'', answer:'', number:0}],
+                                          dispatchResponse=()=>{})=>{
+    const API = `/holiday-plan/api/user/add-security-questions?username=${answers[0]?.username}`;
+    dispatchResponse({  isLoading:true});
+    return useAxiosPrivate.post(API,{answers:answers})
+    .then(response =>
+        {
+          return (response.ok || response.status===200)?
+           {isRequestError:false,  isLoading:false,isRequestSuccessful:true,...response.data}:{};
+          
+
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+             return{isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:errorMessage}
+         }else return({isRequestError:true, isLoading:false,isRequestSuccessful:false, message:"Internal server error"});
+
+      }
+    )
+
+}
+export const FetchSecuirityQuestions=( useAxiosPrivate,{controller},dispatchResponse=()=>{})=>{
+  const API = `/holiday-plan/api/user/security-questions/`;
+  dispatchResponse({  isLoading:true});
+    useAxiosPrivate.get(API, {signal:controller.signal})
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true, data:response.data});
+          }
+
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true,  isLoading:false,isRequestSuccessful:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true, isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+      }
+    )
 
 }
 export const RegisterAdmin = ({firstname,lastname,email,password, age,registered,userType},useAxiosPrivate, dispatchRegister) => {
@@ -141,18 +365,18 @@ export const FetchUsers = (useAxiosPrivate,dispatchUsers,controller) => {
 
 
 
-export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,email,newPassword,age,currentPassword},dispatchRegister) => {
+export const UpdateUser = (useAxiosPrivate,{firstname,lastname,age,currentUsername},dispatchRegister) => {
 
    //dispatchRegister({registered:true})
    let isMounted = true;
    const controller = new AbortController();
-  const username=email.replace('/','-');
-   const API = '/holiday-plan/api/user/update/';
-   isMounted&& useAxiosPrivate.patch(API,{firstname,lastname,currentUsername,username,age,newPassword,currentPassword,signal:controller.signal})
+
+   const API = '/holiday-plan/api/user/update/none-security';
+   isMounted&& useAxiosPrivate.patch(API,{currentUsername,firstname,lastname,age,signal:controller.signal})
    .then(response =>
        {
          if(response.ok || response.status===200){
-           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:"Account successfully updated,logout and in to see changes."})
+           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:response.data})
 
          }
          return ()=>{isMounted=false; controller.abort()}
@@ -180,6 +404,38 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,currentUsername,e
    )
 }
 
+
+export const User = async(useAxiosPrivate,controller,username) => {
+
+  const API = `/holiday-plan/api/user/${username}`;
+   const response = await useAxiosPrivate.get(API, {signal:controller.signal,  validateStatus: function (status) {
+      // if this function returns true, exception is not thrown, so
+      // in simplest case just return true to handle status checks externally.
+      return true;
+  }})
+  try{
+      return (response.ok || response.status===302)?
+      {isRequestError:false,isRequestSuccessful:true, isLoading:false, ...response.data}:{}
+  }catch(err){
+      
+      if(!err?.response.ok && err.name!=="AbortErr"){
+          let message  =null;
+          if(err.response.status===404){
+              message  ="Invalid credentials";
+          }
+          else if(err.response.status===401){
+                  message  ="Denied access";
+          }
+          else{
+                  message  = getErrorMessage(err);
+          }
+          return({message:message,isRequestError:true,isRequestSuccessful:false})
+      }else return({message:"Server Error",isRequestError:true,isRequestSuccessful:false})
+  }
+
+    
+  
+}
 
 
 export const DeleteUser = (useAxiosPrivate,password,email,dispatchAccount) => {
