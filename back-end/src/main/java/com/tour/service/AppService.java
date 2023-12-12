@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AppService implements OnApp{
+public class AppService implements IApp {
     private final AppRepository repository;
     private final Environment environment;
     private final SocialNetworkRepository socialNetworkRepository;

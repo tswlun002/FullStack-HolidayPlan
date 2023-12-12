@@ -21,11 +21,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
-public class RoleService implements  OnRole{
+public class RoleService implements IRole {
 
     private final RolesRepository rolesRepository;
     private final ApplicationEventPublisher publisher;
-    private final OnPermission onPermission;
+    private final IPermission iPermission;
     private final Environment environment;
 
     /**
@@ -48,8 +48,8 @@ public class RoleService implements  OnRole{
         try{
             if (rolesRepository.count() == 0) {
                 var names = getNamesDefaultRoles();
-                var permissions = Arrays.stream(onPermission.getNamesDefaultedPermission()).
-                        map(onPermission::getPermission).collect(Collectors.toSet());
+                var permissions = Arrays.stream(iPermission.getNamesDefaultedPermission()).
+                        map(iPermission::getPermission).collect(Collectors.toSet());
                 for (var name : names) {
                     var role = Role.builder().permissions(permissions).name(name.toUpperCase()).build();
                     rolesRepository.save(role);
@@ -88,7 +88,7 @@ public class RoleService implements  OnRole{
   public boolean addNewPermissionToRole(String roleName, String permissionName)  {
         Role role = getRole(roleName);
         if(role==null )throw  new NotFoundException("Role is not found");
-        var permission = onPermission.getPermission(permissionName);
+        var permission = iPermission.getPermission(permissionName);
         if(permission == null) throw  new NotFoundException("Permission is not found");
         var added = false;
         try {

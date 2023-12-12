@@ -10,7 +10,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,7 +59,8 @@ public class JwtService {
         extraClaims.put("user",
                 UserResponseToAdmin.builder().age(user.getAge())
                         .username(user.getUsername()).lastname(user.getLastname())
-                        .firstname(user.getFirstname()).roles(user.getRoles()).permissions(user.getPermissions()).build());
+                        .firstname(user.getFirstname()).roles(user.getRoles()).
+                        permissions(user.getPermissions()).build());
     }
     public String generateRefreshToken(Map<String, Object> extraClaims, User user) {
         if(user==null)throw new NullException("User is invalid");

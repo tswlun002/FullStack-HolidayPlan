@@ -38,20 +38,22 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
      @Mock
      private UserRepository repository;
-     @Mock private  OnRole roleObj;
-     @Mock private  OnPermission permissionObj;
+     @Mock private IRole roleObj;
+     @Mock private IPermission permissionObj;
      @Mock private ApplicationEventPublisher publisher;
      @InjectMocks UserService service;
      @Mock
      private Environment environment;
-
+      @Mock  private   SecurityDataChangeService securityDataChangeService;
      @Mock
      private HttpServletRequest servletRequest;
+     @Mock ISecurityQuestionAnswer iSecurityQuestionAnswer;
      private  final VerificationURL  url = new VerificationURL("/HolidayPlan/api/authenticate",8080,"/");
 
     @BeforeEach
     void setUp() {
-        service = new UserService(repository,publisher,roleObj,permissionObj,environment);
+        service = new UserService(repository,publisher,roleObj,permissionObj,environment,securityDataChangeService
+        , iSecurityQuestionAnswer);
     }
 
     @Test

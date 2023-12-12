@@ -1,10 +1,8 @@
 package com.tour.model;
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.Date;
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -15,8 +13,8 @@ import java.util.Objects;
 @Setter
 @ToString
 @Builder
-@Table(name = "PasswordResetTokens")
-public class PasswordResetToken {
+@Table(name = "SecurityQuestions")
+public class SecurityQuestion {
     @Id
     @GenericGenerator(name="cmrSeq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
@@ -26,25 +24,22 @@ public class PasswordResetToken {
     @Column(name = "id", nullable = false)
     private Long id;
     @NonNull
-    private String token;
-    private  Boolean verified=false;
+    @Column(nullable = false,unique = true)
+    private  String question;
     @NonNull
-    private Date expirationDate;
-    @OneToOne(optional = false)
-    @JoinColumn(name = "user_id",nullable = false)
-    private User user;
+    @Column(nullable = false,unique = true)
+    private  Integer number;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PasswordResetToken that)) return false;
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getToken(), that.getToken()) &&
-                Objects.equals(getVerified(), that.getVerified()) && Objects.equals(getExpirationDate(),
-                that.getExpirationDate());
+        if (!(o instanceof SecurityQuestion that)) return false;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getQuestion(), that.getQuestion())
+                && Objects.equals(getNumber(), that.getNumber());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getToken(), getVerified(), getExpirationDate());
+        return Objects.hash(getId(), getQuestion(), getNumber());
     }
 }

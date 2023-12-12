@@ -1,4 +1,4 @@
-import { Box,FormControlLabel,Grid} from '@mui/material';
+import { FormControlLabel,Grid} from '@mui/material';
 import { makeStyles} from  "@mui/styles"
 import Card from '../component/HolidayCard';
 import {  useReducer, useEffect, useContext, useState,useMemo} from "react"
@@ -165,7 +165,7 @@ const Home = ()=>{
                        <Grid item sx={{display:'flex', justifyContent:'center',alignItems:"center",minHeight:'1vh'}}>
                      
                      <Chip
-                       icon={<ClearIcon/>}
+                       icon={<ClearIcon style={{color:"green"}}/>}
                        label="Close"
                        onClick={clearFilter}
                        

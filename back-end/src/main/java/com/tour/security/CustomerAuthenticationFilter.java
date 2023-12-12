@@ -52,7 +52,7 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult) throws IOException {
 
         var username=  authResult.getPrincipal().toString();
         var user = userDetailsService.loadUserByUsername(username).user();

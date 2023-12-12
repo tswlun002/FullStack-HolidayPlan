@@ -5,3 +5,5 @@ back-end/target
 .env
 *.env
 
+/back-end/.idea/
+   if: needs.check.outputs.run_job == 'true'

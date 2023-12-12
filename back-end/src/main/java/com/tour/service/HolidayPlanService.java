@@ -17,15 +17,15 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 @AllArgsConstructor
 @Service
-public class HolidayPlanService  implements  OnHolidayPlan{
-    private final OnUser onUser;
+public class HolidayPlanService  implements IHolidayPlan {
+    private final IUser iUser;
     private final HolidayPlanRepository holidayPlanRepository;
     private final HolidayImagesRepository imagesRepository;
 
     @Override
     public boolean saveHolidayPlan(HolidayPlaDTO dto, List<Part> images) {
 
-        var user  = onUser.getLoginedUser();
+        var user  = iUser.getLoginedUser();
        var holidayPlan = HolidayPlan.builder().event(dto.event()).description(dto.description())
                 .endDate(dto.endDate()).startDate(dto.startDate()).priorityLevel
                        (Integer.parseInt(dto.priorityLevel().trim())).city(dto.city())
@@ -60,7 +60,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
     }
     @Override
     public Set<HolidayPlan> getHolidayPlans() {
-        return holidayPlanRepository.getHolidayPlan(onUser.getLoginedUser().getId());
+        return holidayPlanRepository.getHolidayPlan(iUser.getLoginedUser().getId());
     }
 
    @Override
@@ -69,7 +69,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
    }
     @Override
     public boolean deleteHolidayPlan(long holidayPlanId) {
-        HolidayPlan holidayPlan =getHolidayPlan(onUser.getLoginedUser(),holidayPlanId);
+        HolidayPlan holidayPlan =getHolidayPlan(iUser.getLoginedUser(),holidayPlanId);
         if(holidayPlan==null)throw  new NullPointerException("Can not delete null HolidayPlan");
         var deleted =false;
         try {
@@ -130,7 +130,7 @@ public class HolidayPlanService  implements  OnHolidayPlan{
 
     @Override
     public boolean updateHolidayPlan(long holidayPlaId,int level) {
-        HolidayPlan holidayPlan = getHolidayPlan(onUser.getLoginedUser(),holidayPlaId);
+        HolidayPlan holidayPlan = getHolidayPlan(iUser.getLoginedUser(),holidayPlaId);
         if(holidayPlan==null) throw new NullPointerException("Can not update null HolidayPlan");
         var updated=false;
         try{

@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class VerificationTokenService implements  OnVerificationToken {
+public class VerificationTokenService implements IVerificationToken {
     private  final VerificationTokenRepository repository;
     private final ApplicationEventPublisher publisher;
     @Value("${verification.expire.time:15}")

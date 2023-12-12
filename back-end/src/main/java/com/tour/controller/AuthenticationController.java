@@ -3,11 +3,12 @@ package com.tour.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.PasswordResetRequest;
 import com.tour.dto.RegisterUserRequest;
+import com.tour.dto.SecurityChangeDataEvent;
 import com.tour.exception.NotFoundException;
 import com.tour.model.VerificationToken;
 import com.tour.security.AuthenticationResponse;
 import com.tour.service.AuthenticationService;
-import com.tour.service.PasswordResetService;
+import com.tour.service.SecurityDataChangeService;
 import com.tour.service.UserService;
 import com.tour.service.VerificationTokenService;
 import com.tour.utils.MapResponse;
@@ -16,17 +17,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+
 import java.io.IOException;
 import java.util.HashMap;
+
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -38,7 +36,7 @@ public class AuthenticationController {
    private final AuthenticationService authenticationService;
    private  final UserService userService;
    private  final VerificationTokenService verificationTokenService;
-   private  final PasswordResetService passwordResetService;
+
     @GetMapping(value = "accessToken/refresh/")
     public void refreshToken(HttpServletRequest request,
                                              HttpServletResponse response ) throws IOException {
@@ -87,41 +85,21 @@ public class AuthenticationController {
 
     }
     @GetMapping(value = "password-reset-request")
-    public   void requestResetPassword(@RequestParam("email") String email,
-                                                              HttpServletRequest request,
-                                                              HttpServletResponse response) throws IOException {
-        userService.resetPassword(email,
-                new VerificationURL(request.getServerName(), request.getServerPort(), request.getContextPath()));
+    public   void requestResetPassword(@RequestParam("email") String email, HttpServletResponse response) throws IOException {
+        userService.resetPassword(email);
         response.setContentType(APPLICATION_JSON_VALUE);
         response.setStatus(OK.value());
         new ObjectMapper().writeValue(response.getOutputStream(),
-                new MapResponse("message","Link is sent to email, check emails"));
+                new MapResponse("message","OTP code for password reset is sent to your email."));
 
     }
-    @GetMapping(value = "reset-password", produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
-    public   ModelAndView resetPassword(@RequestParam(value = "token", required = false) String token,
-                                  @RequestParam(value = "error", required = false ) String error,
-                                  Model model){
-        model.addAttribute("token",token);
-        model.addAttribute("error",error);
-        model.addAttribute("passwordResetRequest", PasswordResetRequest.builder().token(token).build());
-        var map = new HashMap<String, Model>();
-        map.put("reset-password",model);
-        return new ModelAndView("reset-password",map);
 
-    }
     @PostMapping(value = "reset-password")
-    public  String  resetPassword(@Valid PasswordResetRequest  passwordResetRequest,
-                                                 BindingResult bindingResult, Model model,
-                                                 HttpServletRequest request){
-        boolean resetPasswordToken = passwordResetService.verify(passwordResetRequest,
-                new VerificationURL(request.getServerName(), request.getServerPort(), request.getContextPath()) );
-        var response =resetPasswordToken&& userService.resetPassword(passwordResetRequest)?
-                "success":"not_acceptable";
-        model.addAttribute("error",response);
-
-        return "redirect:/reset-password?"+response;
+email-verification-for-user-create-update
+    public  ResponseEntity<String>  resetPassword(@RequestBody @Valid PasswordResetRequest  passwordResetRequest){
+        return userService.resetPassword(passwordResetRequest)?
+                new ResponseEntity<>("Password was successful change",OK):
+                new ResponseEntity<>("Failed to reset password",NOT_ACCEPTABLE);
 
     }
 

@@ -30,6 +30,7 @@ const initialState = {
   age:"",
   username: "",
   userType: "",
+  isSecurityEnabled:false,
   roles:[],
   permissions:[]
   
@@ -61,6 +62,7 @@ const App=()=>{
             firstname: user.firstname,
             lastname: user.lastname,
             age:user.age,
+            isSecurityEnabled:false,
             username:user.username,
             userType: user.userType,
             roles:user.roles
@@ -68,21 +70,14 @@ const App=()=>{
         case "UPDATE_TOKEN":
     
             return {...state, access_token:action.payload.access_token}
+        case "UPDATE_DETAILS":
+          return {...state, ...action}
     
         case "LOGOUT":
           navigate('/')
           return {
             ...state,
-            isAuthenticated: false,
-            access_token: null,
-            firstname: "",
-            lastname: "",
-            age:"",
-            username: "",
-            userType: "",
-            roles:[],
-            permissions:[]
-            
+            ...initialState
           };
     
         default:

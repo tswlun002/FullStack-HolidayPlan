@@ -8,7 +8,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 @Service
 public record VerificationTokenEventListener(
-        OnVerificationToken  service
+        IVerificationToken service
 
 ) {
     /**

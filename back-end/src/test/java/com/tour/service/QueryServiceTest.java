@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 class QueryServiceTest {
     @Mock
     private UserQueryRepository repository;
-    @Mock private  OnUser userObj;
+    @Mock private IUser userObj;
     @Mock private ApplicationEventPublisher publisher;
     @InjectMocks
     private   QueryService service;

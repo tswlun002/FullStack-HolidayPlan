@@ -19,7 +19,7 @@ import java.io.IOException;
 public abstract class Email {
 
     @Nonnull
-    protected String  styleMail(String mailContent, String url, String token, int expiration) {
+    protected String  styleMail(String mailContent, String token, int expiration) {
 
         return "<html>\n" +
                 "  <head>\n" +
@@ -44,8 +44,8 @@ public abstract class Email {
                 "    </style>\n" +
                 "  </head>\n" +
                 "  <body>\n" +
-                mailContent +
-                "    <a class=\"button\" href=\""+url+token+"\">Verify email</a>\n" +
+                mailContent + "\n" +token+"\n"+
+
                 "     <p>Verification expires after: "+ expiration +" minutes </p>"+
 
                 "  </body>\n" +
@@ -68,7 +68,7 @@ public abstract class Email {
         return email;
     }
    protected void sendEmail(JavaMailSender mailSender,EmailDTO email,
-                   String recipient, String url,
+                   String recipient,
                    String token,
                    int expiration) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -76,7 +76,7 @@ public abstract class Email {
         helper.setFrom(email.senderName());
         helper.setTo(recipient);
         helper.setSubject(email.subject());
-        helper.setText(styleMail(email.content(),url,token,expiration),true);
+        helper.setText(styleMail(email.content(),token,expiration),true);
         mailSender.send(message);
     }
 }
