@@ -95,10 +95,12 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "reset-password")
+email-verification-for-user-create-update
     public  ResponseEntity<String>  resetPassword(@RequestBody @Valid PasswordResetRequest  passwordResetRequest){
         return userService.resetPassword(passwordResetRequest)?
                 new ResponseEntity<>("Password was successful change",OK):
                 new ResponseEntity<>("Failed to reset password",NOT_ACCEPTABLE);
+
     }
 
 }
