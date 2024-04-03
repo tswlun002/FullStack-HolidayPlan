@@ -3,27 +3,30 @@ package com.tour.service;
 import com.tour.dto.UserResponseToAdmin;
 import com.tour.exception.NullException;
 import com.tour.model.User;
+import com.tour.security.TokenType;
+import com.tour.utils.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class JwtService {
-    @Value("${jwt.signing.key}")
-    private String SECRET_KEY;
-    @Value("${jwt.refresh.accessToken.period}")
-    private double REFRESH_TOKEN_PERIOD;
-    @Value("${jwt.access.accessToken.period}")
-    private double ACCESS_TOKEN_PERIOD;
+
+
+   private  final  Environment environment;
+
+
     public String extractUsername(String token) {
         if(token==null || token.isEmpty())throw new NullException("AccessToken is invalid");
 
@@ -49,7 +52,9 @@ public class JwtService {
         if(extraClaims!=null && extraClaims.isEmpty()){
             getExtraClaims(extraClaims, user);
         }
-        return  buildJwtToken(extraClaims,user, ACCESS_TOKEN_PERIOD);
+        var ACCESS_TOKEN_PERIOD= Double.parseDouble(Objects.requireNonNull(environment.getProperty("jwt.access.accessToken.period")));
+        log.info("----------------------------- Generate access_token -----------------------------------");
+        return  buildJwtToken(extraClaims,user, ACCESS_TOKEN_PERIOD,TokenType.ACCESS_TOKEN);
     }
     public String generateRefreshToken(User user) {
         if(user==null)throw new NullException("User is invalid");
@@ -67,16 +72,22 @@ public class JwtService {
         if(extraClaims!=null && extraClaims.isEmpty()){
             getExtraClaims(extraClaims, user);
         }
-        return  buildJwtToken(extraClaims,user, REFRESH_TOKEN_PERIOD);
+        var REFRESH_TOKEN_PERIOD= Double.parseDouble(Objects.requireNonNull(environment.getProperty("jwt.refresh.accessToken.period")));
+        log.info("----------------------------- Generate refresh_token: {} -----------------------------------",REFRESH_TOKEN_PERIOD);
+        return  buildJwtToken(extraClaims,user,REFRESH_TOKEN_PERIOD,TokenType.REFRESH_TOKEN);
     }
-    private String buildJwtToken(  Map<String, Object> extraClaims,
-                                   User user, double time){
-        return Jwts
-                .builder()
+    private String buildJwtToken(Map<String, Object> extraClaims,
+                                 User user, double time, TokenType type){
+        var currentTime= Constants.getCurrentTime();
+        log.info("-------------------------- Current time: {}, calender: {}",currentTime, Calendar.getInstance(TimeZone.getTimeZone("Africa/Johannesburg")));
+
+        return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date((long)( System.currentTimeMillis()+1000*time)))
+                .setHeaderParam("type",type)
+                .setIssuedAt(Date.from(currentTime))
+                .setExpiration(
+                        Date.from(currentTime.plusMillis(60000*(long)time)))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -87,15 +98,24 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        var dateNow = Date.from(Constants.getCurrentTime());
+        var tokenDate= extractExpiration(token);
+        var isExpired = dateNow.equals(tokenDate)||dateNow.after(tokenDate);
+
+        log.info("---------------------------- Token is expired: {} , token expire date:{}, date now:{}-------------------------",
+                isExpired,tokenDate,dateNow);
+        return isExpired;
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+    public Date extractCreationTime(String token) {
+        return extractClaim(token, Claims::getIssuedAt);
     }
 
     private Key getSignInKey() {
-        byte[]key = Decoders.BASE64.decode(SECRET_KEY);
+        byte[]key = Decoders.BASE64.decode(environment.getProperty("jwt.signing.key"));
         return Keys.hmacShaKeyFor(key);
     }
 }

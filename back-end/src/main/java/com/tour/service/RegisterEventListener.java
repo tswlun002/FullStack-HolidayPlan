@@ -7,6 +7,7 @@ import com.tour.model.User;
 import com.tour.model.VerificationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -31,7 +32,7 @@ public class RegisterEventListener extends Email {
      * @param event is the RegisterEvent
      * @throws  InvalidToken if the user is null and  if the failed to create verification token and send email
      */
-    @EventListener
+    @EventListener(value = RegisterEvent.class)
     void sendVerification(RegisterEvent event) {
 
          user =event.user();
@@ -48,10 +49,6 @@ public class RegisterEventListener extends Email {
 
     }
 
-
-
-
-
     /**
      * Send email  for account verification
      * @param url is the verification end-point
@@ -61,7 +58,7 @@ public class RegisterEventListener extends Email {
         try {
             super.sendEmail(
                     mailSender,
-                    getEmail(EMAIL_DETAILS),
+                    getEmail(StringEscapeUtils.unescapeJson(EMAIL_DETAILS)),
                     token.getUser().getUsername(),
                     "    <a class=\"button\" href=\""+url+token.getToken()+"\">Verify email</a>"
                     ,
@@ -69,10 +66,8 @@ public class RegisterEventListener extends Email {
             );
 
         }catch (Exception e){
-
             var username =token.getUser().getUsername();
-            var deleted = iVerificationToken.deleteToken(token.getToken());
-            if(deleted) iUser.deleteUser(username);
+            iUser.deleteUser(username);
             CatchException.catchException(e);
         }
     }

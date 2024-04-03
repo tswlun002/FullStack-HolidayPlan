@@ -5,11 +5,9 @@ import { Typography,Box,Card,CardContent,CardActions ,CardHeader,IconButton} fro
 import background from '../images/2.jpg'
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
+import PasswordVisibility from '../component/PasswordVisibility';
 import {RegisterUser } from '../utils/User';
 import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import InputAdornment from '@mui/material/InputAdornment';
 
 const Register =()=>{
     const [dateType, setDateType]= useState("text");
@@ -130,17 +128,7 @@ const Register =()=>{
                             type={register.passwordVisible?"text":"password" }
                             autoComplete='new-password' className="password-input" placeholder="password" value={register.password}
                             onChange={(e)=>dispatchRegister({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
-                            InputProps={{
-                                endAdornment: (
-                                <InputAdornment   sx={{padding:"0.1rem",}} position="end">
-                                    <IconButton 
-                                    onClick={()=>dispatchRegister({passwordVisible:!register.passwordVisible})} 
-                                >
-                                    {register.passwordVisible?<VisibilityIcon/>:<VisibilityOffIcon/>}
-                                    </IconButton>
-                                </InputAdornment>
-                                )
-                            }}
+                            InputProps={{endAdornment: (<PasswordVisibility dispatcher={dispatchRegister} fieldData={"passwordVisible"} isVisible={register.passwordVisible}/>)}}
                         />
                 
                         <CssTextField 
@@ -153,17 +141,8 @@ const Register =()=>{
                             type={register.confirmPasswordVisible?"text":"password" }
                             autoComplete='new-password' className="password-input" placeholder="confirm password" value={register.confirmPassword}
                             onChange={(e)=>dispatchRegister({confirmPassword:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
-                            InputProps={{
-                                endAdornment: (
-                                  <InputAdornment   sx={{padding:"0.1rem",}} position="end">
-                                    <IconButton 
-                                      onClick={()=>dispatchRegister({confirmPasswordVisible:!register.confirmPasswordVisible})} 
-                                   >
-                                    {register.confirmPasswordVisible?<VisibilityIcon/>:<VisibilityOffIcon/>}
-                                    </IconButton>
-                                  </InputAdornment>
-                                )
-                              }}
+                            InputProps={{endAdornment: (<PasswordVisibility dispatcher={dispatchRegister} fieldData={"confirmPasswordVisible"} isVisible={register.confirmPasswordVisible}/>)}}
+
                             
                         />
 

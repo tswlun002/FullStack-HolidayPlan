@@ -53,7 +53,6 @@ const App=()=>{
            try{
               user =jwtDecode(action.payload?.access_token).user;
            }catch(e){
-            // console.error(e);
            }
           return {
             ...state,
@@ -68,10 +67,10 @@ const App=()=>{
             roles:user.roles
           };
         case "UPDATE_TOKEN":
-    
-            return {...state, access_token:action.payload.access_token}
+
+            return {...state, access_token:action?.payload?.access_token}
         case "UPDATE_DETAILS":
-          return {...state, ...action}
+          return {...state, ...action};
     
         case "LOGOUT":
           navigate('/')

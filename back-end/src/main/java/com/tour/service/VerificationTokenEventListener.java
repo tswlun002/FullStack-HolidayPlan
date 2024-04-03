@@ -15,7 +15,7 @@ public record VerificationTokenEventListener(
      * Delete the verification token for the user
      * @param event is the  user delete event
      */
-    @EventListener
+    @EventListener(value = UserEvent.class)
     void  deleteUser(UserEvent event){
         if(event.user()==null) throw  new InvalidToken("User is invalid.");
         VerificationToken token = service.findByUserId(event.user().getId()).

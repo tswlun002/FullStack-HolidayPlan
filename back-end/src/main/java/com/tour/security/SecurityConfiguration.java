@@ -3,6 +3,7 @@ package com.tour.security;
 import com.tour.service.JwtService;
 import com.tour.service.AccessTokenService;
 import com.tour.utils.Roles;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,14 +85,16 @@ public class SecurityConfiguration {
                 addLogoutHandler(logoutHandler)
                .logoutSuccessHandler(((request, response, authentication) -> {
                    // Cookie cookie = new Cookie("username", null);
-                   for(var cookie :request.getCookies()) {
-                       cookie.setAttribute("accessToken",null);
-                       cookie.setMaxAge(0);
-                       cookie.setSecure(true);
-                       cookie.setHttpOnly(true);
-                       cookie.setPath("/");
-                       response.addCookie(cookie);
+                   if(request.getCookies()!=null)
+                       for(var cookie :request.getCookies()) {
+                           resetCookies(cookie);
+                           response.addCookie(cookie);
 
+                       }
+                   else {
+                       Cookie cookie = new Cookie("AccessToken",null);
+                       resetCookies(cookie);
+                       response.addCookie(cookie);
                    }
                    SecurityContextHolder.clearContext();
                    response.setStatus(HttpServletResponse.SC_OK);
@@ -102,6 +105,14 @@ public class SecurityConfiguration {
 
        return  http.build();
 
+   }
+
+   private void resetCookies(Cookie cookie){
+       cookie.setAttribute("accessToken",null);
+       cookie.setMaxAge(0);
+       cookie.setSecure(true);
+       cookie.setHttpOnly(true);
+       cookie.setPath("/");
    }
 
     @Bean

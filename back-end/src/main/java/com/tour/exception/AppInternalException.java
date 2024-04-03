@@ -1,6 +1,6 @@
 package com.tour.exception;
 
-public class AppInternalException extends  RuntimeException{
+public class AppInternalException extends  InternalError{
     /**
      * Constructs a new runtime exception with the specified detail message.
      * The cause is not initialized, and may subsequently be initialized by a
@@ -11,5 +11,6 @@ public class AppInternalException extends  RuntimeException{
      */
     public AppInternalException(String message) {
         super(message);
+
     }
 }

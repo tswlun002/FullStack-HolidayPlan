@@ -29,8 +29,6 @@ export const RegisterUser = ({firstname,lastname,email,password,age,userType},di
        }
    ).catch(err => 
      {
-        
-       
         if(!err?.response.ok){
              let errorMessage =null;
              if(err.response.status===404){
@@ -58,7 +56,7 @@ export const resetPassword=({username,OTP,newPassword,confirmPassword},dispatchR
         {
           if(response.ok || response.status===200){
           
-            dispatchResponse({isRequestError:false,passwordResetSucceful:true,  isLoading:false,isRequestSuccessful:true,
+            dispatchResponse({isRequestError:false,isLoading:false,isRequestSuccessful:true,
             message:response.data});
 
           }
@@ -86,15 +84,15 @@ export const resetPassword=({username,OTP,newPassword,confirmPassword},dispatchR
     )
 
 }
-export const resetPasswordRequest=(username,dispatchResponse)=>{
-   const API = `/holiday-plan/api/authenticate/password-reset-request?email=${username}`;
+export const resetPasswordRequest=(username,password,dispatchResponse)=>{
+   const API = `/holiday-plan/api/authenticate/password-reset-request`;
    dispatchResponse({  isLoading:true});
-     axios.get(API)
+    axios.put(API,{username:username,password:password})
      .then(response =>
          {
            if(response.ok || response.status===200){
-             dispatchResponse({isRequestError:false,passwordResetSucceful:true,  isLoading:false,isRequestSuccessful:true,
-             message:response.data.message});
+             dispatchResponse({isRequestError:false,passwordResetRequestSuccessful:true,
+              isLoading:false,message:response.data.message});
 
            }
 
@@ -114,21 +112,19 @@ export const resetPasswordRequest=(username,dispatchResponse)=>{
 
                      errorMessage  = getErrorMessage(err);
                }
-               dispatchResponse({isRequestError:true, passwordResetSucceful:false,
-               isLoading:false,isRequestSuccessful:false, message:errorMessage})
-          }else dispatchResponse({isRequestError:true,passwordResetSucceful:false,
-          isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+               dispatchResponse({isRequestError:true, passwordResetRequestSuccessful:false,isLoading:false,message:errorMessage})
+          }else dispatchResponse({isRequestError:true,passwordResetRequestSuccessful:false, isLoading:false,message:"Internal server error"})
 
        }
      )
 
 }
 
-export const requestSecuirityChangePassword=({useAxiosPrivate,username='',dispatchResponse=()=>{}})=>{
+export const requestSecuirityChangePassword=({useAxiosPrivate,username='',password='',dispatchResponse=()=>{}})=>{
 
-  const API = `/holiday-plan/api/user/update/password-change-request?username=${username}`;
+  const API = '/holiday-plan/api/user/update/password-change-request';
    dispatchResponse({  isLoading:true});
-    useAxiosPrivate.post(API)
+    useAxiosPrivate.put(API,{username:username,password:password})
     .then(response =>
         {
           if(response.ok || response.status===200){
@@ -165,18 +161,20 @@ export const requestSecuirityChangePassword=({useAxiosPrivate,username='',dispat
     )
 
 }
-export const requestSecuirityChangeEmail=({useAxiosPrivate, currentUsername='',userAnswers=[{username:'', answer:'', number:0}],
+export const requestSecuirityChangeEmail=({useAxiosPrivate, username='',newUsername="",
                                 dispatchResponse=()=>{}})=>{
-  const API = `/holiday-plan/api/user/update/username-change-request?currentUsername=${currentUsername}`;
-   dispatchResponse({  isLoading:true});
-    useAxiosPrivate.post(API,{userAnswers:userAnswers})
+   //
+  const API = `/holiday-plan/api/user/update/username-change-request?username=${username}&newUsername=${newUsername}`;
+    useAxiosPrivate.get(API)
     .then(response =>
         {
           if(response.ok || response.status===200){
             dispatchResponse({
               isRequestError:false,isEmailUpdateRequestSuccessful:true,  
               isLoading:false,isRequestSuccessful:true,
-              message:response.data
+              questions:response.data?.questions,
+              email:response.data?.username,
+              message:response.data?.message?response.data.message:response.data
             });
 
           }
@@ -206,20 +204,58 @@ export const requestSecuirityChangeEmail=({useAxiosPrivate, currentUsername='',u
     )
 
 }
-
-export const changeSecuirity=( useAxiosPrivate,{currentUsername,username, password,currentPassword, OTP},dispatchResponse)=>{
-  const API = '/holiday-plan/api/user/update/security';
+export const changeEmail=( useAxiosPrivate,resetUsername={username:"",newUsername:"", answers:Map.arguments(), OTP:""},dispatchResponse)=>{
+  const API ='/holiday-plan/api/user/security/change-username';
   dispatchResponse({  isLoading:true});
-    useAxiosPrivate.patch(API,{username, newPassword:password, OTP,currentPassword,currentUsername})
+    useAxiosPrivate.patch(API,resetUsername)
     .then(response =>
         {
           if(response.ok || response.status===200){
-            dispatchResponse({isRequestError:false,isPasswordOrEmailChangeRequestSuccessful:true,  
+            dispatchResponse({isRequestError:false,
               isLoading:false,isRequestSuccessful:true,
-            message:response.data});
+              message:response.data,
+              currentUsername:resetUsername.newUsername,
+              isEmailUpdateRequestSuccessful:false
+            });
 
           }
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
 
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true, passwordResetSucceful:false, isLoading:false,isRequestSuccessful:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,passwordResetSucceful:false,  isLoading:false,isRequestSuccessful:false, message:"Internal server error"})
+
+      }
+    )
+
+}
+export const changePassword=( useAxiosPrivate,resetPassword={currentUsername:"", newPassword:"", OTP:""},dispatchResponse)=>{
+  const API ='/holiday-plan/api/user/security/change-password'
+  dispatchResponse({  isLoading:true});
+    useAxiosPrivate.patch(API,resetPassword)
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({isRequestError:false,
+              isLoading:false,isRequestSuccessful:true,
+              message:response.data,
+              isPasswordUpdateRequestSuccessful:false
+            });
+
+          }
         }
     ).catch(err =>
       {
@@ -277,7 +313,7 @@ export const ActivateSecuirityQuestions= ( useAxiosPrivate,answers=[{username:''
     )
 
 }
-export const FetchSecuirityQuestions=( useAxiosPrivate,{controller},dispatchResponse=()=>{})=>{
+export const FetchSecuirityQuestions= async( useAxiosPrivate,{controller},dispatchResponse=()=>{})=>{
   const API = `/holiday-plan/api/user/security-questions/`;
   dispatchResponse({  isLoading:true});
     useAxiosPrivate.get(API, {signal:controller.signal})
@@ -371,12 +407,12 @@ export const UpdateUser = (useAxiosPrivate,{firstname,lastname,age,currentUserna
    let isMounted = true;
    const controller = new AbortController();
 
-   const API = '/holiday-plan/api/user/update/none-security';
-   isMounted&& useAxiosPrivate.patch(API,{currentUsername,firstname,lastname,age,signal:controller.signal})
+   const API = `/holiday-plan/api/user/update/none-security?firstname=${firstname}&lastname=${lastname}&age=${age}&currentUsername=${currentUsername}`;
+   isMounted&& useAxiosPrivate.patch(API,{signal:controller.signal})
    .then(response =>
        {
          if(response.ok || response.status===200){
-           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:response.data})
+           dispatchRegister({isRequestError:false,isRequestSuccessful:true, message:response.data,isPersonalDetailsChange:true})
 
          }
          return ()=>{isMounted=false; controller.abort()}

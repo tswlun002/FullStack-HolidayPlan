@@ -31,8 +31,9 @@ public class SecurityDataChangeService implements ISecurityDataChange {
         calendar.add(Calendar.MINUTE, EXPIRATION);
         AtomicBoolean isSaved = new AtomicBoolean(false);
         AtomicReference<SecurityDataChangeToken> token=new AtomicReference<>(null);
-        findByUserId(user.getId()).
-        ifPresent((token1)-> {
+        var results=findByUserId(user.getId());
+
+        results.ifPresent((token1)-> {
 
             if(!token1.getVerified()){
                 token1.setExpirationDate(new Date(calendar.getTime().getTime()));
@@ -59,7 +60,7 @@ public class SecurityDataChangeService implements ISecurityDataChange {
     }
 
     private  int generateOTP() {
-        String numbers = "1234567890";
+        String numbers = "123456789";
         Random random = new Random();
         var buildOTP = new StringBuilder();
         for(int i = 0; i<OTP_STRENGTH ; i++) {
@@ -88,10 +89,10 @@ public class SecurityDataChangeService implements ISecurityDataChange {
         var userToken = findByUsername(username).orElseThrow(
                 ()-> new InvalidToken("No OTP associated with given username")
         );
-    if(userToken.getOTP()!=OTP)
+        if(userToken.getOTP()!=OTP)
             throw  new InvalidToken("OTP is invalid for the given username");
 
-        if(token.getVerified()) throw  new InvalidToken("Already verified, you can login");
+        if(token.getVerified()) throw  new InvalidToken("OTP is already verified");
 
         var isVerified =false;
 
@@ -122,6 +123,6 @@ public class SecurityDataChangeService implements ISecurityDataChange {
 
     @Override
     public Optional<SecurityDataChangeToken> findByUserId(Long id) {
-        return repository.findByUserId(id);
+        return repository.getByUserId(id);
     }
 }

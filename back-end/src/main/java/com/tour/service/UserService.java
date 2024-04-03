@@ -3,12 +3,16 @@ package com.tour.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.*;
 import com.tour.exception.*;
-import com.tour.model.*;
+import com.tour.model.Permission;
+import com.tour.model.Role;
+import com.tour.model.SecurityQuestionAnswer;
+import com.tour.model.User;
 import com.tour.repository.UserRepository;
 import com.tour.utils.Roles;
 import com.tour.utils.VerificationURL;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +24,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Validated
 public class UserService implements IUser {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher publisher;
@@ -33,6 +41,8 @@ public class UserService implements IUser {
     private final Environment environment;
     private  final ISecurityDataChange securityDataChangeService;
     private  final ISecurityQuestionAnswer iSecurityQuestionAnswer;
+    private final PasswordResetBean passwordResetBean;
+    private final NewUsernameBean newUsernameBean;
 
 
     /**
@@ -244,13 +254,14 @@ public class UserService implements IUser {
      * @throws  NullException all new details are null
      * @throws  NotFoundException if the user is not found
      */
-    public boolean updateUserDetails(EditUserNoneSecurityData user) {
+    public boolean updateUserDetails(@Valid EditUserNoneSecurityData user) {
         if (user == null) throw new NullPointerException("User is invalid");
         var user1 = getUser(user.currentUsername());
         if (user1 == null) throw new NotFoundException("User is not found");
         if(isValid.isValid(user.firstname()) ) user1.setFirstname(user.firstname());
         if(isValid.isValid(user.lastname()) ) user1.setLastname(user.lastname());
-        if(user.age()!=null &&isValid.isValid(user.age().toString()))user1.setAge(user.age());
+        if(user.age()!=null &&isValid.isValid(user.age().toString()))
+            user1.setAge(user.age());
         var updatedUser =false;
         try {
             userRepository.save(user1);
@@ -411,16 +422,27 @@ public class UserService implements IUser {
     }
 
     @Override
-    public void resetPassword(String username) {
+    public void resetPassword(String username,String newPassword) {
         var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found with given email.");
         publisher.publishEvent( new SecurityChangeDataEvent(user, user.getUsername()));
+        passwordResetBean.setNewPassword(newPassword);
+        passwordResetBean.setEmail(username);
     }
+
+    /**
+     * Updates password of the user
+     * @param passwordResetRequest  is the object that contains new password, confirm password and username
+     * @throws  InvalidCredentials if  new password and confirm password are not the equal
+     * @throws NotFoundException if the given username is not found
+     * @throws  InvalidToken is the provided OTP is not valid or can not be verified
+     * @return tru if password is changed successful else false
+     */
 
     @Override
     public boolean resetPassword(@NonNull PasswordResetRequest passwordResetRequest) {
         if(!Objects.equals(passwordResetRequest.confirmPassword(), passwordResetRequest.newPassword()))
-            throw  new NullException("Passwords are not the same.");
+            throw  new InvalidCredentials("Passwords are not the same.");
         var user = getUser(passwordResetRequest.username());
         if(user==null)throw  new NotFoundException("User is not found");
         if(!securityDataChangeService.verify(
@@ -442,11 +464,7 @@ public class UserService implements IUser {
 
         return isUpdated;
     }
-
-
-
-    @Override
-    public boolean updateUserSecurityData(EditUserSecurityData edit) {
+    private boolean updateUserSecurityData(EditUserSecurityData edit) {
 
         if (edit == null) throw new NullPointerException("Invalid edit details");
 
@@ -460,7 +478,8 @@ public class UserService implements IUser {
         if(!isValid.isValid(edit.username()) && !isValid.isValid(edit.newPassword()) )
             throw  new NullException("No new data to update");
         if(isValid.isValid(edit.username()) ) user1.setUsername(edit.username());
-        if(isValid.isValid(edit.newPassword()) ) user1.setPassword(new BCryptPasswordEncoder().encode(edit.newPassword()));
+        if(isValid.isValid(edit.newPassword())||isValid.isValid(passwordResetBean.getNewPassword()) )
+            user1.setPassword(new BCryptPasswordEncoder().encode(edit.newPassword()));
         var updatedUser =false;
         try {
             userRepository.save(user1);
@@ -476,17 +495,17 @@ public class UserService implements IUser {
     }
 
     @Override
-    public void resetUsername(String currentUsername, String username, Map<Integer, String> answers) {
-        var user = getUser(currentUsername);
+    public void resetUsername(String username, String newUsername, Map<String, String> answers) {
+        var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found with given email.");
         if(checkSecurityEnabled(user.getUsername())){
              if(!iSecurityQuestionAnswer
-                     .checkAnswers(currentUsername,answers
+                     .checkAnswers(username,answers
                              )){
                  throw  new InvalidCredentials("Incorrect security answers to security questions");
              }
         }
-        publisher.publishEvent( new SecurityChangeDataEvent(user,username));
+        publisher.publishEvent( new SecurityChangeDataEvent(user, newUsername));
     }
 
     @Override
@@ -505,6 +524,49 @@ public class UserService implements IUser {
     public boolean checkSecurityEnabled(String username) {
         return !iSecurityQuestionAnswer.findByUsername(username).isEmpty();
     }
+
+    @Override
+    public boolean changePassword(ResetPassword edit) {
+        return updateUserSecurityData(
+                new EditUserSecurityData(
+                        edit.OTP(),
+                       null,
+                        edit.newPassword(),
+                        edit.currentUsername()
+                )
+        );
+    }
+
+    @Override
+    public boolean changeUsername(ResetUsername edit) {
+        if(checkSecurityEnabled(edit.username())){
+            if(!iSecurityQuestionAnswer.checkAnswers(edit.username(),edit.answers())){
+                throw  new InvalidCredentials("Incorrect security answers to some security questions");
+            }
+        }
+        return updateUserSecurityData(
+                new EditUserSecurityData(
+                        edit.OTP(),
+                        edit.newUsername(),
+                        null,
+                        edit.username()
+                )
+        );
+    }
+
+    @Override
+    public Set<SecurityQuestionAnswer> resetUsername(String username, String newUsername) {
+        if(getUser(newUsername)!=null)throw new DuplicateException("User with given username already exist.");
+        var user = getUser(username);
+        if(user==null)throw  new NotFoundException("User is not found with given email.");
+        var answerQuestions = iSecurityQuestionAnswer.findByUsername(username);
+        if(checkSecurityEnabled(user.getUsername())){
+            publisher.publishEvent( new SecurityChangeDataEvent(user,newUsername));
+        }
+        newUsernameBean.setUsername(newUsername);
+        return answerQuestions;
+    }
+
 
 
     /**

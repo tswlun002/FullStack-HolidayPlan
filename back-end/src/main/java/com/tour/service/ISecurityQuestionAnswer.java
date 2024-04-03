@@ -17,5 +17,5 @@ public interface ISecurityQuestionAnswer {
     Optional<SecurityQuestionAnswer> findByNumber(int questionNumber);
     Optional<SecurityQuestionAnswer> findByQuestion(String question);
 
-    boolean checkAnswers(String username, Map<Integer, String> answers);
+    boolean checkAnswers(String username, Map<String, String> answers);
 }

@@ -1,5 +1,5 @@
 import './Register.css'
-import {  useReducer,useEffect} from "react"
+import {  useReducer} from "react"
 import { Link } from "react-router-dom";
 import { Typography,Box,Card,CardContent,CardActions ,CardHeader,IconButton} from '@mui/material';
 import background from '../images/2.jpg'
@@ -12,50 +12,47 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
 
-
+const   REQUEST_TYPE=["REQUEST-PASSWORD-CHANGE","CHANGE-PASSWORD"]
 const ResetPassword =()=>{
     
-    const INIT_STATE ={email:"", isRequestSuccessful:false,password:"",OTP:"",confirmPassword:"",
-                        passwordResetSucceful:JSON.parse(window.localStorage.getItem("passwordResetSucceful"))||false,
-                        isLoading:false,isRequestError:false, message: '',newPasswordVisible:false,confirmPasswordVisible:false}
+    const INIT_STATE ={ email:"", isRequestSuccessful:false,password:"",OTP:"",confirmPassword:"",passwordResetRequestSuccessful:false,
+                        isLoading:false,isRequestError:false, message: '',newPasswordVisible:false,confirmPasswordVisible:false,
+                       }
     const[passwordReset, dispatchPasswordReset] = useReducer((state, action)=>{
         return {...state,...action }
     },INIT_STATE)
-   
 
-    useEffect(()=>{
-          window.localStorage.setItem("passwordResetSucceful",JSON.stringify(passwordReset.passwordResetSucceful));
-       
-      }, [passwordReset.passwordResetSucceful]);
 
-    const isValid =()=>{
-
-       return  passwordReset.passwordResetSucceful? passwordReset.email.trim()!== "" && passwordReset.password.trim()!== "" &&
-               passwordReset.confirmPassword.trim() !== "" && (passwordReset.OTP&&passwordReset.OTP.toString() !=='')
-               : passwordReset.email.trim()!== "" ;
-    }
-
-    const OnSubmit = (e)=>{
-        e.preventDefault(); 
-        
-        if(isValid()){
-             
+    const OnSubmit = (e,requestType)=>{
+        e.preventDefault();
+        if(requestType===REQUEST_TYPE[1]){
              if(passwordReset.password===passwordReset.confirmPassword){
-               passwordReset.passwordResetSucceful? 
-               resetPassword(
+               if(passwordReset.OTP.trim()===''){dispatchPasswordReset({message:"OTP is required",isLoading:false,isRequestError:true,registered:false})}
+               else resetPassword(
                 {username:passwordReset.email,OTP:parseInt(passwordReset.OTP),newPassword:passwordReset.password,confirmPassword:passwordReset.confirmPassword},
                 dispatchPasswordReset
-               ):
-               resetPasswordRequest(passwordReset.email,dispatchPasswordReset);
-            
-            }else
+               )
+            }
+            else
             {
                 dispatchPasswordReset({message:"Password don not match", isLoading:false,isRegisterError:true,registered:false});
             }
-            
-        }else {
-            dispatchPasswordReset({message:"Email is required",
-             isLoading:false,isRequestError:true,isRequestSuccessful:false});
+        }
+        else{
+
+            if(passwordReset.password.trim()==='' && passwordReset.email.trim()===''){
+                 console.log((passwordReset.password.trim()===''&& passwordReset.email.trim()===''))
+                 dispatchPasswordReset({isRequestError:true,isLoading:false,register:false,message:"Both email and new password are required"});
+            }
+            else if(passwordReset.password.trim()===''){
+                dispatchPasswordReset({isRequestError:true,isLoading:false,register:false, message:"New password is required"});
+            }
+            else if(passwordReset.email.trim()===''){
+                dispatchPasswordReset({isRequestError:true,isLoading:false,register:false, message:"Email is required"});
+            }
+            else{
+                  resetPasswordRequest(passwordReset.email,passwordReset.password,dispatchPasswordReset);
+            }
 
         }
     }
@@ -90,7 +87,8 @@ const ResetPassword =()=>{
                                 </Typography>
                             }
                             subheader={ passwordReset.isRequestError?
-                                passwordReset.message:passwordReset.isRequestSuccessful&&passwordReset.message}
+                                passwordReset.message:(passwordReset.isRequestSuccessful||passwordReset.passwordResetRequestSuccessful)
+                                &&passwordReset.message}
                             subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",
                                color:passwordReset.isRequestError?ERROR_COLOR:SUCCESS_COLOR}}
                         
@@ -100,6 +98,7 @@ const ResetPassword =()=>{
                     <form className="register-inputs" autoComplete="off">
                         <CssTextField 
                            required
+                           disabled={passwordReset.passwordResetRequestSuccessful}
                             variant="outlined"
                             helpertext=""
                             id="demo-helper-text-aligned"
@@ -108,7 +107,7 @@ const ResetPassword =()=>{
                             placeholder="enter email" value={passwordReset.email} 
                            onChange={(e)=>dispatchPasswordReset({email:e.target.value,  isLoading:false,isRequestError:false,isRequestSuccessful:false })}
                          />
-                         {passwordReset.passwordResetSucceful&&<CssTextField 
+                         {passwordReset.passwordResetRequestSuccessful&&<CssTextField
                            required
                             variant="outlined"
                             helpertext=""
@@ -118,16 +117,17 @@ const ResetPassword =()=>{
                              placeholder="enter OTP code" value={passwordReset.OTP} 
                            onChange={(e)=>dispatchPasswordReset({OTP:e.target.value,  isLoading:false,isRequestError:false,isRequestSuccessful:false })}
                          />}
-                            {passwordReset.passwordResetSucceful&& <CssTextField 
+                            {<CssTextField
                             required
+                            disabled={passwordReset.passwordResetRequestSuccessful}
                             variant="outlined"
                             helpertext=""
                             id="demo-helper-text-aligned"
-                            label="password"
+                            label="New password"
                             color="secondary" 
                             type={passwordReset.newPasswordVisible?"text":"password"} 
-                            autoComplete='new-password' className="password-input" placeholder="password" value={passwordReset.password}
-                            onChange={(e)=>dispatchPasswordReset({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
+                            autoComplete='new-password' className="password-input" placeholder="new password" value={passwordReset.password}
+                            onChange={(e)=>dispatchPasswordReset({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false,isRequestSuccessful:false })}
                             
                             InputProps={{
                                 endAdornment: (
@@ -144,18 +144,16 @@ const ResetPassword =()=>{
                                 )
                               }}
                             />}
-                  
-                
-                       { passwordReset.passwordResetSucceful&&<CssTextField 
+                       { passwordReset.passwordResetRequestSuccessful&&<CssTextField
                             required
                             variant="outlined"
                             helpertext=""
                             id="demo-helper-text-aligned"
-                            label="confirm-password"
+                            label="Confirm password"
                             color="secondary"
                             type={passwordReset.confirmPasswordVisible?"text":"password"} 
                             autoComplete='new-password' className="password-input" placeholder="confirm password" value={passwordReset.confirmPassword}
-                            onChange={(e)=>dispatchPasswordReset({confirmPassword:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
+                            onChange={(e)=>dispatchPasswordReset({confirmPassword:e.target.value,   isLoading:false,isRegisterError:false,registered:false,isRequestSuccessful:false })}
                             InputProps={{
                                 endAdornment: (
                                   <InputAdornment   sx={{padding:"0.1rem",}} position="end">
@@ -168,14 +166,12 @@ const ResetPassword =()=>{
                                 )
                               }}
                         />}
-
-                       
-                       
-            
-
                         <ColorButton variant='contained'
-                                    style={{marginTop:"20px",color:"white"}} className="submit-btn"
-                                    onClick={(e)=>{OnSubmit(e)}}
+                                    style={{marginTop:"20px",color:"white"}}
+                                     className="submit-btn"
+                                    onClick={(e)=>{
+                                        OnSubmit(e,passwordReset.passwordResetRequestSuccessful?REQUEST_TYPE[1]:REQUEST_TYPE[0] )}
+                                     }
                                     >
                                     {(passwordReset.isLoading)?
                                      "Resetting...":"Reset Password"}
