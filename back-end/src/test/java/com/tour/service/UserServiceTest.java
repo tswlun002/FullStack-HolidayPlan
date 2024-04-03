@@ -48,12 +48,15 @@ class UserServiceTest {
      @Mock
      private HttpServletRequest servletRequest;
      @Mock ISecurityQuestionAnswer iSecurityQuestionAnswer;
+     @Mock PasswordResetBean passwordResetBean;
+     @Mock
+     NewUsernameBean newUsernameBean;
      private  final VerificationURL  url = new VerificationURL("/HolidayPlan/api/authenticate",8080,"/");
 
     @BeforeEach
     void setUp() {
         service = new UserService(repository,publisher,roleObj,permissionObj,environment,securityDataChangeService
-        , iSecurityQuestionAnswer);
+        , iSecurityQuestionAnswer,passwordResetBean, newUsernameBean);
     }
 
     @Test

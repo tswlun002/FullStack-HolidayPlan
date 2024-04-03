@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.PasswordResetRequest;
 import com.tour.dto.RegisterUserRequest;
 import com.tour.dto.SecurityChangeDataEvent;
+import com.tour.dto.SecurityEditRequest;
 import com.tour.exception.NotFoundException;
 import com.tour.model.VerificationToken;
 import com.tour.security.AuthenticationResponse;
@@ -16,15 +17,14 @@ import com.tour.utils.VerificationURL;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.HashMap;
-
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -42,18 +42,18 @@ public class AuthenticationController {
                                              HttpServletResponse response ) throws IOException {
 
       var token= authenticationService.refreshToken(request);
-      AuthenticationResponse responseMessage= new AuthenticationResponse(new HashMap<>());
+      AuthenticationResponse tokens= new AuthenticationResponse(new HashMap<>());
       if(token!=null) {
           response.setStatus(OK.value());
-          responseMessage.tokens().put("access_token",token);
+          tokens.tokens().put("access_token",token);
 
       }else{
         response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
-        responseMessage.tokens().put("message","Invalid User credential ");
+          tokens.tokens().put("error_message","Invalid User credential");
 
       }
       response.setContentType(APPLICATION_JSON_VALUE);
-      new ObjectMapper().writeValue(response.getOutputStream(), responseMessage);
+      new ObjectMapper().writeValue(response.getOutputStream(), tokens);
     }
     @PostMapping(value="register",consumes = {"application/json"})
     public ResponseEntity<Boolean> save(@RequestBody  @Validated RegisterUserRequest requester,
@@ -84,9 +84,10 @@ public class AuthenticationController {
 
 
     }
-    @GetMapping(value = "password-reset-request")
-    public   void requestResetPassword(@RequestParam("email") String email, HttpServletResponse response) throws IOException {
-        userService.resetPassword(email);
+
+    @PutMapping(value = "password-reset-request")
+    public   void requestResetPassword(@RequestBody @Valid SecurityEditRequest edit, HttpServletResponse response) throws IOException {
+        userService.resetPassword(edit.username(), edit.password());
         response.setContentType(APPLICATION_JSON_VALUE);
         response.setStatus(OK.value());
         new ObjectMapper().writeValue(response.getOutputStream(),
@@ -95,12 +96,10 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "reset-password")
-email-verification-for-user-create-update
     public  ResponseEntity<String>  resetPassword(@RequestBody @Valid PasswordResetRequest  passwordResetRequest){
         return userService.resetPassword(passwordResetRequest)?
-                new ResponseEntity<>("Password was successful change",OK):
-                new ResponseEntity<>("Failed to reset password",NOT_ACCEPTABLE);
-
+                new ResponseEntity<>("Password was successful updated",OK):
+                new ResponseEntity<>("Failed to update password",NOT_ACCEPTABLE);
     }
 
 }

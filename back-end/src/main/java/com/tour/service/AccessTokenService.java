@@ -15,8 +15,8 @@ public class AccessTokenService {
     private final AccessTokenRepository accessTokenRepository;
     public void save(@Valid AccessToken accessToken) {
         if(accessToken ==null)throw  new NullException("AccessToken is not invalid");
-        var token1 = accessTokenRepository.findByTokenName(accessToken.getToken());
-        if(token1.isPresent()) throw  new DuplicateException("AccessToken already exists");
+        accessTokenRepository.findByTokenName(accessToken.getToken())
+                .ifPresent(t->{throw  new DuplicateException("AccessToken already exists");});
         try{
             accessTokenRepository.save(accessToken);
         }catch (Exception e){

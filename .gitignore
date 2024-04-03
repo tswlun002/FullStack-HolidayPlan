@@ -4,6 +4,9 @@ back-end/target
 /front-end/public/logo.png
 .env
 *.env
+.expo/
+.vscode/
 
 /back-end/.idea/
    if: needs.check.outputs.run_job == 'true'
+/front-end/node_modules/

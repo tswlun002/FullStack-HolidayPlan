@@ -1,27 +1,20 @@
 package com.tour.dto;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
-import lombok.NonNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import java.util.Date;
 
 
 public record EditUserNoneSecurityData(
 
-    @NotBlank(message = "userName is required")
-    @NotEmpty(message = "userName is required")
-    @Size(min = 3, max = 50, message = "userName must contain 3 to 50 characters.")
+    @Size(min = 2, max = 50, message = "Firstname must contain 3 to 50 characters.")
     String firstname,
-    @NotBlank(message = "firstName is required")
-    @NotEmpty(message = "firstName is required")
-    @Size(min = 3, max = 50, message = "firstName must contain 3 to 50 characters.")
+    @Size(min = 2, max = 50, message = "Lastname must contain 3 to 50 characters.")
     String lastname,
-
-    @JsonFormat(pattern="yyyy-MM-dd") Date age,
-    @NotBlank(message = "lastName is required")
-    @NotEmpty(message = "lastName is required")
-    @Size(min = 3, max = 50, message = "lastName must contain 3 to 50 characters.")
+    @Past(message = "Date of birth cannot be future date")
+    @JsonFormat(pattern = "yy-mm-dd") Date age,
+    @Email(message = "username must in email format. example:tswlun@gmail.com")
     String currentUsername
  ){
 

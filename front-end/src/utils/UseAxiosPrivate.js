@@ -4,7 +4,7 @@ import UseRefreshToken from "./RefreshToken";
 import { CreateAuthContext } from "../context/CreateAuthContext";
 
 const UseAxiosPrivate = ()=>{
-    const{userLoginState} =  useContext(CreateAuthContext);
+    const{userLoginState,dispatchLogin} =  useContext(CreateAuthContext);
     const refresh = UseRefreshToken();
     
     useEffect(()=>
@@ -30,8 +30,13 @@ const UseAxiosPrivate = ()=>{
                     const previousRequest  = error?.config
                     if(error?.response?.status===403 && !previousRequest?.sent) {
                         previousRequest.sent = true;
-                        const accessToken = await refresh();
-                        previousRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+                        const data = await refresh();
+                        dispatchLogin({
+                            type:"UPDATE_TOKEN",
+                            payload:data
+                        });
+                        console.log(data?.access_token)
+                        previousRequest.headers['Authorization'] = `Bearer ${data?.access_token}`;
                         return AxiosPrivate(previousRequest);
                     }
                     return Promise.reject(error);

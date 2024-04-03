@@ -1,5 +1,6 @@
 package com.tour.service;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.EmailDTO;
 import com.tour.exception.CatchException;
@@ -60,7 +61,10 @@ public abstract class Email {
                 ||emailDetails.split(",").length<4)throw  new IOException("Invalid  email details");
         EmailDTO email = null;
         try{
-            email= new ObjectMapper().readValue(emailDetails,EmailDTO.class);
+            ObjectMapper mapper = new ObjectMapper();
+
+            mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+            email= mapper.readValue(emailDetails,EmailDTO.class);
         }catch (Exception e){
             CatchException.catchException(e);
         }

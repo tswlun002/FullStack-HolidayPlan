@@ -74,20 +74,16 @@ public class SecurityQuestionAnswerService implements  ISecurityQuestionAnswer{
     }
 
     @Override
-    public final boolean checkAnswers(String username, Map<Integer, String> answers) {
+    public final boolean checkAnswers(String username, Map<String, String> answers) {
         var actualAnswers= repository.findByUsername(username);
 
         if(actualAnswers.isEmpty())throw new NotFoundException("User security questions not found");
 
-        return answers.keySet().stream().allMatch(key->
-                actualAnswers.stream().anyMatch(actualAnswer->{
-                    var answer = answers.get(key);
-                    return Objects.equals(key, actualAnswer.getQuestion().getNumber()) &&
-                            answer.equalsIgnoreCase(actualAnswer.getAnswer());
-
-
-                })
-        );
+        return 
+                actualAnswers.stream().allMatch(actualAnswer->{
+                    var answer = answers.get(actualAnswer.getQuestion().getQuestion().trim());
+                    return (answer!=null)&&answer.trim().equalsIgnoreCase(actualAnswer.getAnswer().trim());
+                });
 
     }
 }
