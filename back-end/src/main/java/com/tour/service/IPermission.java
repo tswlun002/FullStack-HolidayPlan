@@ -5,7 +5,7 @@ import com.tour.model.Permission;
 import org.springframework.stereotype.Service;
 import java.util.Set;
 @Service
-public interface OnPermission {
+public interface IPermission {
     String[]  getNamesDefaultedPermission();
     void save(Permission permission);
     Permission getPermission(String userPermission);

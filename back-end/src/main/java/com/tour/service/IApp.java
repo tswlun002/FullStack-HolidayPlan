@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public interface OnApp {
+public interface IApp {
     Optional<App> findByName(String name);
      Set<SocialNetwork> getSocial(String name);
 }

@@ -1,8 +1,9 @@
 package com.tour.exception;
 
 
+import java.util.NoSuchElementException;
 
-public class NotFoundException extends RuntimeException {
+public class NotFoundException extends  NoSuchElementException {
 
     /**
      * Constructs a new runtime exception with the specified detail message.

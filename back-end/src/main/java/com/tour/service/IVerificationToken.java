@@ -6,7 +6,7 @@ import com.tour.utils.VerificationURL;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 @Service
-public interface OnVerificationToken {
+public interface IVerificationToken {
 
 
     VerificationToken   saveToken(User user);

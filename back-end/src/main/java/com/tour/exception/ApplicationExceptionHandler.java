@@ -1,11 +1,11 @@
 package com.tour.exception;
-import com.tour.service.ApplicationConstraintViolationException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tour.service.ApplicationConstraintViolationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import lombok.Builder;
 import lombok.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
-@Builder
+import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 @ControllerAdvice
 public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler {
 
@@ -37,7 +37,16 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   @NonNull HttpHeaders headers,
                                                                   @NonNull HttpStatusCode status, @NonNull WebRequest request) {
-        ErrorDetails details= ErrorDetails.builder().message(ex.getMessage()).date(LocalDateTime.now()).build();
+
+        String builder=null;
+        try {
+           builder= new  ObjectMapper().writeValueAsString(ex.getBindingResult().getFieldErrors().stream().map(e->e.getDefaultMessage()).
+              collect(Collectors.joining(", ")));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        ErrorDetails details= ErrorDetails.builder().path(request.getContextPath()).
+                message(builder).date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
     @Override
@@ -45,7 +54,8 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
                                                                          @NonNull HttpHeaders headers,
                                                                          @NonNull HttpStatusCode status,
                                                                          @NonNull WebRequest request) {
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMethod()+":"+ex.getMessage())
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.METHOD_NOT_ALLOWED);
     }
@@ -53,25 +63,31 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
     @ExceptionHandler(value={com.tour.exception.TimeoutException.class})
     public  ResponseEntity<Object> timeoutException(com.tour.exception.TimeoutException ex,
                                                     WebRequest request){
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.GATEWAY_TIMEOUT);
 
     }
     @ExceptionHandler(ApplicationConstrainViolationException.class)
     public ResponseEntity<Object> constrainViolationException(
-            ApplicationConstrainViolationException ex, WebRequest request){
+            ApplicationConstrainViolationException ex, WebRequest request) throws JsonProcessingException {
 
+      String builder = new  ObjectMapper().writeValueAsString(ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).
+               collect(Collectors.toSet()));
 
-        ErrorDetails details = ErrorDetails.builder().message(ex.getConstraintViolations().toString())
+       ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(builder)
                 .date(LocalDateTime.now()).build();
         return  new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
-  @ExceptionHandler(NotFoundException.class)
+  @ExceptionHandler({NotFoundException.class, NoSuchElementException.class})
   public ResponseEntity<Object> NotFoundException(
           NotFoundException ex, WebRequest request) {
 
-      ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+      ErrorDetails details = ErrorDetails.builder()
+              .path(request.getContextPath()).message(ex.getMessage())
               .date(LocalDateTime.now()).build();
       return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
   }
@@ -79,7 +95,8 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
     public ResponseEntity<Object> invalidToken(
             InvalidToken ex, WebRequest request) {
 
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.NOT_ACCEPTABLE);
     }
@@ -89,7 +106,8 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
             DuplicateException ex, WebRequest request) {
 
 
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
@@ -97,19 +115,19 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
     public ResponseEntity<Object> NullPointerException(
             NullException ex, WebRequest request) {
 
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.NOT_ACCEPTABLE);
     }
 
-    @ExceptionHandler(value ={ApplicationConstraintViolationException.class, ConstraintViolationException.class})
+    @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> ConstraintViolationException(
-            ApplicationConstraintViolationException ex, WebRequest request) throws JsonProcessingException {
-
-        ErrorDetails details = ErrorDetails.builder().message(
-                        new  ObjectMapper().writeValueAsString(ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.toSet())))
-
-                .date(LocalDateTime.now()).build();
+            ConstraintViolationException ex, WebRequest request) throws JsonProcessingException {
+         var builder = new  ObjectMapper().writeValueAsString(ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).
+                collect(Collectors.toSet()));
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(builder).date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
 
@@ -121,31 +139,34 @@ public class ApplicationExceptionHandler  extends ResponseEntityExceptionHandler
             IllegalTypeException ex, WebRequest request) {
 
         ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
-                .date(LocalDateTime.now()).build();
+                .path(request.getContextPath()).date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidCredentials.class)
     public ResponseEntity<Object> InvalidCredentials(
             InvalidCredentials ex, WebRequest request) {
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
     }
 
     @ExceptionHandler(value={ApplicationExpiredJwtException.class, ExpiredJwtException.class})
     public ResponseEntity<Object> applicationExpiredJwtException(
-            ApplicationExpiredJwtException ex) {
-
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+            ApplicationExpiredJwtException ex,WebRequest request) {
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value={AppInternalException.class})
+    @ExceptionHandler(AppInternalException.class)
     public ResponseEntity<Object> appInternalException(
-            ApplicationExpiredJwtException ex) {
-        ErrorDetails details = ErrorDetails.builder().message(ex.getMessage())
+            AppInternalException ex,WebRequest request) {
+
+        ErrorDetails details = ErrorDetails.builder().
+                path(request.getContextPath()).message(ex.getMessage())
                 .date(LocalDateTime.now()).build();
         return new ResponseEntity<>(details, HttpStatus.INTERNAL_SERVER_ERROR);
     }

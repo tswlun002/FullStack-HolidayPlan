@@ -8,14 +8,14 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 @Service
 public record VerificationTokenEventListener(
-        OnVerificationToken  service
+        IVerificationToken service
 
 ) {
     /**
      * Delete the verification token for the user
      * @param event is the  user delete event
      */
-    @EventListener
+    @EventListener(value = UserEvent.class)
     void  deleteUser(UserEvent event){
         if(event.user()==null) throw  new InvalidToken("User is invalid.");
         VerificationToken token = service.findByUserId(event.user().getId()).
