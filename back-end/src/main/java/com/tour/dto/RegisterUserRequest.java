@@ -7,19 +7,19 @@ import lombok.NonNull;
 import java.util.Date;
 
 public record RegisterUserRequest(
-@NotBlank(message = "userName is required")
-@NotEmpty(message = "userName is required")
-@Size(min = 4, max = 50, message = "userName must contain 3 to 50 characters.")
+@NotBlank(message = "Firstname is required")
+@NotEmpty(message = "Firstname is required")
+@Size(min = 2, max = 50, message = "Firstname must contain 2 to 50 characters.")
 String firstname,
 @NonNull
-@NotBlank(message = "firstName is required")
-@NotEmpty(message = "firstName is required")
-@Size(min = 3, max = 50, message = "firstName must contain 3 to 50 characters.")
+@NotBlank(message = "lastname is required")
+@NotEmpty(message = "lastname is required")
+@Size(min = 2, max = 50, message = "lastname must contain 2 to 50 characters.")
 
 String lastname,
-@NotBlank(message = "lastName is required")
-@NotEmpty(message = "lastName is required")
-@Size(min = 3, max = 50, message = "lastName must contain 3 to 50 characters.")
+@NotBlank(message = "username is required")
+@NotEmpty(message = "username is required")
+@Size(min = 3, max = 50, message = "Enter valid username, e.g tswlun2@gmail.com")
 String username,
 @JsonFormat(pattern="yyyy-MM-dd")
 Date age,

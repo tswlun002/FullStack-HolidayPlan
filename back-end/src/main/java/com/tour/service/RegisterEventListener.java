@@ -3,11 +3,11 @@ package com.tour.service;
 import com.tour.dto.RegisterEvent;
 import com.tour.exception.CatchException;
 import com.tour.exception.InvalidToken;
-import com.tour.exception.NullException;
 import com.tour.model.User;
 import com.tour.model.VerificationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class RegisterEventListener extends Email {
-    private  final  OnVerificationToken onVerificationToken;
+    private  final IVerificationToken iVerificationToken;
     private  final  JavaMailSender  mailSender;
-    private  final  OnUser onUser;
+    private  final IUser iUser;
 
     private User user;
     @Value("${verification.expire.time:15}")
@@ -32,14 +32,14 @@ public class RegisterEventListener extends Email {
      * @param event is the RegisterEvent
      * @throws  InvalidToken if the user is null and  if the failed to create verification token and send email
      */
-    @EventListener
+    @EventListener(value = RegisterEvent.class)
     void sendVerification(RegisterEvent event) {
 
          user =event.user();
         if(user==null) throw new InvalidToken("User is invalid");
 
 
-        var verificationToken= onVerificationToken.saveToken(user);
+        var verificationToken= iVerificationToken.saveToken(user);
 
        if(verificationToken !=null) {
            sendMail( event.url()+"authenticate/verify-mail?token=",verificationToken);
@@ -48,10 +48,6 @@ public class RegisterEventListener extends Email {
        else throw new InvalidToken("Failed to create verification Token");
 
     }
-
-
-
-
 
     /**
      * Send email  for account verification
@@ -62,18 +58,16 @@ public class RegisterEventListener extends Email {
         try {
             super.sendEmail(
                     mailSender,
-                    getEmail(EMAIL_DETAILS),
+                    getEmail(StringEscapeUtils.unescapeJson(EMAIL_DETAILS)),
                     token.getUser().getUsername(),
-                    url,
-                    token.getToken(),
+                    "    <a class=\"button\" href=\""+url+token.getToken()+"\">Verify email</a>"
+                    ,
                     EXPIRATION
             );
 
         }catch (Exception e){
-
             var username =token.getUser().getUsername();
-            var deleted =onVerificationToken.deleteToken(token.getToken());
-            if(deleted)onUser.deleteUser(username);
+            iUser.deleteUser(username);
             CatchException.catchException(e);
         }
     }

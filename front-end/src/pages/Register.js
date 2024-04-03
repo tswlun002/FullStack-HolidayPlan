@@ -1,18 +1,18 @@
 import './Register.css'
 import {  useReducer,  useState} from "react"
 import { Link } from "react-router-dom";
-import { Typography,Box,Card,CardContent,CardActions ,CardHeader} from '@mui/material';
+import { Typography,Box,Card,CardContent,CardActions ,CardHeader,IconButton} from '@mui/material';
 import background from '../images/2.jpg'
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
+import PasswordVisibility from '../component/PasswordVisibility';
 import {RegisterUser } from '../utils/User';
 import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
-
-
 
 const Register =()=>{
     const [dateType, setDateType]= useState("text");
     const INIT_STATE ={firstname:"",lastname:"",email:"",password:"",confirmPassword:"",userType:"USER",age:"",
+    passwordVisible:false, confirmPasswordVisible:false,
      registered:false, isRegisterError:false,   isLoading:false,errorMessage: ''}
     const[register, dispatchRegister] = useReducer((state, action)=>{
         return {...state,...action }
@@ -125,8 +125,11 @@ const Register =()=>{
                             id="demo-helper-text-aligned"
                             label="password"
                             color="secondary" 
-                        type="password" autoComplete='new-password' className="password-input" placeholder="password" value={register.password}
-                        onChange={(e)=>dispatchRegister({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}></CssTextField>
+                            type={register.passwordVisible?"text":"password" }
+                            autoComplete='new-password' className="password-input" placeholder="password" value={register.password}
+                            onChange={(e)=>dispatchRegister({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
+                            InputProps={{endAdornment: (<PasswordVisibility dispatcher={dispatchRegister} fieldData={"passwordVisible"} isVisible={register.passwordVisible}/>)}}
+                        />
                 
                         <CssTextField 
                              required
@@ -135,8 +138,12 @@ const Register =()=>{
                             id="demo-helper-text-aligned"
                             label="confirm-password"
                             color="secondary"
-                            type="password" autoComplete='new-password' className="password-input" placeholder="confirm password" value={register.confirmPassword}
+                            type={register.confirmPasswordVisible?"text":"password" }
+                            autoComplete='new-password' className="password-input" placeholder="confirm password" value={register.confirmPassword}
                             onChange={(e)=>dispatchRegister({confirmPassword:e.target.value,   isLoading:false,isRegisterError:false,registered:false})}
+                            InputProps={{endAdornment: (<PasswordVisibility dispatcher={dispatchRegister} fieldData={"confirmPasswordVisible"} isVisible={register.confirmPasswordVisible}/>)}}
+
+                            
                         />
 
                         <ColorButton variant='contained' style={{marginTop:"15px",color:"white"}} className="submit-btn" onClick={(e)=>{OnSubmit(e)}}>

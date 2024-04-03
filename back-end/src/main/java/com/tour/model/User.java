@@ -40,7 +40,7 @@ public class User{
      @NonNull
      @Column(nullable = false)
     private  String password;
-
+     @Builder.Default
      private boolean  isEnabled = false;
 
     @ManyToMany(fetch = FetchType.LAZY)

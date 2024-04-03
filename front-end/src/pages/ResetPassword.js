@@ -1,40 +1,62 @@
 import './Register.css'
 import {  useReducer} from "react"
 import { Link } from "react-router-dom";
-import { Typography,Box,Card,CardContent,CardActions ,CardHeader} from '@mui/material';
+import { Typography,Box,Card,CardContent,CardActions ,CardHeader,IconButton} from '@mui/material';
 import background from '../images/2.jpg'
 import CssTextField from '../component/CssTextField';
 import ColorButton from '../component/ColorButton';
-import {resetPassword } from '../utils/User';
+import {resetPassword, resetPasswordRequest } from '../utils/User';
 import { ERROR_COLOR, PRIMAR_COLOR, SUCCESS_COLOR } from '../utils/Constant';
-import UseAxiosPrivate from '../utils/UseAxiosPrivate';
+import InputAdornment from '@mui/material/InputAdornment';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
+
+const   REQUEST_TYPE=["REQUEST-PASSWORD-CHANGE","CHANGE-PASSWORD"]
 const ResetPassword =()=>{
-
-    const INIT_STATE ={email:"", isRequestSuccessful:false,   isLoading:false,isRequestError:false, message: ''}
+    
+    const INIT_STATE ={ email:"", isRequestSuccessful:false,password:"",OTP:"",confirmPassword:"",passwordResetRequestSuccessful:false,
+                        isLoading:false,isRequestError:false, message: '',newPasswordVisible:false,confirmPasswordVisible:false,
+                       }
     const[passwordReset, dispatchPasswordReset] = useReducer((state, action)=>{
         return {...state,...action }
     },INIT_STATE)
-    const  useAxiosPrivate=UseAxiosPrivate();
 
 
-    const isValid =()=>{
+    const OnSubmit = (e,requestType)=>{
+        e.preventDefault();
+        if(requestType===REQUEST_TYPE[1]){
+             if(passwordReset.password===passwordReset.confirmPassword){
+               if(passwordReset.OTP.trim()===''){dispatchPasswordReset({message:"OTP is required",isLoading:false,isRequestError:true,registered:false})}
+               else resetPassword(
+                {username:passwordReset.email,OTP:parseInt(passwordReset.OTP),newPassword:passwordReset.password,confirmPassword:passwordReset.confirmPassword},
+                dispatchPasswordReset
+               )
+            }
+            else
+            {
+                dispatchPasswordReset({message:"Password don not match", isLoading:false,isRegisterError:true,registered:false});
+            }
+        }
+        else{
 
-       return  passwordReset.email.trim()!== "" 
-    }
-
-    const OnSubmit = (e)=>{
-        e.preventDefault(); 
-        
-        if(isValid()){
-             resetPassword(passwordReset.email,useAxiosPrivate,dispatchPasswordReset);
-            
-        }else {
-            dispatchPasswordReset({message:"Email is required",
-             isLoading:false,isRequestError:true,isRequestSuccessful:false});
+            if(passwordReset.password.trim()==='' && passwordReset.email.trim()===''){
+                 console.log((passwordReset.password.trim()===''&& passwordReset.email.trim()===''))
+                 dispatchPasswordReset({isRequestError:true,isLoading:false,register:false,message:"Both email and new password are required"});
+            }
+            else if(passwordReset.password.trim()===''){
+                dispatchPasswordReset({isRequestError:true,isLoading:false,register:false, message:"New password is required"});
+            }
+            else if(passwordReset.email.trim()===''){
+                dispatchPasswordReset({isRequestError:true,isLoading:false,register:false, message:"Email is required"});
+            }
+            else{
+                  resetPasswordRequest(passwordReset.email,passwordReset.password,dispatchPasswordReset);
+            }
 
         }
     }
+    
     
     return (
 
@@ -65,7 +87,8 @@ const ResetPassword =()=>{
                                 </Typography>
                             }
                             subheader={ passwordReset.isRequestError?
-                                passwordReset.message:passwordReset.isRequestSuccessful&&passwordReset.message}
+                                passwordReset.message:(passwordReset.isRequestSuccessful||passwordReset.passwordResetRequestSuccessful)
+                                &&passwordReset.message}
                             subheaderTypographyProps={{alignItems:"start",fontSize:"0.8rem",
                                color:passwordReset.isRequestError?ERROR_COLOR:SUCCESS_COLOR}}
                         
@@ -75,18 +98,80 @@ const ResetPassword =()=>{
                     <form className="register-inputs" autoComplete="off">
                         <CssTextField 
                            required
+                           disabled={passwordReset.passwordResetRequestSuccessful}
                             variant="outlined"
                             helpertext=""
                             id="demo-helper-text-aligned"
                             label="Email"
-                        type="text" className="email-input" placeholder="enter email" value={passwordReset.email} 
-                         onChange={(e)=>dispatchPasswordReset({email:e.target.value,  isLoading:false,isRequestError:false,isRequestSuccessful:false })}></CssTextField>
-                       
-            
+                            type="email" className="email-input"
+                            placeholder="enter email" value={passwordReset.email} 
+                           onChange={(e)=>dispatchPasswordReset({email:e.target.value,  isLoading:false,isRequestError:false,isRequestSuccessful:false })}
+                         />
+                         {passwordReset.passwordResetRequestSuccessful&&<CssTextField
+                           required
+                            variant="outlined"
+                            helpertext=""
+                            id="demo-helper-text-aligned"
+                            label="OTP"
+                            type="text" className="opt-input"
+                             placeholder="enter OTP code" value={passwordReset.OTP} 
+                           onChange={(e)=>dispatchPasswordReset({OTP:e.target.value,  isLoading:false,isRequestError:false,isRequestSuccessful:false })}
+                         />}
+                            {<CssTextField
+                            required
+                            disabled={passwordReset.passwordResetRequestSuccessful}
+                            variant="outlined"
+                            helpertext=""
+                            id="demo-helper-text-aligned"
+                            label="New password"
+                            color="secondary" 
+                            type={passwordReset.newPasswordVisible?"text":"password"} 
+                            autoComplete='new-password' className="password-input" placeholder="new password" value={passwordReset.password}
+                            onChange={(e)=>dispatchPasswordReset({password:e.target.value,   isLoading:false,isRegisterError:false,registered:false,isRequestSuccessful:false })}
+                            
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment
+                                    sx={{padding:"0.1rem",}} position="end">
+                                    <IconButton                                      
+                                        onClick={()=>dispatchPasswordReset({ newPasswordVisible:!passwordReset.newPasswordVisible})} 
+                                    >
+                                       {passwordReset.newPasswordVisible?<VisibilityIcon/>:<VisibilityOffIcon/>}
+                                    </IconButton>
 
+                                   
+                                  </InputAdornment>
+                                )
+                              }}
+                            />}
+                       { passwordReset.passwordResetRequestSuccessful&&<CssTextField
+                            required
+                            variant="outlined"
+                            helpertext=""
+                            id="demo-helper-text-aligned"
+                            label="Confirm password"
+                            color="secondary"
+                            type={passwordReset.confirmPasswordVisible?"text":"password"} 
+                            autoComplete='new-password' className="password-input" placeholder="confirm password" value={passwordReset.confirmPassword}
+                            onChange={(e)=>dispatchPasswordReset({confirmPassword:e.target.value,   isLoading:false,isRegisterError:false,registered:false,isRequestSuccessful:false })}
+                            InputProps={{
+                                endAdornment: (
+                                  <InputAdornment   sx={{padding:"0.1rem",}} position="end">
+                                    <IconButton 
+                                      onClick={()=>dispatchPasswordReset({confirmPasswordVisible:!passwordReset.confirmPasswordVisible})} 
+                                   >
+                                    {passwordReset.confirmPasswordVisible?<VisibilityIcon/>:<VisibilityOffIcon/>}
+                                    </IconButton>
+                                  </InputAdornment>
+                                )
+                              }}
+                        />}
                         <ColorButton variant='contained'
-                                    style={{marginTop:"20px",color:"white"}} className="submit-btn"
-                                    onClick={(e)=>{OnSubmit(e)}}
+                                    style={{marginTop:"20px",color:"white"}}
+                                     className="submit-btn"
+                                    onClick={(e)=>{
+                                        OnSubmit(e,passwordReset.passwordResetRequestSuccessful?REQUEST_TYPE[1]:REQUEST_TYPE[0] )}
+                                     }
                                     >
                                     {(passwordReset.isLoading)?
                                      "Resetting...":"Reset Password"}

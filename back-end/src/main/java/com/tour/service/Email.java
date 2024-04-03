@@ -1,5 +1,6 @@
 package com.tour.service;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.EmailDTO;
 import com.tour.exception.CatchException;
@@ -19,7 +20,7 @@ import java.io.IOException;
 public abstract class Email {
 
     @Nonnull
-    protected String  styleMail(String mailContent, String url, String token, int expiration) {
+    protected String  styleMail(String mailContent, String token, int expiration) {
 
         return "<html>\n" +
                 "  <head>\n" +
@@ -44,8 +45,8 @@ public abstract class Email {
                 "    </style>\n" +
                 "  </head>\n" +
                 "  <body>\n" +
-                mailContent +
-                "    <a class=\"button\" href=\""+url+token+"\">Verify email</a>\n" +
+                mailContent + "\n" +token+"\n"+
+
                 "     <p>Verification expires after: "+ expiration +" minutes </p>"+
 
                 "  </body>\n" +
@@ -60,7 +61,10 @@ public abstract class Email {
                 ||emailDetails.split(",").length<4)throw  new IOException("Invalid  email details");
         EmailDTO email = null;
         try{
-            email= new ObjectMapper().readValue(emailDetails,EmailDTO.class);
+            ObjectMapper mapper = new ObjectMapper();
+
+            mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+            email= mapper.readValue(emailDetails,EmailDTO.class);
         }catch (Exception e){
             CatchException.catchException(e);
         }
@@ -68,7 +72,7 @@ public abstract class Email {
         return email;
     }
    protected void sendEmail(JavaMailSender mailSender,EmailDTO email,
-                   String recipient, String url,
+                   String recipient,
                    String token,
                    int expiration) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -76,7 +80,7 @@ public abstract class Email {
         helper.setFrom(email.senderName());
         helper.setTo(recipient);
         helper.setSubject(email.subject());
-        helper.setText(styleMail(email.content(),url,token,expiration),true);
+        helper.setText(styleMail(email.content(),token,expiration),true);
         mailSender.send(message);
     }
 }

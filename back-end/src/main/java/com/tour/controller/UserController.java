@@ -1,33 +1,43 @@
 package com.tour.controller;
 
-import com.tour.dto.EditUserRequest;
-import com.tour.exception.CatchException;
-import com.tour.exception.InvalidCredentials;
+import cn.minsin.core.tools.StringUtil;
+import com.tour.dto.*;
 import com.tour.exception.NotFoundException;
+import com.tour.model.SecurityQuestionAnswer;
 import com.tour.model.User;
-import com.tour.security.CustomerUserDetailsService;
-import com.tour.dto.UserResponseToUser;
 import com.tour.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.util.Date;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/holiday-plan/api/user/")
 @AllArgsConstructor
+@Validated
 public class UserController {
 
      private final UserService userService;
-     private final CustomerUserDetailsService customerUserDetailsService;
+
 
      @GetMapping(value = "logout/",consumes = "application/json")
      public  ResponseEntity<Boolean> logout(HttpServletRequest request, HttpServletResponse response){
-         return  new ResponseEntity<>(true, HttpStatus.OK);
+         return  new ResponseEntity<>(true, OK);
      }
     @GetMapping(path="users/")
     public ResponseEntity<Set<UserResponseToUser>> getAllUsers(){
@@ -38,32 +48,91 @@ public class UserController {
                                 .firstname(user.getFirstname()).build())
                 .collect(Collectors.toSet());
         if(users.isEmpty())throw new NotFoundException("User(s) is not found");
-        return  new ResponseEntity<>(users,HttpStatus.OK);
+        return  new ResponseEntity<>(users, OK);
     }
 
-    @PatchMapping(value = "update/")
-    public ResponseEntity<Boolean> updateUserDetails(@RequestBody EditUserRequest editUserRequest) {
+    @PatchMapping(value = "update/none-security")
+    public ResponseEntity<String> updateUserNoneSecurityData(
+            @RequestParam(required = false)
+            String  firstname,
+            @RequestParam(required = false)
+            String lastname,
+            @RequestParam(required = false)
 
-        if(! userService.confirmPassword(editUserRequest.currentPassword())){
-            throw  new InvalidCredentials("Invalid credentials");
+            String age,
+            @RequestParam(required = false)
+            String currentUsername
+    ) {
+         Function<String , String> isBeingEdited= (input)->StringUtil.isNotBlank(input)?input:null;
+         firstname =isBeingEdited.apply(firstname);
+         lastname=isBeingEdited.apply(lastname);
+        currentUsername= isBeingEdited.apply(currentUsername);
+        Date date=null;
+         if(  isBeingEdited.apply(age)!=null) {
+             DateTimeFormatter inputDateTimeFormatter =
+                     new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd")
+                             .parseDefaulting(ChronoField.NANO_OF_DAY, 0)
+                             .toFormatter()
+                             .withZone(ZoneOffset.UTC);
+             ZonedDateTime zonedDateTime = ZonedDateTime.parse(age, inputDateTimeFormatter);
+             date =new Date(zonedDateTime.toEpochSecond()*1000);
+         }
+         return userService.updateUserDetails(new EditUserNoneSecurityData(firstname,lastname, date , currentUsername))?
+                new ResponseEntity<>("Update details successfully.", HttpStatus.OK)
+        :
+                new ResponseEntity<>("Failed to update details.", HttpStatus.NOT_ACCEPTABLE);
+    }
+    @PutMapping("update/password-change-request")
+    public ResponseEntity<?> updateUserSecurityRequest(@RequestBody @Valid SecurityEditRequest edit) {
+         userService.resetPassword(edit.username(), edit.password());
+         return  new ResponseEntity<>("OTP code for verification is sent to your email.",OK);
+    }
+    @GetMapping("update/username-change-request")
+    public ResponseEntity<?> updateUserSecurityRequest(@RequestParam("username") String username,
+                                                       @RequestParam("newUsername") String newUsername) {
+
+        var securityQuestions=userService.resetUsername(username, newUsername);
+        if(securityQuestions.isEmpty()){
+            return  new ResponseEntity<>("OTP is sent to your new email",OK);
         }
+        var questions=securityQuestions.stream().map((SecurityQuestionAnswer::getQuestion)).collect(Collectors.toSet());
+        return  new ResponseEntity<>(new UserSecurityQuestions(newUsername,questions,"Answer questions and provide OTP sent to new email"),OK);
+    }
+    @PostMapping("add-security-questions")
+    public ResponseEntity<?> AddSecurityQuestions(@RequestBody @Valid UserAnswerDTO answers)
+            throws NotFoundException {
+        return answers.answers().stream().allMatch(userService::saveSecurityQuestions)?
+                new ResponseEntity<>("Security questions were added successfully", HttpStatus.OK):
+                new ResponseEntity<>("Failed to add Security questions", NOT_ACCEPTABLE);
+    }
+    @PatchMapping(value = "security/change-password")
+    public ResponseEntity<String> updateUserSecurityData(@RequestBody @Valid ResetPassword edit) {
+        return userService.changePassword(edit)?
+                new ResponseEntity<>("Changes were successful",OK):
+                new ResponseEntity<>("Failed to update",NOT_ACCEPTABLE);
 
-        return userService.updateUserDetails(editUserRequest).map(
-                user1 -> new ResponseEntity<>(true, HttpStatus.OK)
-        ).orElseGet(()-> new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE));
+    }
+    @PatchMapping(value = "security/change-username")
+    public ResponseEntity<String> updateUserSecurityData(@RequestBody @Valid  ResetUsername edit) {
+        return userService.changeUsername(edit)?
+                new ResponseEntity<>("Changes were successful",OK):
+                new ResponseEntity<>("Failed to update",NOT_ACCEPTABLE);
+
     }
 
     @GetMapping(path = "{username}")
-    public ResponseEntity<User> get(@PathVariable("username") String username) throws NotFoundException {
+    public ResponseEntity<UserProfile> get(@PathVariable("username") String username) throws NotFoundException {
         User user =  userService.getUser(username);
         if(user ==null)throw  new NotFoundException("User is not found");
-        return  new ResponseEntity<>(user, HttpStatus.FOUND);
+        var profile = new UserProfile(user.getFirstname(), user.getLastname(), user.getAge(),
+                user.getUsername(), userService.checkSecurityEnabled(user.getUsername()));
+        return  new ResponseEntity<>(profile, HttpStatus.FOUND);
     }
   
     @DeleteMapping("delete/" )
     public  ResponseEntity<Boolean> delete(@RequestParam String username,@RequestParam String password){
         boolean deleted= userService.confirmPassword(password)&& userService.deleteUser(username);
-        return deleted? new ResponseEntity<>(true, HttpStatus.OK) :
+        return deleted? new ResponseEntity<>(true, OK) :
                 new ResponseEntity<>(false, HttpStatus.NOT_ACCEPTABLE);
     }
 }

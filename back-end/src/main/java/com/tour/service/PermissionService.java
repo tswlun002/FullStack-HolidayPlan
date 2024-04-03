@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 @AllArgsConstructor
 @Service
-public class PermissionService  implements  OnPermission{
+public class PermissionService  implements IPermission {
     private final  PermissionRepository repository;
     private  final ApplicationEventPublisher publisher;
     private final Environment environment;

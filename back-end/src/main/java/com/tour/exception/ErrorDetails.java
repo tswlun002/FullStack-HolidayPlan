@@ -11,5 +11,6 @@ import java.util.Map;
 public class ErrorDetails {
     private LocalDateTime date;
     private String message;
+    String path;
 }
 

@@ -1,26 +1,24 @@
 import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import { Button ,CardHeader, Box,Stack} from '@mui/material';
-import Avatar from '@mui/material/Avatar';
+import { CardHeader, Box,Stack, } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import {Avatar} from '@mui/material';
 import { deepOrange } from '@mui/material/colors';
 import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
-import CssTextField from '../component/CssTextField'
 import CustomerTypography from '../component/CustomerTypography';
-import {UpdateUser,DeleteUser} from '../utils/User';
+import { ProfileContext } from '../context/ProfileContext';
+import {UpdateUser,DeleteUser,changePassword,changeEmail,
+      requestSecuirityChangeEmail, requestSecuirityChangePassword,
+      ActivateSecuirityQuestions, User} from '../utils/User';
 import EditUserItem from '../component/EditUserItem';
 import { styled } from '@mui/material/styles';
 import { SECONDARY_COLOR ,PRIMAR_COLOR, SUCCESS_COLOR, ERROR_COLOR} from '../utils/Constant';
-const DeleteButton= styled(Button)({
-  '&:hover': {
-  border:"1px solid red",
-  },
-  '&.Mui-focused': {
-  border:"1px solid red",
-  },
-});
-const EditButton= styled(Button)({
+
+import Security from '../component/Security';
+import { extractFromLocalStorage, setToLocalStorage } from '../utils/LocalStorage';
+const EditButton= styled(LoadingButton)({
   '&:hover': {
   border:`1px solid ${SECONDARY_COLOR}`,
   },
@@ -28,23 +26,70 @@ const EditButton= styled(Button)({
   border:`1px solid ${SECONDARY_COLOR}`,
   },
 });
-const Profile = ()=> {
+
+
+
+
+const Profile =  ()=> {
       const useAxiosPrivate = UseAxiosPrivate();
-
-      const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext)
-
+      const{userLoginState,dispatchLogin} = React.useContext(CreateAuthContext);
+      const INITI_STATE = { 
+                            firstname:"",lastname:"",email:"",currentUsername:userLoginState.username,newPassword:"",
+                            currentPassword:"",confirmNewPassword:"", edited:false,isLoading:false,
+                            isRequestError:false, age:"",message: "",isRequestSuccessful:false,
+                            isPasswordUpdateRequestSuccessful:extractFromLocalStorage("isPasswordUpdateRequestSuccessful")||false,
+                            isEmailUpdateRequestSuccessful:extractFromLocalStorage("isEmailUpdateRequestSuccessful")||false
+                            ,openFirstname:false,openLastname:false,
+                            openAge:false,opeUsername:false,
+                            openNewPassword:false,
+                            AccountDeleted:false,OTP:'',passwordVisible:false,
+                            newPasswordVisible:false,confirmPasswordVisible:false,
+                            isActivateSecurityQuestions:false,questions:{},
+                            isPersonalDetailsChange:extractFromLocalStorage("isPersonalDetailsChange")||false
+       }
       const[profile, dispatchProfile] = React.useReducer((state, action)=>{
               return {...state,...action}
 
           },
-          {
-            firstname:"",lastname:"",email:"",currentUsername:userLoginState.username,newPassword:"",
-            currentPassword:"",confirmNewPassword:"", edited:false,
-            isRequestError:false, age:"",message: "",isRequestSuccessful:false
-            ,openFirstname:false,openLastname:false,openAge:false,opeUsername:false,openNewPassword:false,
-            AccountDeleted:false,
-          }
+          INITI_STATE
       );
+      const[securityQuestions, dispatchSecurityQuestions] = React.useReducer((state, action)=>{return{state,...action}},
+      {isRequestError:false,message:'',  isLoading:false,isRequestSuccessful:false, data:[]})
+
+     React.useEffect(()=>{
+
+        let isMounted = true;
+        const controller = new AbortController();
+          const getUser= async()=>{
+            const results = await User(useAxiosPrivate,controller,userLoginState.username);
+            isMounted&&dispatchLogin({type:"UPDATE_DETAILS",...results});
+          }
+          getUser();
+          
+
+        return ()=>{
+          isMounted=false; 
+          controller.abort();
+        }
+
+     },[])
+      
+      
+      const dependences=[profile.isPersonalDetailsChange,profile.currentUsername]
+      React.useEffect(()=>{
+                setToLocalStorage("isPasswordUpdateRequestSuccessful",profile.isPasswordUpdateRequestSuccessful);
+                setToLocalStorage("isEmailUpdateRequestSuccessful",profile.isEmailUpdateRequestSuccessful);
+                if(profile.isRequestSuccessful && (!profile.isPasswordUpdateRequestSuccessful)){
+                   dispatchLogin({
+                      type:"UPDATE_DETAILS",
+                      firstname:profile.firstname||userLoginState.firstname,
+                      lastname:profile.lastname||userLoginState.lastname,
+                      age:profile.age||userLoginState.age,
+                      username:profile.currentUsername||userLoginState.username,
+                  })
+                 
+                }
+       }, dependences);
 
 
       const [dateType, setDateType]= React.useState("text");
@@ -52,55 +97,161 @@ const Profile = ()=> {
       const isInvalid =()=>{
         return (
           profile.email.trim() === ""&& profile.newPassword.trim() === "" && profile.confirmNewPassword === ""&&
-          profile.firstname.trim() === ""&&profile.lastname.trim() === "" && profile.currentPassword.trim() === ""&&
-          profile.age.trim() === ""
+          profile.firstname.trim() === ""&&profile.lastname.trim() === "" && 
+          profile.age.trim() === ""&&profile.OTP !== ""
          )
 
       }
+      const checkIsSecurityQuestionsValid = ()=> securityQuestions.data?.every(({number})=>{
+        const value =  profile[`question${number}`];
+        return !(value===undefined || value===null|| value?.trim() ==='');
+      })
 
-      const isUpdateField =()=>{
-        return (profile.email.trim() !== ""|| profile.firstname.trim() !== ""||
-               profile.lastname.trim() !== ""  ||profile.age.trim() !== "" ||
-               (profile.newPassword.trim() !== "" &&profile.confirmNewPassword !== "")
-       )
+      const isUpdateNoneSecurityFields =()=>{
+          return (profile.firstname?.trim() !== ""|| profile.lastname?.trim() !== ""  ||profile.age?.trim() !== "" )
+        
       }
-       
-       const OnSubmit =(e)=>{
-           e.preventDefault();
-           if(!(profile.confirmNewPassword.trim()===profile.newPassword.trim())){
-              dispatchProfile({isRequestError:true, message:"new password a and confim password must be equal",isRequestSuccessful:false});
+      const isUpdateSecurityFields =()=>{
+          return (profile.email?.trim() !== ""||(profile.newPassword?.trim() !== "" 
+          &&profile.confirmNewPassword !== ""&&profile.OTP !== "")
+        )
+      }
+        
 
+        const OnSubmitSecurity =(e,{type})=>{
+            console.log(profile)
+            e.preventDefault();
+            if(isInvalid()){
+              dispatchProfile({isRequestError:true, message:"At least one field  is required", isRequestSuccessful:false});
+            }
+            if(profile.isPasswordUpdateRequestSuccessful ||profile.isEmailUpdateRequestSuccessful){
+                if(!(profile.confirmNewPassword.trim()===profile.newPassword.trim())){
+                  dispatchProfile({isRequestError:true, message:"new password and confirmed password must be equal",
+                  isRequestSuccessful:false});
+    
+               }
+              
+               else if(!isUpdateSecurityFields()){
+                  dispatchProfile({isRequestError:true, message:"At least one editable field  is required for update.", isRequestSuccessful:false});
+               }else{
+
+
+                changePassword( useAxiosPrivate,{currentUsername:profile.currentUsername,
+                                 newPassword:profile.newPassword,OTP:parseInt(profile.OTP)},dispatchProfile)
+                  
+               }
+
+            }
+            else{
+                  if(type==='change-email'){
+                      
+                      if(checkIsSecurityQuestionsValid()){
+
+                        const answers = securityQuestions.data?.map(({number})=>{
+                    
+                          return{username:profile.username,answer:profile[`question${number}`], number:number};
+                        });
+                        requestSecuirityChangeEmail({ useAxiosPrivate,username:userLoginState.username,
+                                                      newUsername:profile.email,
+                                                    dispatchResponse:dispatchProfile});
+                    }
+                    else {
+                      
+                        dispatchSecurityQuestions({message:"All the security questions must be answered",isRequestError:true, isRequestSuccessful:false})
+                      
+                    }
+                  }
+                  if(type==='change-password') {
+                        requestSecuirityChangePassword({
+                        useAxiosPrivate,
+                        username:userLoginState.username,
+                        password:profile.newPassword,
+                        dispatchResponse:dispatchProfile
+                     });
+                  }
+          
+            
+            }
+              
+        }
+       
+       
+
+     /**
+     * Save security answers of security questions
+     * @param {*} e  save security answer event
+     */
+     const OnSubmitSecurityQuestions =async(e,submitType)=>{
+      e.preventDefault();
+     
+
+      if(checkIsSecurityQuestionsValid()){
+
+          if(submitType==="ACTIVATE_QUESTIONS"){
+               const answers = securityQuestions.data?.map(({number})=>{
+                     return{username:userLoginState.username,answer:profile[`question${number}`], number:number};
+                 });
+              const results=await ActivateSecuirityQuestions(useAxiosPrivate,answers,dispatchSecurityQuestions);
+              if(results.isRequestSuccessful){
+                 dispatchLogin({type:"UPDATE_DETAILS",isSecurityEnabled:true})
+
+              }else{
+                dispatchSecurityQuestions(results);
+              }
+          }else if(submitType==="ANSWER_QUESTIONS"){
+                 const answers = {}
+                 profile.questions?.forEach(({question, number})=>{
+                       answers[question]=profile[`question${number}`];
+                  });
+                 changeEmail(useAxiosPrivate,{username:profile.currentUsername,newUsername:profile.email,answers:answers,OTP:profile.OTP},dispatchProfile);
+          }
+      }
+      else{
+        dispatchSecurityQuestions({message:"All security questions must be answered",isRequestError:true, isRequestSuccessful:false})
+      }
+
+    }
+        /**
+         * Saves edited user field(s) that are not used as security
+         * @param {*} e  save edit field event
+         */
+        const OnSubmitNoneSecurity=(e)=>{
+          e.preventDefault();
+          //we will finish this tomorrow
+          const answers = securityQuestions.data?.map(({number})=>{
+                      
+            return{username:userLoginState.username,answer:profile[`question${number}`], number:number};
+          })
+          if(isInvalid()){
+               dispatchProfile({isRequestError:true, message:"At least one field  is required",isRequestSuccessful:false});
            }
-           else if(isInvalid()){
-               dispatchProfile({isRequestError:true, message:"At least one field  is required", isRequestSuccessful:false});
-           }
-           else if(!isUpdateField()){
-                dispatchProfile({isRequestError:true, message:"At least one editable field  is required", isRequestSuccessful:false});
+           else if(!isUpdateNoneSecurityFields()){
+                dispatchProfile({isRequestError:true, message:"At least one editable field  is required",isRequestSuccessful:false});
            }
            else{
+                UpdateUser(useAxiosPrivate ,profile, dispatchProfile);
+              if(profile.edited){
+                          ClearForm();
 
-              if(isUpdateField()&&profile.currentPassword.trim()!==''){
-                    UpdateUser(useAxiosPrivate ,profile, dispatchProfile);
-              }
-              else{
-                    dispatchProfile({isRequestError:true, message:"Current password is required",isRequestSuccessful:false});
-              }
-           }
-
-             if(profile.edited){
-                        ClearForm();
-
-                  }else if(profile.isRequestError){
-                        dispatchProfile({currentPassword:"", edited:false});
-                  }
+                }else if(profile.isRequestError){
+                      dispatchProfile({ edited:false});
+                }
+            }
 
 
-       }
+        }
+      
+
+       /**
+        * Deletes the profile of the  
+        * @param {*} e  submit event of the delete button
+        */
         const deleteAccount =(e)=>{
           e.preventDefault();
           if(profile.currentPassword.trim() === ""){
 
-               dispatchProfile({isRequestError:true, message:"Current password of user is required.",isRequestSuccessful:false});
+               dispatchProfile({isRequestError:true, message:"Current password of user is required.",
+               isRequestSuccessful:false});
                return;
           }
            
@@ -125,160 +276,114 @@ const Profile = ()=> {
              }}, 5000);
         
         },[profile.AccountDeleted])
+      
 
 
       return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="start"
-        minHeight="100vh"
-      >
-        <Card sx={{ maxWidth: 400,display:"block"}}>
-        <CardHeader
-              title={<Stack
-                        direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                        flowdirection="row"
-                        spacing={2}>
-                            <Avatar
-                            sx={{ bgcolor:deepOrange[500]}}
-                            >
-                              <CustomerTypography sx={{ textAlign: "center",fontSize:"0.7rem"}}>   {
-                                  userLoginState.firstname && userLoginState.lastname  &&
-                                `${userLoginState.roles[0].name}`
-                                }
-                              </CustomerTypography>
-                            </Avatar>
-                    </Stack>
-                    }
-              titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
-              subheader={(profile.isRequestSuccessful ||profile.isRequestError)?profile.message:""}
-              subheaderTypographyProps={{alignItems:"center" ,color:profile.isRequestSuccessful?SUCCESS_COLOR:ERROR_COLOR}}
-              
-          />
-           <CardContent>            
-             <form className="register-inputs" autoComplete="off">
-              <EditUserItem
-                            IsEditFieldOpen={profile.openFirstname}
-                            field={"openFirstname"}
-                            setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:SECONDARY_COLOR,}}
-                            componentLabel={"Firstname"}
-                            componentValue={userLoginState.firstname}
-                            focus
-                            variant="outlined"
-                            helpertext=""id="demo-helper-text-aligned"
-                            label="Firstname"
-                            type="text" 
-                            className="firstname-input" 
-                            placeholder="enter firstname"
-                            value={profile.firstname}
-                            onChange={(e)=> dispatchProfile({firstname:e.target.value,isRequestSuccessful:false,isRequestError:false})}
-                        />
-                        <EditUserItem
-                            IsEditFieldOpen={profile.openLastname}
-                            field={"openLastname"}
-                            setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:SECONDARY_COLOR,}}
-                            componentLabel={"Lastname"}                                   
-                            componentValue={userLoginState.lastname}
-                            focus
-                            variant="outlined"
-                            helpertext="" id="demo-helper-text-aligned"label="Lastname" color="secondary"
-                            type="text" className="lastname-input" placeholder="enter lastname" value={profile.lastname}
-                            onChange={(e)=> dispatchProfile({lastname:e.target.value ,isRequestSuccessful:false,isRequestError:false})}
-                        />
 
-                        <EditUserItem
-                            IsEditFieldOpen={profile.opeUsername}
-                            field={"opeUsername"}
-                            setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:SECONDARY_COLOR,}}
-                            componentLabel={"Email"}
-                                    
-                            componentValue={userLoginState.username}
-                            focus
-                            variant="outlined"
-                            helpertext=""
-                            id="demo-helper-text-aligned"
-                            label="Email"
-                            type="text" className="email-input" placeholder="enter email" value={profile.email}
-                            onChange={(e)=> dispatchProfile({email:e.target.value,isRequestSuccessful:false ,isRequestError:false})}
+      <ProfileContext.Provider value={{profile, dispatchProfile,securityQuestions, dispatchSecurityQuestions,
+         deleteAccount,OnSubmitSecurity,OnSubmitSecurityQuestions}}>
+     <Box
+     
+      sx={{   
+        display:{sm:'block', md:"flex"} ,backgroundColor:'#ffffff',
+        justifyContent:"center", alignItems:"start",minHeight:"70vh",
+          
+      }}
+     >
+          <Card sx={{ maxWidth: 600,display:"block",boxShadow:"none", }}>
+          <CardHeader
+                title={<Stack
+                          direction="row"
+                          justifyContent="center"
+                          alignItems="center"
+                          flowdirection="row"
+                          spacing={2}>
+                              <Avatar
+                              sx={{ bgcolor:deepOrange[500]}}
+                              >
+                                <CustomerTypography sx={{ textAlign: "center",fontSize:"0.7rem"}}>   {
+                                    userLoginState.firstname && userLoginState.lastname  &&
+                                  `${userLoginState.roles[0].name}`
+                                  }
+                                </CustomerTypography>
+                              </Avatar>
+                      </Stack>
+                      }
+                titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
+                subheader={(profile.isRequestSuccessful ||profile.isRequestError)?profile.message:""}
+                subheaderTypographyProps={{alignItems:"center" ,color:profile.isRequestSuccessful?SUCCESS_COLOR:ERROR_COLOR}}
+                
+            />
+            <CardContent>            
+              <form className="register-inputs" autoComplete="off">
+                <EditUserItem
+                              IsEditFieldOpen={profile.openFirstname}
+                              field={"openFirstname"}
+                              dataField={"firstname"}
+                              setIsEditFieldOpen={ dispatchProfile}
+                              editIconProps={{color:SECONDARY_COLOR,}}
+                              componentLabel={"Firstname"}
+                              componentValue={userLoginState.firstname}
+                              editable={true}
+                              variant="outlined"
+                              helpertext=""id="firstname"
+                              label="Firstname"
+                              type="text" 
+                              className="firstname-input" 
+                              placeholder="enter firstname"
+                              value={profile.firstname}
+                              onChange={(e)=> dispatchProfile({firstname:e.target.value,isRequestSuccessful:false,isRequestError:false,isPersonalDetailsChange:false})}
                           />
-                        <EditUserItem
-                            IsEditFieldOpen={profile.openAge}
-                            field={"openAge"}
-                            setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:SECONDARY_COLOR,}}
-                            componentLabel={"Date of Birth"}                
-                            componentValue={userLoginState.age&&(new Date(parseInt(userLoginState.age))).toLocaleDateString('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'})}
-                            focus
-                            variant="outlined"
-                            helpertext=""
-                            id="demo-helper-text-aligned"
-                            label="Date of Birth"
-                            onClick={()=>setDateType("date")}
-                            onBlur={()=>{setDateType("text");}}
-                            type={dateType} className="age-input" placeholder="enter date of birth" value={profile.age}
-                            onChange={(e)=> dispatchProfile({age:e.target.value,isRequestSuccessful:false,isRequestError:false})}
-                        />
-                        <EditUserItem
-                            IsEditFieldOpen={profile.openNewPassword}
-                            field={"openNewPassword"}
-                            setIsEditFieldOpen={ dispatchProfile}
-                            editIconProps={{color:SECONDARY_COLOR,}}
-                            componentLabel={"Password"}
-                            componentValue={"******"}
-                            variant="outlined"
-                            helpertext=""
-                            id="demo-helper-text-aligned"
-                            label="New-password"
-                            color="secondary"
-                            type="password" autoComplete='new-password' className="new-password-input"
-                            placeholder="Enter new password" value={profile.newPassword}
-                            onChange={(e)=>dispatchProfile({newPassword:e.target.value, isRequestError:false,isRequestSuccessful:false})}
-                        />
-                        {profile.openNewPassword&&<CssTextField
-                            required
-                            variant="outlined"
-                            id="demo-helper-text-aligned"
-                            label="Confirm-new-password"
-                            color="secondary"
-                            type="password" autoComplete='new-password' className="confirm-new-password-input" 
-                            placeholder="Confirm new password" value={profile.confirmNewPassword}
-                            onChange={(e)=>dispatchProfile({confirmNewPassword:e.target.value, isRequestError:false,isRequestSuccessful:false})}
-                        />}
-                        <CssTextField
-                            required
-                            variant="outlined"
-                            helpertext=""
-                            id="demo-helper-text-aligned"
-                            label="Current password"
-                            color="secondary"
-                            type="password" 
-                            autoComplete='new-password' 
-                            className="currentPassword-input" 
-                            placeholder="current password" 
-                            value={profile.currentPassword}
-                            onChange={(e)=> dispatchProfile({currentPassword:e.target.value, isRequestSuccessful:false, isRequestError:false})}
-                        />
+                          <EditUserItem
+                              IsEditFieldOpen={profile.openLastname}
+                              field={"openLastname"}
+                              dataField={"lastname"}
+                              setIsEditFieldOpen={ dispatchProfile}
+                              editIconProps={{color:SECONDARY_COLOR,}}
+                              componentLabel={"Lastname"}                                   
+                              componentValue={userLoginState.lastname}
+                              editable={true}
+                              variant="outlined"
+                              helpertext=""
+                               id="lastname"label="Lastname" color="secondary"
+                              type="text" className="lastname-input" placeholder="enter lastname" value={profile.lastname}
+                              onChange={(e)=> dispatchProfile({lastname:e.target.value ,isRequestSuccessful:false,isRequestError:false,isPersonalDetailsChange:false})}
+                          />
 
-                <EditButton  color="secondary" variant="outlined" style={{marginTop:"15px"}}
-                                      onClick={(e)=>OnSubmit(e)}>Update</EditButton>
-              { (userLoginState.isAuthenticated&&userLoginState.roles.find(role=>role.name==='USER'))&&
-              <DeleteButton
-                   sx={{ marginTop:"10px", color:"black", borderColor:"white"}}
-                   variant="outlined" size="small"
-                   onClick={(e)=>deleteAccount(e)}
-              >
-                delete  account
-              </DeleteButton>}
-        </form>
-        </CardContent>
-        </Card>
-      </Box>
+                        
+                          <EditUserItem
+                              IsEditFieldOpen={profile.openAge}
+                              field={"openAge"}
+                              dataField={"age"}
+                              setIsEditFieldOpen={ dispatchProfile}
+                              editIconProps={{color:SECONDARY_COLOR,}}
+                              componentLabel={"Date of Birth"}                
+                              componentValue={
+                                    userLoginState.age
+                              }
+                              variant="outlined"
+                              helpertext=""
+                              editable={true}
+                              id="age"
+                              label="Date of Birth"
+                              onClick={()=>setDateType("date")}
+                              onBlur={()=>{setDateType("text");}}
+                              type={dateType} className="age-input" placeholder="enter date of birth" value={profile.age}
+                              onChange={(e)=> dispatchProfile({age:e.target.value,isRequestSuccessful:false,isRequestError:false,isPersonalDetailsChange:false})}
+                          />
+                  <EditButton  color="secondary" variant="outlined" style={{marginTop:"15px"}}
+                                        onClick={(e)=>OnSubmitNoneSecurity(e)}>
+                                          Update
+                  </EditButton>
+                
+          </form>
+          </CardContent>
+          </Card>
+
+          <Security />
+      </Box>  
+      </ProfileContext.Provider>
       );
 }
 export default  Profile;

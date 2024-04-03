@@ -32,7 +32,7 @@ class RoleServiceTest {
    @Mock
    private RolesRepository rolesRepository;
    @Mock
-   private OnPermission permissionObj;
+   private IPermission permissionObj;
    @Mock
    private ApplicationEventPublisher publisher;
    @InjectMocks

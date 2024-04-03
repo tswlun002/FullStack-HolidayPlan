@@ -14,9 +14,9 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 
-public class QueryService  implements OnUserQuery{
+public class QueryService  implements IUserQuery {
     private final UserQueryRepository queryRepository;
-    private final OnUser onUser;
+    private final IUser iUser;
     private final ApplicationEventPublisher publisher;
 
     /**
@@ -48,7 +48,7 @@ public class QueryService  implements OnUserQuery{
      */
     public boolean updateQuery(String username,Long queryId,
                                            String response,QueryStatus status){
-        var user = onUser.getUser(username);
+        var user = iUser.getUser(username);
         if(user==null) throw  new NotFoundException("User is not found");
         var query = queryRepository.findByIdAndUserId(queryId,user.getId());
         if(query.isEmpty()) throw  new NotFoundException("Query is not found");
@@ -70,7 +70,7 @@ public class QueryService  implements OnUserQuery{
      * @throws  NotFoundException if no logged-in user
      */
     public List<UserQuery> getQueryOfLoggedInUser() {
-        var user =  onUser.getLoginedUser();
+        var user =  iUser.getLoginedUser();
         if(user==null) throw  new NotFoundException("User not found");
         return findByUsername(user.getUsername());
     }
@@ -82,7 +82,7 @@ public class QueryService  implements OnUserQuery{
      * @throws  NotFoundException if no logged-in user
      */
     public List<UserQuery> getQueryOfLoggedInUser(QueryStatus status) {
-        var user =  onUser.getLoginedUser();
+        var user =  iUser.getLoginedUser();
         if(user==null) throw  new NotFoundException("User not found");
         return getQueryByUserAndStatus(user.getUsername(),status);
     }
@@ -182,7 +182,7 @@ public class QueryService  implements OnUserQuery{
      * @return true if query deleted else false
      */
     public  boolean deleteQueryOfLoggedInUser(long queryId){
-        var user  = onUser.getLoginedUser();
+        var user  = iUser.getLoginedUser();
         if(user==null)throw new NullPointerException("Cannot delete query of null user");
         boolean isDeleted = false;
          var query  = findByUsername(user.getUsername()).stream().

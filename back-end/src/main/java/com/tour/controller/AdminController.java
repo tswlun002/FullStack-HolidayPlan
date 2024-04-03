@@ -21,7 +21,8 @@ public class AdminController {
         var users = userService.getUsers()
                 .stream().map(user-> UserResponseToAdmin.builder().age(user.getAge())
                         .username(user.getUsername()).lastname(user.getLastname())
-                        .firstname(user.getFirstname()).roles(user.getRoles()).permissions(user.getPermissions()).build())
+                        .firstname(user.getFirstname()).roles(user.getRoles()).
+                        permissions(user.getPermissions()).build())
                 .collect(Collectors.toSet());
         if(users.isEmpty())throw new NotFoundException("User(s) is not found");
         return  new ResponseEntity<>(users,HttpStatus.OK);

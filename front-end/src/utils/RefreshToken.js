@@ -2,7 +2,7 @@ import { CreateAuthContext } from "../context/CreateAuthContext";
 import {useContext} from 'react'
 import axios from './Axios'
 const UseRefreshToken = ()=>{
-    const{ dispatchLogin} = useContext(CreateAuthContext);
+   // const{ dispatchLogin} = useContext(CreateAuthContext);
 
 
     const refresh = async() =>{
@@ -14,16 +14,7 @@ const UseRefreshToken = ()=>{
 
             }
         );
-         dispatchLogin(
-            {
-
-                type:"UPDATE_TOKEN",
-                payload:response.data?.tokens
-
-            }
-        )
-
-        return response.data?.tokens?.access_token;
+        return response.data?.tokens;
     }
 
     return refresh;

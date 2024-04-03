@@ -52,14 +52,16 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult) throws IOException {
 
         var username=  authResult.getPrincipal().toString();
         var user = userDetailsService.loadUserByUsername(username).user();
-        var access_token  = jwtService.generateAccessToken(user);
-        var refresh_token = jwtService.generateRefreshToken(user);
         accessTokenService.revokeAllUserToken(user,REFRESH_TOKEN);
         accessTokenService.revokeAllUserToken(user, ACCESS_TOKEN);
+        var access_token  = jwtService.generateAccessToken(user);
+        log.info("----------- Login access token: {}\n",access_token);
+        var refresh_token = jwtService.generateRefreshToken(user);
+        log.info("----------- Login refresh token: {}\n",refresh_token);
         saveUserToken(user,access_token, ACCESS_TOKEN);
         saveUserToken(user, refresh_token,REFRESH_TOKEN);
         Map<String,String> tokens = new HashMap<>();
@@ -67,10 +69,10 @@ public class CustomerAuthenticationFilter  extends UsernamePasswordAuthenticatio
         Cookie cookie = new Cookie("accessToken", refresh_token);
         var period = environment.getProperty("jwt.refresh.accessToken.period");
         log.info("Refresh access token is: {}", period);
-        if(period==null||!period.matches("[0-9]+"))throw  new RuntimeException("Invalid cookies period");
+        if(period==null||!period.matches("[0-9]+"))throw  new RuntimeException("Invalid refresh token period");
 
         int REFRESH_TOKEN_PERIOD= Integer.parseInt(period.trim());
-        cookie.setMaxAge(REFRESH_TOKEN_PERIOD); // expires in 7 days
+        cookie.setMaxAge(REFRESH_TOKEN_PERIOD*60); //set in seconds
         cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setPath("/"); // global cookie accessible everywhere
