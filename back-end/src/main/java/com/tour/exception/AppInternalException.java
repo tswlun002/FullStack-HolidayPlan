@@ -9,8 +9,8 @@ public class AppInternalException extends  InternalError{
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public AppInternalException(String message) {
-        super(message);
+    public AppInternalException(String message, Throwable cause) {
+        super(message,cause);
 
     }
 }
