@@ -472,49 +472,87 @@ export const User = async(useAxiosPrivate,controller,username) => {
     
   
 }
+export const RequestDeleteUserAccount = async(useAxiosPrivate,username,dispatchResponse)=>{
 
-
-export const DeleteUser = (useAxiosPrivate,password,email,dispatchAccount) => {
-
-   const API = `/holiday-plan/api/user/delete/?username=${email}&password=${password}`;
-   useAxiosPrivate.delete(API)
+  const API = `/holiday-plan/api/user/request-to-delete/${username}`;
+  dispatchResponse({  isLoading:true});
+   useAxiosPrivate.post(API)
    .then(response =>
        {
          if(response.ok || response.status===200){
-          dispatchAccount({
+           dispatchResponse({
             isRequestError:false,
-            isRequestSuccessful:true,
-            AccountDeleted:true,
-             message:"Account deleted successful"
-         });
-
+             isLoading:false,isRequestSuccessful:false,
+             isDeleteAccountRequestSuccessful:true,
+             questions:response.data?.questions,
+              email:response.data?.username,
+              message:response.data?.message?response.data.message:response.data
+           });
+          
          }
-
        }
    ).catch(err =>
      {
-       
-            if(!err?.response.ok){
-              let errorMessage =null;
-              if(err.response.status===404){
-            
-                 errorMessage  =getErrorMessage(err)||"Invalid credentials";
-                            }
-                            else if(err.response.status===401){
-                                 errorMessage  =getErrorMessage(err)||"Denied access";
-              }
-              else{
-                  
-                    errorMessage  = getErrorMessage(err);
-              }
-              dispatchAccount({isRequestError:true,isRequestSuccessful:false, message:errorMessage})
-        }else dispatchAccount({isRequestError:true,isRequestSuccessful:false, message:"Internal server error"})
+        if(!err?.response.ok && err.name!=="AbortErr"){
+             let errorMessage =null;
+             if(err.response.status===404){
+
+               errorMessage  =getErrorMessage(err)||"Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  =getErrorMessage(err)||"Denied access";
+             }
+             else{
+
+                   errorMessage  = getErrorMessage(err);
+             }
+             dispatchResponse({isRequestError:true, isRequestSuccessful:false, isDeleteAccountRequestSuccessful:false, isLoading:false, message:errorMessage})
+        }else dispatchResponse({isRequestError:true,isRequestSuccessful:false, isDeleteAccountRequestSuccessful:false,isLoading:false, message:"Internal server error"})
 
      }
    )
+
 }
 
+export const DeleteUser = async(useAxiosPrivate,deleteAccount={email:"",answers:Map.arguments(), OTP:""},dispatchResponse,dispatchLogin)=>{
 
+   const API = `/holiday-plan/api/user/delete`;
+   dispatchResponse({  isLoading:true});
+    useAxiosPrivate.patch(API,deleteAccount)
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({isRequestError:false,
+              isLoading:false,isRequestSuccessful:true,
+              message:response.data,
+              currentUsername:deleteAccount.username,
+              isDeleteAccountRequestSuccessful:false
+            });
+            setTimeout(()=>dispatchLogin({type:"LOGOUT"}),5000);
+          }
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
+
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true, isRequestSuccessful:false, isLoading:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,isRequestSuccessful:false,  isLoading:false, message:"Internal server error"})
+
+      }
+    )
+
+}
 
 /**
  * 

@@ -9,7 +9,7 @@ import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CustomerTypography from '../component/CustomerTypography';
 import { ProfileContext } from '../context/ProfileContext';
-import {UpdateUser,DeleteUser,changePassword,changeEmail,
+import {UpdateUser,DeleteUser,RequestDeleteUserAccount,changePassword,changeEmail,
       requestSecuirityChangeEmail, requestSecuirityChangePassword,
       ActivateSecuirityQuestions, User} from '../utils/User';
 import EditUserItem from '../component/EditUserItem';
@@ -45,7 +45,8 @@ const Profile =  ()=> {
                             AccountDeleted:false,OTP:'',passwordVisible:false,
                             newPasswordVisible:false,confirmPasswordVisible:false,
                             isActivateSecurityQuestions:false,questions:{},
-                            isPersonalDetailsChange:extractFromLocalStorage("isPersonalDetailsChange")||false
+                            isPersonalDetailsChange:extractFromLocalStorage("isPersonalDetailsChange")||false,
+                            isDeleteAccountRequestSuccessful:extractFromLocalStorage("isDeleteAccountRequestSuccessful")||false
        }
       const[profile, dispatchProfile] = React.useReducer((state, action)=>{
               return {...state,...action}
@@ -246,16 +247,30 @@ const Profile =  ()=> {
         * Deletes the profile of the  
         * @param {*} e  submit event of the delete button
         */
-        const deleteAccount =(e)=>{
+        const deleteAccount =async(e,status)=>{
+          const DELETE_ACCOUNT_STATUS=["Request","Delete"]
           e.preventDefault();
-          if(profile.currentPassword.trim() === ""){
-
-               dispatchProfile({isRequestError:true, message:"Current password of user is required.",
-               isRequestSuccessful:false});
-               return;
+          if(status===DELETE_ACCOUNT_STATUS[0]){
+             RequestDeleteUserAccount(useAxiosPrivate, userLoginState.username,dispatchProfile);
           }
-           
-           DeleteUser(useAxiosPrivate,profile.currentPassword, userLoginState.username,dispatchProfile);
+          else if(status===DELETE_ACCOUNT_STATUS[1]){
+            if(profile.OTP.trim() === ""){
+
+              dispatchProfile({isRequestError:true, message:"OTP is required, it was sent to your email.",
+              isRequestSuccessful:false});
+              
+            }
+            else{
+               const answers = securityQuestions.data?.map(({number})=>{
+                     return{username:userLoginState.username,answer:profile[`question${number}`], number:number};
+                });
+              DeleteUser(useAxiosPrivate,deleteAccount={username:userLoginState.username,OTP:profile.OTP,answers:answers},
+                dispatchProfile,dispatchLogin);
+
+            }
+
+          }
+         
         }
         const ClearForm= ()=>{
           setTimeout(()=>{

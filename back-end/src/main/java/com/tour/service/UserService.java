@@ -425,7 +425,7 @@ public class UserService implements IUser {
     public void resetPassword(String username,String newPassword) {
         var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found with given email.");
-        publisher.publishEvent( new SecurityChangeDataEvent(user, user.getUsername()));
+        publisher.publishEvent( new SecurityChangeDataEvent(user, user.getUsername(), "Change Password"));
         passwordResetBean.setNewPassword(newPassword);
         passwordResetBean.setEmail(username);
     }
@@ -447,7 +447,7 @@ public class UserService implements IUser {
         if(user==null)throw  new NotFoundException("User is not found");
         if(!securityDataChangeService.verify(
                 passwordResetRequest.OTP(), passwordResetRequest.username(),
-                new SecurityChangeDataEvent(user, passwordResetRequest.username()))){
+                new SecurityChangeDataEvent(user, passwordResetRequest.username(),"Reset Password"))){
             throw  new InvalidToken("Failed to verify OTP");
         }
 
@@ -471,7 +471,7 @@ public class UserService implements IUser {
         var user1 = getUser(edit.currentUsername());
         if (user1 == null) throw new NotFoundException("User is not found");
         if(! securityDataChangeService.verify(edit.OTP(), edit.currentUsername(),
-                new SecurityChangeDataEvent(user1,edit.currentUsername()))){
+                new SecurityChangeDataEvent(user1,edit.currentUsername(),"Update Security"))){
 
             throw  new InvalidToken("Failed to verify  OTP");
         }
@@ -505,7 +505,7 @@ public class UserService implements IUser {
                  throw  new InvalidCredentials("Incorrect security answers to security questions");
              }
         }
-        publisher.publishEvent( new SecurityChangeDataEvent(user, newUsername));
+        publisher.publishEvent( new SecurityChangeDataEvent(user, newUsername,"Change Email"));
     }
 
     @Override
@@ -561,7 +561,7 @@ public class UserService implements IUser {
         if(user==null)throw  new NotFoundException("User is not found with given email.");
         var answerQuestions = iSecurityQuestionAnswer.findByUsername(username);
         if(checkSecurityEnabled(user.getUsername())){
-            publisher.publishEvent( new SecurityChangeDataEvent(user,newUsername));
+            publisher.publishEvent( new SecurityChangeDataEvent(user,newUsername,"Change Email"));
         }
         newUsernameBean.setUsername(newUsername);
         return answerQuestions;
@@ -617,6 +617,19 @@ public class UserService implements IUser {
             CatchException.catchException(e);
         }
         return deleted;
+    }
+
+    @Override
+    public Set<SecurityQuestionAnswer>  reuqestToDeleteUserAccount(String username) {
+        var user = getUser(username);
+        if(user==null)throw  new NotFoundException("User is not found with given email.");
+        var answerQuestions = iSecurityQuestionAnswer.findByUsername(username);
+        if(checkSecurityEnabled(user.getUsername())){
+            publisher.publishEvent( new SecurityChangeDataEvent(user,user.getUsername(),"Delete Account"));
+        }
+       
+        return answerQuestions;
+
     }
 
 }

@@ -9,6 +9,7 @@ import com.tour.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,8 +89,10 @@ public class UserController {
          return  new ResponseEntity<>("OTP code for verification is sent to your email.",OK);
     }
     @GetMapping("update/username-change-request")
-    public ResponseEntity<?> updateUserSecurityRequest(@RequestParam("username") String username,
-                                                       @RequestParam("newUsername") String newUsername) {
+    public ResponseEntity<?> updateUserSecurityRequest(@RequestParam("username") @Email(message = "username must be valid email address")
+                                                           String username,
+                                                       @RequestParam("newUsername")@Email(message = "username must be valid email address")
+                                                       String newUsername) {
 
         var securityQuestions=userService.resetUsername(username, newUsername);
         if(securityQuestions.isEmpty()){
@@ -121,15 +124,26 @@ public class UserController {
     }
 
     @GetMapping(path = "{username}")
-    public ResponseEntity<UserProfile> get(@PathVariable("username") String username) throws NotFoundException {
+    public ResponseEntity<UserProfile> get(@PathVariable("username") @Email(message = "username must be valid email address")
+                                               String username) throws NotFoundException {
         User user =  userService.getUser(username);
         if(user ==null)throw  new NotFoundException("User is not found");
         var profile = new UserProfile(user.getFirstname(), user.getLastname(), user.getAge(),
                 user.getUsername(), userService.checkSecurityEnabled(user.getUsername()));
         return  new ResponseEntity<>(profile, HttpStatus.FOUND);
     }
+    @PostMapping("request-to-delete/{username}" )
+    public  ResponseEntity<?> reuqestToDelete(@PathVariable("username") @Email(message = "username must be valid email address")
+                                                  String username){
+        var securityQuestions=userService.reuqestToDeleteUserAccount(username);
+        if(securityQuestions.isEmpty()){
+            return  new ResponseEntity<>("OTP is sent to your new email",OK);
+        }
+        var questions=securityQuestions.stream().map((SecurityQuestionAnswer::getQuestion)).collect(Collectors.toSet());
+        return  new ResponseEntity<>(new UserSecurityQuestions(username,questions,"Answer questions and provide OTP sent to new email"),OK);
+    }
   
-    @DeleteMapping("delete/" )
+    @DeleteMapping("delete" )
     public  ResponseEntity<Boolean> delete(@RequestParam String username,@RequestParam String password){
         boolean deleted= userService.confirmPassword(password)&& userService.deleteUser(username);
         return deleted? new ResponseEntity<>(true, OK) :

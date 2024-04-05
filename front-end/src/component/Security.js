@@ -27,6 +27,9 @@ const DeleteButton= styled(Button)({
 const Security =  ()=>{
             const{userLoginState} = React.useContext(CreateAuthContext);
             const{profile, dispatchProfile, OnSubmitSecurity, deleteAccount} = React.useContext(ProfileContext);
+            const showOTP=profile.isPasswordUpdateRequestSuccessful || profile.isEmailUpdateRequestSuccessful||profile.isDeleteAccountRequestSuccessful;
+            const answerSecurityQuestions= ((userLoginState.isSecurityEnabled)&&(profile.isEmailUpdateRequestSuccessful||profile.isDeleteAccountRequestSuccessful));
+            const addAnswerSecurityQuestions= (!(userLoginState.isSecurityEnabled)&&(profile.isActivateSecurityQuestions));
           
             return(
               <Card sx={{maxWidth: 700,width:400,display:"block", boxShadow:"none"}}>
@@ -79,7 +82,7 @@ const Security =  ()=>{
                                   )
                                 }}
                               />
-                { (profile.isPasswordUpdateRequestSuccessful || profile.isEmailUpdateRequestSuccessful)&&
+                { showOTP&&
                         <CssTextField
                         required
                         variant="outlined"
@@ -179,12 +182,12 @@ const Security =  ()=>{
                     }  
 
                     {                               
-                      (!(userLoginState.isSecurityEnabled)&&(profile.isActivateSecurityQuestions))&&
+                     addAnswerSecurityQuestions&&
                         <SecurityQuestions label='Activate'  submitType={'ACTIVATE_QUESTIONS'}/>
                     }   
                           
                     {
-                      ((userLoginState.isSecurityEnabled)&&(profile.isEmailUpdateRequestSuccessful))&&
+                      answerSecurityQuestions&&
                        <SecurityQuestions label='Submit' submitType={'ANSWER_QUESTIONS'}/>
                     }
                     
@@ -194,9 +197,9 @@ const Security =  ()=>{
                         disabled={profile.isLoading}
                         sx={{ marginTop:"10px", color:"black", borderColor:"white"}}
                         variant="outlined" size="small"
-                        onClick={(e)=>deleteAccount(e)}
+                        onClick={(e)=>deleteAccount(e,profile.isDeleteAccountRequestSuccessful?"Delete":"Request")}
                     >
-                      {"delete  account"}
+                      {profile.isLoading?"processing...":"delete  account"}
                     </DeleteButton>}
                   
                 </CardContent>            

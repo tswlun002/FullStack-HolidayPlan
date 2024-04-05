@@ -15,6 +15,7 @@ public interface IUser {
     boolean saveUser(RegisterUserRequest requester, VerificationURL url);
     User getUser(String username);
     boolean deleteUser(String username);
+    Set<SecurityQuestionAnswer>  reuqestToDeleteUserAccount(String username);
     boolean deleteRoleFromUser(String username, String roleName);
     User getLoginedUser();
     boolean addNewRoleToUser( String username,String roleName);
