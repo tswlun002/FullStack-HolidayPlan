@@ -26,7 +26,7 @@ const DeleteButton= styled(Button)({
           
 const Security =  ()=>{
             const{userLoginState} = React.useContext(CreateAuthContext);
-            const{profile, dispatchProfile, OnSubmitSecurity, deleteAccount} = React.useContext(ProfileContext);
+            const{profile, dispatchProfile, OnSubmitSecurity, deleteAccount,FetchSecurityQuestions} = React.useContext(ProfileContext);
             const showOTP=profile.isPasswordUpdateRequestSuccessful || profile.isEmailUpdateRequestSuccessful||profile.isDeleteAccountRequestSuccessful;
             const answerSecurityQuestions= ((userLoginState.isSecurityEnabled)&&(profile.isEmailUpdateRequestSuccessful||profile.isDeleteAccountRequestSuccessful));
             const addAnswerSecurityQuestions= (!(userLoginState.isSecurityEnabled)&&(profile.isActivateSecurityQuestions));
@@ -175,7 +175,7 @@ const Security =  ()=>{
                             size="small"
                             sx={{border:"none", fontSize:"0.7rem", color:"orange"}} 
                             endIcon={<PriorityHighIcon style={{color:"orange"}}/>}
-                            onClick={()=>dispatchProfile({isActivateSecurityQuestions:true})}
+                            onClick={()=>FetchSecurityQuestions()}
                         >
                           Click to activate security question to secure account
                         </Button>
@@ -188,11 +188,9 @@ const Security =  ()=>{
                           
                     {
                       answerSecurityQuestions&&
-                       <SecurityQuestions label='Submit' submitType={'ANSWER_QUESTIONS'}/>
+                       <SecurityQuestions label='Submit' submitType={'ANSWER_QUESTIONS'} showSubmitButton={!profile.isDeleteAccountRequestSuccessful}/>
                     }
-                    
-                    
-                    { (userLoginState.isAuthenticated&&userLoginState.roles.find(role=>role.name==='USER'))&&
+                    { (userLoginState.isAuthenticated&&userLoginState.roles.find(role=>role.name==='USER')) &&
                     <DeleteButton
                         disabled={profile.isLoading}
                         sx={{ marginTop:"10px", color:"black", borderColor:"white"}}

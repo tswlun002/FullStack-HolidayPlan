@@ -19,11 +19,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE;
 import static org.springframework.http.HttpStatus.OK;
@@ -76,9 +78,11 @@ public class AuthenticationController {
         if(isVerified) {
            isVerified= userService.verifyUser(token1.getUser());
         }
+        var header = new HttpHeaders();
+        header.setLocation(URI.create("http://localhost:3000/"));
 
         return  isVerified?
-                new ResponseEntity<>("Account is verified, you can login", OK)
+                new ResponseEntity<>(header,HttpStatus.MOVED_PERMANENTLY)
                 :new ResponseEntity<>("Failed to verify account.",
                 HttpStatus.NOT_ACCEPTABLE);
 

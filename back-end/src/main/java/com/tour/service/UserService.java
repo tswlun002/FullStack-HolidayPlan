@@ -168,14 +168,44 @@ public class UserService implements IUser {
 
     /**
      * Delete user
-     * @param username of the user to delete
+     * @param deleteUserAccount object of the contains user security answer, opt and username
      * @return true if user is deleted else false
-     * @throws  NullException if user is null
+     * @throws  NotFoundException if user is null
+     * @throws  InvalidToken if the OTP is invalid
+     * @throws  InvalidCredentials if the security are not correct answered
      */
     @Override
-    public boolean deleteUser(String  username) {
+    public boolean deleteUser(DeleteUserAccount deleteUserAccount) {
+        User user = getUser(deleteUserAccount.username());
+        if(user ==null)throw  new NotFoundException("User is not found");
+        if(! securityDataChangeService.verify(deleteUserAccount.OTP(), deleteUserAccount.username(),
+                new SecurityChangeDataEvent(user,user.getUsername(),"Delete Account"))){
+            throw  new InvalidToken("Failed to verify  OTP");
+        }
+        if(checkSecurityEnabled(user.getUsername())&& !iSecurityQuestionAnswer.checkAnswers(user.getUsername(),deleteUserAccount.answers()))
+            throw  new InvalidCredentials("Invalid answers for security question.");
+        return  deleteUser(user.getUsername());
+    }
+
+    /**
+     * Delete user by admin
+     * @param adminEditUser is the object contain username of the account to delete and admin username and password
+     * @return true if the user is deleted else false
+     * @throws  UserAccessDeniedException if the operation is performed by user that is not admin
+     * @throws  NotFoundException if the user is not found
+     */
+    @Override
+    public boolean deleteUserByAdmin(AdminEditUser adminEditUser) {
+        if(!verifyAdmin(adminEditUser))throw  new UserAccessDeniedException("Access denied to perform this operation.");
+        return  deleteUser(adminEditUser.username());
+    }
+    private boolean verifyAdmin(AdminEditUser adminEditUser) {
+        return getUser(adminEditUser.adminUsername())!=null&&confirmPassword(adminEditUser.password());
+    }
+
+    public   boolean deleteUser(String username){
         User user = getUser(username);
-        if(user ==null)throw  new NullPointerException("User is not found");
+        if(user ==null)throw  new NotFoundException("User is not found");
         boolean deleted = false;
         try {
             var numberRolesToDelete  = user.getRoles().size();
@@ -569,6 +599,7 @@ public class UserService implements IUser {
 
 
 
+
     /**
      * Delete permission from user
      * @param permission to from user
@@ -624,10 +655,7 @@ public class UserService implements IUser {
         var user = getUser(username);
         if(user==null)throw  new NotFoundException("User is not found with given email.");
         var answerQuestions = iSecurityQuestionAnswer.findByUsername(username);
-        if(checkSecurityEnabled(user.getUsername())){
-            publisher.publishEvent( new SecurityChangeDataEvent(user,user.getUsername(),"Delete Account"));
-        }
-       
+        publisher.publishEvent( new SecurityChangeDataEvent(user,user.getUsername(),"Delete Account"));
         return answerQuestions;
 
     }

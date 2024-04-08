@@ -213,11 +213,11 @@ export const changeEmail=( useAxiosPrivate,resetUsername={username:"",newUsernam
           if(response.ok || response.status===200){
             dispatchResponse({isRequestError:false,
               isLoading:false,isRequestSuccessful:true,
-              message:response.data,
+              message:response.data?.message,
+              securityQuestions:response.data?.questions,
               currentUsername:resetUsername.newUsername,
               isEmailUpdateRequestSuccessful:false
             });
-
           }
         }
     ).catch(err =>
@@ -313,14 +313,14 @@ export const ActivateSecuirityQuestions= ( useAxiosPrivate,answers=[{username:''
     )
 
 }
-export const FetchSecuirityQuestions= async( useAxiosPrivate,{controller},dispatchResponse=()=>{})=>{
+export const FetchSecuirityQuestions= async( useAxiosPrivate,dispatchResponse=()=>{})=>{
   const API = `/holiday-plan/api/user/security-questions/`;
   dispatchResponse({  isLoading:true});
-    useAxiosPrivate.get(API, {signal:controller.signal})
+    useAxiosPrivate.get(API)
     .then(response =>
         {
           if(response.ok || response.status===200){
-            dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true, data:response.data});
+            dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true, securityQuestions:response.data});
           }
 
         }
@@ -481,14 +481,13 @@ export const RequestDeleteUserAccount = async(useAxiosPrivate,username,dispatchR
        {
          if(response.ok || response.status===200){
            dispatchResponse({
-            isRequestError:false,
+             isRequestError:false,
              isLoading:false,isRequestSuccessful:false,
              isDeleteAccountRequestSuccessful:true,
-             questions:response.data?.questions,
               email:response.data?.username,
-              message:response.data?.message?response.data.message:response.data
+              securityQuestions:response.data?.questions,
+              message:response.data?.message
            });
-          
          }
        }
    ).catch(err =>
@@ -514,18 +513,17 @@ export const RequestDeleteUserAccount = async(useAxiosPrivate,username,dispatchR
 
 }
 
-export const DeleteUser = async(useAxiosPrivate,deleteAccount={email:"",answers:Map.arguments(), OTP:""},dispatchResponse,dispatchLogin)=>{
-
+export const DeleteUser = async(useAxiosPrivate,DeleteUserAccount={username:"",answers:Map.arguments(), OTP:""},dispatchResponse,dispatchLogin)=>{
    const API = `/holiday-plan/api/user/delete`;
    dispatchResponse({  isLoading:true});
-    useAxiosPrivate.patch(API,deleteAccount)
+    useAxiosPrivate.patch(API,DeleteUserAccount)
     .then(response =>
         {
           if(response.ok || response.status===200){
             dispatchResponse({isRequestError:false,
               isLoading:false,isRequestSuccessful:true,
               message:response.data,
-              currentUsername:deleteAccount.username,
+              currentUsername:DeleteUserAccount.username,
               isDeleteAccountRequestSuccessful:false
             });
             setTimeout(()=>dispatchLogin({type:"LOGOUT"}),5000);

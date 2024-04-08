@@ -73,6 +73,8 @@ const App=()=>{
           return {...state, ...action};
     
         case "LOGOUT":
+           window.localStorage.removeItem('access_token');
+           window.localStorage.clear()
           navigate('/')
           return {
             ...state,
