@@ -23,17 +23,17 @@ public class SecurityDataChangeEventListener extends Email {
     void createToken(SecurityChangeDataEvent event) {
         var passwordResetToken= ISecurityDataChange.createToken(event.user());
         if(passwordResetToken!=null){
-            sendMail( passwordResetToken,event.email());
+            sendMail( passwordResetToken,event.email(),event.titleChanged());
         }
         else throw new InvalidToken("Failed to create password reset verification ");
 
     }
 
-    private void sendMail( SecurityDataChangeToken token,String email)  {
+    private void sendMail( SecurityDataChangeToken token,String email,String title)  {
 
         try{
              super.sendEmail(
-                     mailSender, getEmail(StringEscapeUtils.unescapeJson(EMAIL_DETAILS)),
+                     mailSender, getEmail(StringEscapeUtils.unescapeJson(EMAIL_DETAILS).replaceAll("emailTitle",title)),
                      email,
                      "<p>OTP: "+token.getOTP()+"</p>",
 

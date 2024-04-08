@@ -9,9 +9,9 @@ import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CustomerTypography from '../component/CustomerTypography';
 import { ProfileContext } from '../context/ProfileContext';
-import {UpdateUser,DeleteUser,changePassword,changeEmail,
+import {UpdateUser,DeleteUser,RequestDeleteUserAccount,changePassword,changeEmail,
       requestSecuirityChangeEmail, requestSecuirityChangePassword,
-      ActivateSecuirityQuestions, User} from '../utils/User';
+      ActivateSecuirityQuestions, User,FetchSecuirityQuestions} from '../utils/User';
 import EditUserItem from '../component/EditUserItem';
 import { styled } from '@mui/material/styles';
 import { SECONDARY_COLOR ,PRIMAR_COLOR, SUCCESS_COLOR, ERROR_COLOR} from '../utils/Constant';
@@ -45,7 +45,9 @@ const Profile =  ()=> {
                             AccountDeleted:false,OTP:'',passwordVisible:false,
                             newPasswordVisible:false,confirmPasswordVisible:false,
                             isActivateSecurityQuestions:false,questions:{},
-                            isPersonalDetailsChange:extractFromLocalStorage("isPersonalDetailsChange")||false
+                            isPersonalDetailsChange:extractFromLocalStorage("isPersonalDetailsChange")||false,
+                            isDeleteAccountRequestSuccessful:extractFromLocalStorage("isDeleteAccountRequestSuccessful")||false,
+                            securityQuestions:[]
        }
       const[profile, dispatchProfile] = React.useReducer((state, action)=>{
               return {...state,...action}
@@ -53,8 +55,6 @@ const Profile =  ()=> {
           },
           INITI_STATE
       );
-      const[securityQuestions, dispatchSecurityQuestions] = React.useReducer((state, action)=>{return{state,...action}},
-      {isRequestError:false,message:'',  isLoading:false,isRequestSuccessful:false, data:[]})
 
      React.useEffect(()=>{
 
@@ -75,10 +75,11 @@ const Profile =  ()=> {
      },[])
       
       
-      const dependences=[profile.isPersonalDetailsChange,profile.currentUsername]
+      const dependences=[profile.isPersonalDetailsChange,profile.currentUsername, profile.isDeleteAccountRequestSuccessful]
       React.useEffect(()=>{
                 setToLocalStorage("isPasswordUpdateRequestSuccessful",profile.isPasswordUpdateRequestSuccessful);
                 setToLocalStorage("isEmailUpdateRequestSuccessful",profile.isEmailUpdateRequestSuccessful);
+                setToLocalStorage("isDeleteAccountRequestSuccessful", profile.isDeleteAccountRequestSuccessful);
                 if(profile.isRequestSuccessful && (!profile.isPasswordUpdateRequestSuccessful)){
                    dispatchLogin({
                       type:"UPDATE_DETAILS",
@@ -93,7 +94,13 @@ const Profile =  ()=> {
 
 
       const [dateType, setDateType]= React.useState("text");
-        
+
+      const FetchSecurityQuestions= ()=>{
+           dispatchProfile({isActivateSecurityQuestions:true});
+           FetchSecuirityQuestions(useAxiosPrivate,dispatchProfile);
+
+      }
+
       const isInvalid =()=>{
         return (
           profile.email.trim() === ""&& profile.newPassword.trim() === "" && profile.confirmNewPassword === ""&&
@@ -102,7 +109,14 @@ const Profile =  ()=> {
          )
 
       }
-      const checkIsSecurityQuestionsValid = ()=> securityQuestions.data?.every(({number})=>{
+
+       const validateOTP = ()=>{
+          if(profile.OTP.trim() === ""){
+              dispatchProfile({isRequestError:true, message:"OTP is required, it was sent to your email.",
+              isRequestSuccessful:false});
+          }
+      }
+      const checkIsSecurityQuestionsValid = ()=> profile.securityQuestions?.every(({number})=>{
         const value =  profile[`question${number}`];
         return !(value===undefined || value===null|| value?.trim() ==='');
       })
@@ -147,7 +161,7 @@ const Profile =  ()=> {
                       
                       if(checkIsSecurityQuestionsValid()){
 
-                        const answers = securityQuestions.data?.map(({number})=>{
+                        const answers = profile.securityQuestions?.map(({number})=>{
                     
                           return{username:profile.username,answer:profile[`question${number}`], number:number};
                         });
@@ -157,7 +171,7 @@ const Profile =  ()=> {
                     }
                     else {
                       
-                        dispatchSecurityQuestions({message:"All the security questions must be answered",isRequestError:true, isRequestSuccessful:false})
+                        dispatchProfile({message:"All the security questions must be answered",isRequestError:true, isRequestSuccessful:false})
                       
                     }
                   }
@@ -174,9 +188,6 @@ const Profile =  ()=> {
             }
               
         }
-       
-       
-
      /**
      * Save security answers of security questions
      * @param {*} e  save security answer event
@@ -188,26 +199,33 @@ const Profile =  ()=> {
       if(checkIsSecurityQuestionsValid()){
 
           if(submitType==="ACTIVATE_QUESTIONS"){
-               const answers = securityQuestions.data?.map(({number})=>{
+               const answers = profile.securityQuestions?.map(({number})=>{
                      return{username:userLoginState.username,answer:profile[`question${number}`], number:number};
                  });
-              const results=await ActivateSecuirityQuestions(useAxiosPrivate,answers,dispatchSecurityQuestions);
+              const results=await ActivateSecuirityQuestions(useAxiosPrivate,answers,dispatchProfile);
               if(results.isRequestSuccessful){
                  dispatchLogin({type:"UPDATE_DETAILS",isSecurityEnabled:true})
 
               }else{
-                dispatchSecurityQuestions(results);
+                dispatchProfile(results);
               }
           }else if(submitType==="ANSWER_QUESTIONS"){
-                 const answers = {}
-                 profile.questions?.forEach(({question, number})=>{
-                       answers[question]=profile[`question${number}`];
-                  });
-                 changeEmail(useAxiosPrivate,{username:profile.currentUsername,newUsername:profile.email,answers:answers,OTP:profile.OTP},dispatchProfile);
+                if(profile.isEmailUpdateRequestSuccessful){
+                     validateOTP();
+                     checkIsSecurityQuestionsValid();
+                    const answers = {}
+                    profile.securityQuestions?.forEach(({question, number})=>{
+                           answers[question]=profile[`question${number}`];
+                    });
+                    changeEmail(useAxiosPrivate,{username:profile.currentUsername,newUsername:profile.email,answers:answers,OTP:profile.OTP},
+                    dispatchProfile,dispatchProfile);
+                 }
+
+
           }
       }
       else{
-        dispatchSecurityQuestions({message:"All security questions must be answered",isRequestError:true, isRequestSuccessful:false})
+        dispatchProfile({message:"All security questions must be answered",isRequestError:true, isRequestSuccessful:false})
       }
 
     }
@@ -218,7 +236,7 @@ const Profile =  ()=> {
         const OnSubmitNoneSecurity=(e)=>{
           e.preventDefault();
           //we will finish this tomorrow
-          const answers = securityQuestions.data?.map(({number})=>{
+          const answers = profile.securityQuestions?.map(({number})=>{
                       
             return{username:userLoginState.username,answer:profile[`question${number}`], number:number};
           })
@@ -229,16 +247,15 @@ const Profile =  ()=> {
                 dispatchProfile({isRequestError:true, message:"At least one editable field  is required",isRequestSuccessful:false});
            }
            else{
-                UpdateUser(useAxiosPrivate ,profile, dispatchProfile);
+
+              UpdateUser(useAxiosPrivate ,profile, dispatchProfile);
               if(profile.edited){
                           ClearForm();
 
-                }else if(profile.isRequestError){
+               }else if(profile.isRequestError){
                       dispatchProfile({ edited:false});
-                }
+               }
             }
-
-
         }
       
 
@@ -246,16 +263,25 @@ const Profile =  ()=> {
         * Deletes the profile of the  
         * @param {*} e  submit event of the delete button
         */
-        const deleteAccount =(e)=>{
+        const deleteAccount =async(e,status)=>{
+          const DELETE_ACCOUNT_STATUS=["Request","Delete"]
           e.preventDefault();
-          if(profile.currentPassword.trim() === ""){
-
-               dispatchProfile({isRequestError:true, message:"Current password of user is required.",
-               isRequestSuccessful:false});
-               return;
+          if(status===DELETE_ACCOUNT_STATUS[0]){
+             RequestDeleteUserAccount(useAxiosPrivate, userLoginState.username,dispatchProfile);
           }
-           
-           DeleteUser(useAxiosPrivate,profile.currentPassword, userLoginState.username,dispatchProfile);
+          else if(status===DELETE_ACCOUNT_STATUS[1]){
+            if(profile.isDeleteAccountRequestSuccessful){
+               validateOTP();
+               checkIsSecurityQuestionsValid();
+               const answers = {}
+               profile.securityQuestions?.forEach(({question, number})=>{
+                     answers[question]=profile[`question${number}`];
+                });
+               DeleteUser(useAxiosPrivate,{username:userLoginState.username,OTP:profile.OTP,answers:answers},
+                                 dispatchProfile,dispatchLogin);
+            }
+          }
+         
         }
         const ClearForm= ()=>{
           setTimeout(()=>{
@@ -281,8 +307,8 @@ const Profile =  ()=> {
 
       return (
 
-      <ProfileContext.Provider value={{profile, dispatchProfile,securityQuestions, dispatchSecurityQuestions,
-         deleteAccount,OnSubmitSecurity,OnSubmitSecurityQuestions}}>
+      <ProfileContext.Provider value={{profile, dispatchProfile,
+         deleteAccount,OnSubmitSecurity,OnSubmitSecurityQuestions,FetchSecurityQuestions}}>
      <Box
      
       sx={{   
@@ -311,7 +337,9 @@ const Profile =  ()=> {
                       </Stack>
                       }
                 titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
-                subheader={(profile.isRequestSuccessful ||profile.isRequestError)?profile.message:""}
+                subheader={(profile.isRequestSuccessful || profile.isDeleteAccountRequestSuccessful||
+                profile.isEmailUpdateRequestSuccessful || profile.isPasswordUpdateRequestSuccessful
+                ||profile.isRequestError)?profile.message:""}
                 subheaderTypographyProps={{alignItems:"center" ,color:profile.isRequestSuccessful?SUCCESS_COLOR:ERROR_COLOR}}
                 
             />

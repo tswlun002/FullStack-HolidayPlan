@@ -6,8 +6,6 @@ import {CreateAuthContext} from '../context/CreateAuthContext';
 import UseAxiosPrivate from '../utils/UseAxiosPrivate'
 import CssTextField from '../component/CssTextField'
 import { ProfileContext } from '../context/ProfileContext';
-import {FetchSecuirityQuestions} 
-   from '../utils/User';
 import { styled } from '@mui/material/styles';
 import { SECONDARY_COLOR ,PRIMAR_COLOR, SUCCESS_COLOR, ERROR_COLOR} from '../utils/Constant';
 import CloseIcon from '@mui/icons-material/Close';
@@ -19,24 +17,10 @@ const EditButton= styled(LoadingButton)({
   border:`1px solid ${SECONDARY_COLOR}`,
   },
 });
-const SecurityQuestions=({submitType,label="Submit"})=>{
+const SecurityQuestions=({submitType,label="Submit",showSubmitButton=true})=>{
             const{userLoginState} = React.useContext(CreateAuthContext);
             const useAxiosPrivate = UseAxiosPrivate();
-            const{profile, dispatchProfile,securityQuestions,
-                dispatchSecurityQuestions,OnSubmitSecurityQuestions} = React.useContext(ProfileContext);
-      
-            React.useEffect(()=>{
-              let isMounted = true;
-              const controller = new AbortController();
-              isMounted&&FetchSecuirityQuestions(useAxiosPrivate,{controller},dispatchSecurityQuestions);
-              
-              return ()=>{
-                isMounted=false; 
-                controller.abort();
-              }
-      
-            },[])
-      
+            const{profile, dispatchProfile,OnSubmitSecurityQuestions} = React.useContext(ProfileContext);
         return(
           <Card sx={{boxShadow:"none", }}>
           <CardHeader
@@ -52,12 +36,12 @@ const SecurityQuestions=({submitType,label="Submit"})=>{
                  titleTypographyProps={{color:PRIMAR_COLOR,align:"center"}}
         
                 action={<IconButton size='small' onClick={()=>dispatchProfile({isActivateSecurityQuestions:false})}><CloseIcon/></IconButton>}
-                subheader={(securityQuestions.isRequestSuccessful ||securityQuestions.isRequestError)?securityQuestions.message:""}
-                subheaderTypographyProps={{alignItems:"center" ,color:securityQuestions.isRequestSuccessful?SUCCESS_COLOR:ERROR_COLOR}}
+                subheader={(profile.isRequestSuccessful ||profile.isRequestError)?profile.message:""}
+                subheaderTypographyProps={{alignItems:"center" ,color:profile.isRequestSuccessful?SUCCESS_COLOR:ERROR_COLOR}}
                 
             />
           <form className="register-inputs" autoComplete="off">
-              {securityQuestions.data?.map(({question, number})=>{
+              {profile.securityQuestions?.map(({question, number})=>{
                 const field =  [`question${number}`]  ;  
                 const value = profile[field];
                 if(value===null||value===undefined)profile[field]='';
@@ -80,7 +64,7 @@ const SecurityQuestions=({submitType,label="Submit"})=>{
               })}
                
            
-                { (!userLoginState.enabledSecurityQuestions)&&
+                { ( (!userLoginState.enabledSecurityQuestions)&&showSubmitButton )&&
                    <EditButton
                       color="secondary" 
                       variant="outlined" 
