@@ -1,8 +1,11 @@
 package com.tour.controller;
+import com.tour.dto.AdminEditUser;
 import com.tour.dto.UserResponseToAdmin;
 import com.tour.exception.NotFoundException;
 import com.tour.model.User;
 import com.tour.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,9 +75,9 @@ public class AdminController {
     }
 
     @DeleteMapping("delete/" )
-    public  ResponseEntity<Boolean> delete(@RequestParam String username){
+    public  ResponseEntity<Boolean> delete(@RequestBody @Valid AdminEditUser adminEditUser){
 
-        boolean deleted= userService.deleteUser(username);
+        boolean deleted= userService.deleteUserByAdmin(adminEditUser);
         if(deleted)return  new ResponseEntity<>(true, HttpStatus.OK);
         return new ResponseEntity<>(false,HttpStatus.NOT_ACCEPTABLE);
     }

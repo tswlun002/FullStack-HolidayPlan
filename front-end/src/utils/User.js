@@ -213,11 +213,11 @@ export const changeEmail=( useAxiosPrivate,resetUsername={username:"",newUsernam
           if(response.ok || response.status===200){
             dispatchResponse({isRequestError:false,
               isLoading:false,isRequestSuccessful:true,
-              message:response.data,
+              message:response.data?.message,
+              securityQuestions:response.data?.questions,
               currentUsername:resetUsername.newUsername,
               isEmailUpdateRequestSuccessful:false
             });
-
           }
         }
     ).catch(err =>
@@ -313,14 +313,14 @@ export const ActivateSecuirityQuestions= ( useAxiosPrivate,answers=[{username:''
     )
 
 }
-export const FetchSecuirityQuestions= async( useAxiosPrivate,{controller},dispatchResponse=()=>{})=>{
+export const FetchSecuirityQuestions= async( useAxiosPrivate,dispatchResponse=()=>{})=>{
   const API = `/holiday-plan/api/user/security-questions/`;
   dispatchResponse({  isLoading:true});
-    useAxiosPrivate.get(API, {signal:controller.signal})
+    useAxiosPrivate.get(API)
     .then(response =>
         {
           if(response.ok || response.status===200){
-            dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true, data:response.data});
+            dispatchResponse({isRequestError:false,  isLoading:false,isRequestSuccessful:true, securityQuestions:response.data});
           }
 
         }
@@ -472,49 +472,85 @@ export const User = async(useAxiosPrivate,controller,username) => {
     
   
 }
+export const RequestDeleteUserAccount = async(useAxiosPrivate,username,dispatchResponse)=>{
 
-
-export const DeleteUser = (useAxiosPrivate,password,email,dispatchAccount) => {
-
-   const API = `/holiday-plan/api/user/delete/?username=${email}&password=${password}`;
-   useAxiosPrivate.delete(API)
+  const API = `/holiday-plan/api/user/request-to-delete/${username}`;
+  dispatchResponse({  isLoading:true});
+   useAxiosPrivate.post(API)
    .then(response =>
        {
          if(response.ok || response.status===200){
-          dispatchAccount({
-            isRequestError:false,
-            isRequestSuccessful:true,
-            AccountDeleted:true,
-             message:"Account deleted successful"
-         });
-
+           dispatchResponse({
+             isRequestError:false,
+             isLoading:false,isRequestSuccessful:false,
+             isDeleteAccountRequestSuccessful:true,
+              email:response.data?.username,
+              securityQuestions:response.data?.questions,
+              message:response.data?.message
+           });
          }
-
        }
    ).catch(err =>
      {
-       
-            if(!err?.response.ok){
-              let errorMessage =null;
-              if(err.response.status===404){
-            
-                 errorMessage  =getErrorMessage(err)||"Invalid credentials";
-                            }
-                            else if(err.response.status===401){
-                                 errorMessage  =getErrorMessage(err)||"Denied access";
-              }
-              else{
-                  
-                    errorMessage  = getErrorMessage(err);
-              }
-              dispatchAccount({isRequestError:true,isRequestSuccessful:false, message:errorMessage})
-        }else dispatchAccount({isRequestError:true,isRequestSuccessful:false, message:"Internal server error"})
+        if(!err?.response.ok && err.name!=="AbortErr"){
+             let errorMessage =null;
+             if(err.response.status===404){
+
+               errorMessage  =getErrorMessage(err)||"Invalid credentials";
+             }
+             else if(err.response.status===401){
+                  errorMessage  =getErrorMessage(err)||"Denied access";
+             }
+             else{
+
+                   errorMessage  = getErrorMessage(err);
+             }
+             dispatchResponse({isRequestError:true, isRequestSuccessful:false, isDeleteAccountRequestSuccessful:false, isLoading:false, message:errorMessage})
+        }else dispatchResponse({isRequestError:true,isRequestSuccessful:false, isDeleteAccountRequestSuccessful:false,isLoading:false, message:"Internal server error"})
 
      }
    )
+
 }
 
+export const DeleteUser = async(useAxiosPrivate,DeleteUserAccount={username:"",answers:Map.arguments(), OTP:""},dispatchResponse,dispatchLogin)=>{
+   const API = `/holiday-plan/api/user/delete`;
+   dispatchResponse({  isLoading:true});
+    useAxiosPrivate.patch(API,DeleteUserAccount)
+    .then(response =>
+        {
+          if(response.ok || response.status===200){
+            dispatchResponse({isRequestError:false,
+              isLoading:false,isRequestSuccessful:true,
+              message:response.data,
+              currentUsername:DeleteUserAccount.username,
+              isDeleteAccountRequestSuccessful:false
+            });
+            setTimeout(()=>dispatchLogin({type:"LOGOUT"}),5000);
+          }
+        }
+    ).catch(err =>
+      {
+         if(!err?.response.ok && err.name!=="AbortErr"){
+              let errorMessage =null;
+              if(err.response.status===404){
 
+                errorMessage  =getErrorMessage(err)||"Invalid credentials";
+              }
+              else if(err.response.status===401){
+                   errorMessage  =getErrorMessage(err)||"Denied access";
+              }
+              else{
+
+                    errorMessage  = getErrorMessage(err);
+              }
+              dispatchResponse({isRequestError:true, isRequestSuccessful:false, isLoading:false, message:errorMessage})
+         }else dispatchResponse({isRequestError:true,isRequestSuccessful:false,  isLoading:false, message:"Internal server error"})
+
+      }
+    )
+
+}
 
 /**
  * 
