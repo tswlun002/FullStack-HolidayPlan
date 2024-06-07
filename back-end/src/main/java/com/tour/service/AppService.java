@@ -12,6 +12,7 @@ import com.tour.model.Contact;
 import com.tour.model.SocialNetwork;
 import com.tour.repository.AppRepository;
 import com.tour.repository.SocialNetworkRepository;
+import com.tour.utils.UnescapeJson;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
@@ -80,10 +81,10 @@ public class AppService implements IApp {
                 .city(addressDTO.city()).postalCode(addressDTO.postalCode()).country(addressDTO.country()).build();
     }
     private App getLtHolidayPlan() {
-        String app = environment.getProperty("app.details");
+        String app = UnescapeJson.unescapeJson(environment.getProperty("app.details"));
         if(app==null || app.trim().length()<=1)throw  new NullException("Invalid  LT Holiday-Plan");
         if(app.split(",").length<5)throw new RuntimeException("Invalid  LT Holiday-Plan details, all field are required");
-        String address = environment.getProperty("app.address");
+        String address = UnescapeJson.unescapeJson(environment.getProperty("app.address"));
 
         AppDTO ltDTO = null;
         try{

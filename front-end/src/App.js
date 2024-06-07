@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import {CreateAuthContext} from './context/CreateAuthContext';
 import Profile from './pages/Profile';
-import jwtDecode from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import MissingPage from './pages/MissingPage';
 import UserQuery from './pages/UserQuery';
 import QueryTicket from './pages/QueryTicket';
