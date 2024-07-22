@@ -3,13 +3,11 @@ package com.tour.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tour.dto.PasswordResetRequest;
 import com.tour.dto.RegisterUserRequest;
-import com.tour.dto.SecurityChangeDataEvent;
 import com.tour.dto.SecurityEditRequest;
 import com.tour.exception.NotFoundException;
 import com.tour.model.VerificationToken;
 import com.tour.security.AuthenticationResponse;
 import com.tour.service.AuthenticationService;
-import com.tour.service.SecurityDataChangeService;
 import com.tour.service.UserService;
 import com.tour.service.VerificationTokenService;
 import com.tour.utils.MapResponse;
@@ -17,7 +15,6 @@ import com.tour.utils.VerificationURL;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +30,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/holiday-plan/api/authenticate/")
 @AllArgsConstructor
+@Validated
 public class AuthenticationController {
 
    private final AuthenticationService authenticationService;
@@ -58,7 +56,7 @@ public class AuthenticationController {
       new ObjectMapper().writeValue(response.getOutputStream(), tokens);
     }
     @PostMapping(value="register",consumes = {"application/json"})
-    public ResponseEntity<Boolean> save(@RequestBody  @Validated RegisterUserRequest requester,
+    public ResponseEntity<Boolean> save(@RequestBody  @Valid RegisterUserRequest requester,
                                         HttpServletRequest request){
         var url =new VerificationURL(request.getServerName(),request.getServerPort(),request.getContextPath());
         var saved= userService.saveUser(requester,url) ;

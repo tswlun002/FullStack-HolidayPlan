@@ -34,8 +34,10 @@ public class MailConfiguration {
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", PROTOCOL);
         props.put("mail.smtp.auth", "true");
+        props.put("spring.mail.properties.mail.smtp.starttls.required",true);
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
+        props.put("mail.smtp.ssl.trust", "host-url");
 
         return mailSender;
     }
