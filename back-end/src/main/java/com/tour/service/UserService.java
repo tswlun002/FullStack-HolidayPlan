@@ -9,6 +9,7 @@ import com.tour.model.SecurityQuestionAnswer;
 import com.tour.model.User;
 import com.tour.repository.UserRepository;
 import com.tour.utils.Roles;
+import com.tour.utils.UnescapeJson;
 import com.tour.utils.VerificationURL;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.PostConstruct;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,6 +54,7 @@ public class UserService implements IUser {
      */
     private RegisterUserRequest getDefaultUser(){
         String stringUser = environment.getProperty("user.default.user");
+        stringUser = UnescapeJson.unescapeJson(stringUser);
         if(stringUser==null || stringUser.trim().length()<=1)throw  new NullException("Invalid default user");
         if(stringUser.split(",").length<6)throw new NullException("Invalid default user details, all field are required");
         RegisterUserRequest userDTO = null;
