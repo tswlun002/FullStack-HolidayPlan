@@ -1,9 +1,10 @@
 name: client CI/CD 
 on:
-  push:
-    paths:
-    - "front-end/**"
-    branches: [ "main" ]
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #   - "front-end/**"
+  #   branches: [ "main" ]
 jobs:
   client:
     runs-on: ubuntu-latest
