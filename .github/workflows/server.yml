@@ -84,10 +84,10 @@ jobs:
       spring.mail.properties.mail.transport.protocol: ${{secrets.MAIL_PROTOCOL}}
       jwt.signing.key: ${{secrets.JWT_SIGNING_KEY}}
       role.default.names: ${{secrets.ROLE_DEFAULT_NAMES}}
-      permission.default.names: ${{secrets.DEFAULT_PERMISSIONS}}
+      permission.default.names: ${{secrets.PERMISSION_DEFAULT_NAMES}}
       user.default.user: ${{secrets.DEFAULT_USER}}
-      jwt.access.accessToken.period: ${{secrets.JWT_ACCESS_TOKEN_PERIOD}}
-      jwt.refresh.accessToken.period: ${{secrets.JWT_REFRESH_TOKEN_PERIOD}}
+      jwt.access.accessToken.period: ${{secrets.JWT_ACCESS_ACCESSTOKEN_PERIOD}}
+      jwt.refresh.accessToken.period: ${{secrets.JWT_REFRESH_ACCESSTOKEN_PERIOD}}
       app.details: ${{secrets.APP}}
       app.address: ${{secrets.ADDRESS}}
       app.socials: ${{secrets.SOCIALS}}
@@ -97,6 +97,6 @@ jobs:
       mail.protocol: ${{secrets.MAIL_PROTOCOL}}
       mail.port: ${{secrets.MAIL_PORT}}
       verification.expire.time: ${{secrets.VERIFICATION_EXPIRE_TIME}}
-      host.registration.mail: ${{secrets.MAIL_REGISTER_DETAILS}}
+      host.registration.mail: ${{secrets.HOST_REGISTRATION_MAIL}}
       password.reset.expire.time: ${{secrets.PASSWORD_EXPIRATION}}
       host.password.reset.mail: ${{secrets.MAIL_PASSWORD_DETAILS}}
