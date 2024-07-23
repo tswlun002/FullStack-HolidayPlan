@@ -2,10 +2,11 @@
 name: server CI/CD 
 
 on:
-  push:
-    paths:
-    - "back-end/**"
-    branches: [ "main" ]
+  workflow_dispatch:
+  # push:
+  #   paths:
+  #   - "back-end/**"
+  #   branches: [ "main" ]
 jobs:
   server:
     name: Job for 'back-end' folder
